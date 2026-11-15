@@ -1,0 +1,154 @@
+<!doctype html><html lang="mr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#075e48"><title>विघ्नहर्ता मेडिकल | Cloud खाता</title><style>
+*{box-sizing:border-box}body{font-family:system-ui,-apple-system,sans-serif;margin:0;background:#f2f7f5;color:#16382e}header{background:#075e48;color:white;padding:20px 16px}header h1{font-size:22px;margin:0 0 4px}main{max-width:820px;margin:auto;padding:14px}section,.tile{background:white;border-radius:12px;padding:15px;margin-bottom:13px;box-shadow:0 1px 5px #0001}.cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.tile{margin:0;min-width:0}.tile strong{font-size:22px;display:block;overflow-wrap:anywhere}.muted{font-size:13px;color:#60746a}.warn{background:#fff3cd;border-radius:8px;padding:12px;font-size:13px}.hidden{display:none!important}label{display:block;margin:10px 0 4px}input,select,button{font:inherit;width:100%;padding:11px;border:1px solid #cad8d2;border-radius:8px}button{background:#075e48;color:white;border:0;margin:10px 0;font-weight:700;cursor:pointer}.secondary{background:#e5f2ed;color:#075e48}button:disabled{opacity:.5}.line{padding:12px 0;border-bottom:1px solid #ddd;overflow-wrap:anywhere}.buttons{display:flex;gap:8px}.buttons button{width:auto;padding:7px 12px}.section-title{margin-top:0;font-size:19px}#cloud-identity{overflow-wrap:anywhere}#sync-state{margin-top:12px}@media(min-width:680px){.cards{grid-template-columns:repeat(4,minmax(0,1fr))}}@media print{button,form,#login-panel,#logout-btn{display:none!important}body{background:white}section{box-shadow:none}}
+
+.ledger-history{margin-top:8px}
+.ledger-history summary{cursor:pointer;font-weight:700;color:#075e48;padding:10px 0}
+.ledger-filters{display:grid;grid-template-columns:repeat(auto-fit,minmax(135px,1fr));gap:8px}
+.ledger-pages{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:8px 0}
+.ledger-pages button{width:auto;margin:0;padding:7px 11px}
+.ledger-pages button:disabled{opacity:.55}
+.ledger-pages[hidden]{display:none}
+</style></head><body><header><h1>✚ विघ्नहर्ता मेडिकल</h1>वर्धा • सुरक्षित Cloud जमा-खर्च व स्टॉकिस्ट खाते</header><main><section id="login-panel"><h2 class="section-title">🔐 लॉगिन</h2><label>ईमेल</label><input id="login-email" type="email" autocomplete="username"><label>पासवर्ड</label><input id="login-password" type="password" autocomplete="current-password"><button id="login-btn" type="button">लॉगिन करा</button><p id="login-error" class="muted"></p></section>
+<div id="cloud-panel" class="hidden"><section><div id="cloud-identity" class="muted"></div><button id="logout-btn" class="secondary" type="button">लॉगआउट</button><p id="sync-state" class="warn">Cloud कनेक्शन तपासत आहे…</p><p class="muted">ऑफलाइन असताना सिंक बाकी असू शकते. सर्व्हरशी सिंक झाल्याची खात्री होईपर्यंत ब्राउझर डेटा साफ करू नका. जुने CSV बॅकअप स्वतंत्र सुरक्षित ठेवा.</p></section>
+<section><h2 class="section-title">📊 मुख्य डॅशबोर्ड</h2><div class="cards"><div class="tile">एकूण जमा<strong id="sum-income">₹0</strong></div><div class="tile">एकूण खर्च<strong id="sum-expense">₹0</strong></div><div class="tile">रोख शिल्लक<strong id="sum-cash">₹0</strong></div><div class="tile">उधारी बाकी<strong id="sum-due">₹0</strong></div></div><p class="muted">रोख शिल्लक = रोख सुरुवातीची रक्कम + रोख जमा/वसुली − रोख खर्च. इतर पेमेंट माध्यमांचा यात समावेश नाही.</p></section>
+<section><h2 class="section-title">📦 स्टॉकिस्ट महिन्याचा सारांश</h2><label>महिना</label><input id="month-filter" type="month"><div class="cards"><div class="tile">महिन्याची खरेदी<strong id="sum-purchase">₹0</strong></div><div class="tile">महिन्याचे पेमेंट<strong id="sum-payment">₹0</strong></div><div class="tile">महिनाअखेर बाकी<strong id="sum-stockdue">₹0</strong></div></div></section>
+<section><h2 class="section-title">☁️ जमा-खर्च व्यवहार</h2><form id="cloud-main-form"><label>तारीख</label><input id="cm-date" type="date" required><label>व्यवहार</label><select id="cm-type"><option value="income">जमा / विक्री</option><option value="expense">खर्च</option><option value="credit">उधारी</option><option value="repayment">उधारी वसुली</option><option value="opening">सुरुवातीची रोख</option></select><label>तपशील</label><input id="cm-note" required><label>पेमेंट माध्यम</label><select id="cm-mode"><option>Cash</option><option>UPI</option><option>Bank</option></select><label>रक्कम ₹</label><input id="cm-amount" type="number" min="0.01" step="0.01" required><button id="cm-submit" type="submit">Cloud मध्ये नोंद सेव्ह करा</button><button id="cm-cancel" class="secondary hidden" type="button">दुरुस्ती रद्द</button></form><button id="export-main" type="button" class="secondary">CSV बॅकअप डाउनलोड</button><div id="cm-list"></div></section>
+<section><h2 class="section-title">☁️ स्टॉकिस्ट व्यवहार</h2><form id="cloud-stock-form"><label>तारीख</label><input id="cs-date" type="date" required><label>स्टॉकिस्ट नाव</label><input id="cs-name" required><label>व्यवहार</label><select id="cs-type"><option value="purchase">माल खरेदी</option><option value="payment">पेमेंट</option><option value="opening">मागील बाकी</option></select><label>बिल / तपशील</label><input id="cs-note"><label>रक्कम ₹</label><input id="cs-amount" type="number" min="0.01" step="0.01" required><button id="cs-submit" type="submit">Cloud मध्ये नोंद सेव्ह करा</button><button id="cs-cancel" class="secondary hidden" type="button">दुरुस्ती रद्द</button></form><button id="export-stock" type="button" class="secondary">CSV बॅकअप डाउनलोड</button><div id="cs-list"></div></section><section><button type="button" onclick="window.print()" class="secondary">रिपोर्ट प्रिंट करा</button></section></div></main><script type="module">
+import {initializeApp} from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js';
+import {getAuth,onAuthStateChanged,signInWithEmailAndPassword,signOut} from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js';
+import {initializeFirestore,persistentLocalCache,persistentMultipleTabManager,collection,doc,setDoc,deleteDoc,onSnapshot,getDoc,serverTimestamp} from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js';
+const config={apiKey:'AIzaSyCjCVQcMGzmN-Cmld_di_Vz0q2tRu7VkwA',authDomain:'vighnaharta-medical.firebaseapp.com',projectId:'vighnaharta-medical',storageBucket:'vighnaharta-medical.firebasestorage.app',messagingSenderId:'879096407229',appId:'1:879096407229:web:6861bca7fb7b7dd43603d4',measurementId:'G-3ND0BFH2VK'};
+const ownerUID='daFV9pOYYqMs3C9APuPtGiOZvhD2';
+const app=initializeApp(config),auth=getAuth(app);let db;
+try{db=initializeFirestore(app,{localCache:persistentLocalCache({tabManager:persistentMultipleTabManager()})})}catch(e){document.getElementById('login-error').textContent='ऑफलाइन स्टोरेज उपलब्ध नाही: '+e.message;throw e}
+const el=id=>document.getElementById(id);let owner=false,user=null,unsubs=[],editMain=null,editStock=null;let cloudMain=[],cloudStock=[];
+const safeError=e=>{const msg=e?.code||e?.message||String(e);alert('कारवाई पूर्ण झाली नाही: '+msg)};
+el('cm-date').value=el('cs-date').value=new Date().toLocaleDateString('en-CA');
+el('login-btn').onclick=async()=>{el('login-error').textContent='लॉगिन सुरू आहे…';try{await signInWithEmailAndPassword(auth,el('login-email').value.trim(),el('login-password').value);el('login-password').value='';el('login-error').textContent=''}catch(e){el('login-error').textContent='लॉगिन अयशस्वी: '+(e.code||e.message)}};
+el('logout-btn').onclick=()=>signOut(auth).catch(safeError);
+function clearSubs(){unsubs.forEach(f=>f());unsubs=[];historyByBook.clear()}
+function reset(which){const main=which==='main',prefix=main?'cm':'cs';if(main)editMain=null;else editStock=null;el(prefix+'-cancel').classList.add('hidden');el(prefix+'-submit').textContent='Cloud मध्ये नोंद सेव्ह करा';el('cloud-'+(main?'main':'stock')+'-form').reset();el(prefix+'-date').value=new Date().toLocaleDateString('en-CA')}
+el('cm-cancel').onclick=()=>reset('main');el('cs-cancel').onclick=()=>reset('stock');
+function updateDashboard(){
+ let income=0,expense=0,cash=0,credit=0,repay=0;
+ for(const r of cloudMain){let n=Number(r.amount)||0;if(r.type==='income'||r.type==='repayment')income+=n;if(r.type==='expense')expense+=n;if(r.type==='credit')credit+=n;if(r.type==='repayment')repay+=n;if(r.mode==='Cash'){if(['income','repayment','opening'].includes(r.type))cash+=n;if(r.type==='expense')cash-=n}}
+ const fmt=n=>'₹'+n.toLocaleString('en-IN',{maximumFractionDigits:2});
+ el('sum-income').textContent=fmt(income);el('sum-expense').textContent=fmt(expense);el('sum-cash').textContent=fmt(cash);el('sum-due').textContent=fmt(credit-repay);
+ const month=el('month-filter').value;let buys=0,pays=0,owed=0;
+ for(const r of cloudStock){let n=Number(r.amount)||0;if(r.date?.slice(0,7)===month){if(r.type==='purchase')buys+=n;if(r.type==='payment')pays+=n}if(r.date?.slice(0,7)<=month){if(['purchase','opening'].includes(r.type))owed+=n;if(r.type==='payment')owed-=n}}
+ el('sum-purchase').textContent=fmt(buys);el('sum-payment').textContent=fmt(pays);el('sum-stockdue').textContent=fmt(owed);
+}
+el('month-filter').value=new Date().toLocaleDateString('en-CA').slice(0,7);el('month-filter').onchange=updateDashboard;
+function downloadCSV(rows,name){const csv='\ufeff'+rows.map(r=>r.map(x=>'"'+String(x??'').replace(/"/g,'""')+'"').join(',')).join('\r\n');const a=document.createElement('a');const u=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));a.href=u;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(u),1000)}
+el('export-main').onclick=()=>downloadCSV([['Date','Type','Description','Mode','Amount'],...cloudMain.map(r=>[r.date,r.type,r.note,r.mode,r.amount])],'Vighnaharta_Khata_Cloud.csv');
+el('export-stock').onclick=()=>downloadCSV([['Date','Stockist','Type','Bill/Details','Amount'],...cloudStock.map(r=>[r.date,r.name,r.type,r.note,r.amount])],'Vighnaharta_Stockist_Cloud.csv');
+const historyByBook=new Map();
+const RECENT_COUNT=5;
+const PAGE_SIZE=10;
+
+function ledgerButton(label,action){
+ const button=document.createElement('button');
+ button.type='button';
+ button.className='secondary';
+ button.textContent=label;
+ button.onclick=action;
+ return button;
+}
+
+function recordLine(coll,d){
+ const main=coll==='transactions',prefix=main?'cm':'cs';
+ const r=d.data(),line=document.createElement('div');line.className='line';
+ const txt=document.createElement('div');txt.textContent=main?`${r.date} · ${r.type} · ${r.note} · ${r.mode} · ₹${r.amount}`:`${r.date} · ${r.name} · ${r.type} · ${r.note||''} · ₹${r.amount}`;
+ line.append(txt);
+ if(owner){const bar=document.createElement('div');bar.className='buttons';const edit=document.createElement('button');edit.type='button';edit.textContent='Edit';edit.onclick=()=>{if(main){editMain=d.id;for(const k of ['date','type','note','mode','amount'])el('cm-'+k).value=r[k]}else{editStock=d.id;for(const k of ['date','name','type','note','amount'])el('cs-'+k).value=r[k]||''}el(prefix+'-submit').textContent='बदल सेव्ह करा';el(prefix+'-cancel').classList.remove('hidden');el('cloud-'+(main?'main':'stock')+'-form').scrollIntoView({behavior:'smooth'})};
+  const del=document.createElement('button');del.type='button';del.className='secondary';del.textContent='काढा';del.onclick=async()=>{if(confirm('ही Cloud नोंद कायमची काढायची?'))try{await deleteDoc(doc(db,coll,d.id))}catch(e){safeError(e)}};
+  bar.append(edit,del);
+  line.append(bar);
+ }
+ return line;
+}
+
+function createHistory(coll,list){
+ const status=document.createElement('p');
+ status.className='muted';
+ const recent=document.createElement('div');
+ const history=document.createElement('details');
+ history.className='ledger-history';
+ const summary=document.createElement('summary');
+ const filters=document.createElement('div');
+ filters.className='ledger-filters';
+ const date=document.createElement('input');
+ date.type='date';
+ const month=document.createElement('input');
+ month.type='month';
+ for(const [labelText,input] of [['तारीख',date],['महिना',month]]){
+  const label=document.createElement('label');
+  label.textContent=labelText;
+  label.append(input);
+  filters.append(label);
+ }
+ const results=document.createElement('div');
+ const pages=document.createElement('div');
+ pages.className='ledger-pages';
+ const pageLabel=document.createElement('span');
+ pageLabel.setAttribute('aria-live','polite');
+ let docs=[],page=0;
+ const previous=ledgerButton('मागील',()=>{page--;renderHistory()});
+ const next=ledgerButton('पुढील',()=>{page++;renderHistory()});
+ pages.append(previous,pageLabel,next);
+ history.append(summary,filters,results,pages);
+ list.replaceChildren(status,recent,history);
+
+ function renderHistory(){
+  if(!history.open)return;
+  const filtered=docs.filter(d=>{
+   const value=d.data().date||'';
+   return (!date.value||value===date.value)&&(!month.value||value.startsWith(month.value));
+  });
+  const count=Math.ceil(filtered.length/PAGE_SIZE);
+  page=Math.max(0,Math.min(page,count-1));
+  const rows=filtered.slice(page*PAGE_SIZE,(page+1)*PAGE_SIZE);
+  results.replaceChildren(...rows.map(d=>recordLine(coll,d)));
+  if(!rows.length){
+   const empty=document.createElement('p');
+   empty.textContent='या कालावधीत नोंदी नाहीत.';
+   results.append(empty);
+  }
+  pageLabel.textContent=count?`पान ${page+1} / ${count}`:'';
+  pages.hidden=count<2;
+  previous.disabled=page===0;
+  next.disabled=page>=count-1;
+ }
+
+ date.onchange=()=>{if(date.value)month.value='';page=0;renderHistory()};
+ month.onchange=()=>{if(month.value)date.value='';page=0;renderHistory()};
+ history.ontoggle=renderHistory;
+
+ return {
+  list,
+  update(entries,meta){
+   docs=entries;
+   status.textContent=`Cloud नोंदी: ${docs.length} | ${meta.fromCache?'स्थानिक कॅश':'सर्व्हर'}${meta.hasPendingWrites?' | सिंक बाकी':''}`;
+   summary.textContent=`सर्व नोंदी पहा (${docs.length})`;
+   recent.hidden=history.open;
+   recent.replaceChildren(...docs.slice(0,RECENT_COUNT).map(d=>recordLine(coll,d)));
+   history.ontoggle=()=>{recent.hidden=history.open;renderHistory()};
+   renderHistory();
+  }
+ };
+}
+
+function display(coll,docs,meta){
+ const prefix=coll==='transactions'?'cm':'cs',list=el(prefix+'-list');
+ let view=historyByBook.get(coll);
+ if(!view||!list.firstElementChild){
+  view=createHistory(coll,list);
+  historyByBook.set(coll,view);
+ }
+ view.update(docs,meta);
+}
+function watch(coll){const prefix=coll==='transactions'?'cm':'cs';unsubs.push(onSnapshot(collection(db,coll),{includeMetadataChanges:true},snap=>{const ds=snap.docs.sort((a,b)=>(b.data().date||'').localeCompare(a.data().date||'')||(b.data({serverTimestamps:'estimate'}).updatedAt?.toMillis?.()??0)-(a.data({serverTimestamps:'estimate'}).updatedAt?.toMillis?.()??0));if(coll==='transactions')cloudMain=ds.map(d=>d.data());else cloudStock=ds.map(d=>d.data());updateDashboard();display(coll,ds,snap.metadata);el('sync-state').textContent=snap.metadata.hasPendingWrites?'⏳ काही Cloud नोंदींचे सिंक बाकी आहे':snap.metadata.fromCache?'📱 स्थानिक कॅश दिसत आहे; सर्व्हरशी संपर्क तपासा':'✅ Firestore सर्व्हरशी कनेक्शन आहे'},e=>{el('sync-state').textContent='⚠️ Cloud वाचन अयशस्वी: '+(e.code||e.message);historyByBook.delete(coll);el(prefix+'-list').textContent='डेटा वाचता आला नाही'}))}
+onAuthStateChanged(auth,async u=>{clearSubs();user=null;owner=false;el('cloud-panel').classList.add('hidden');el('login-panel').classList.remove('hidden');if(!u)return;try{owner=u.uid===ownerUID;const staff=owner|| (await getDoc(doc(db,'authorizedStaff',u.uid))).exists();if(!staff){el('login-error').textContent='या खात्याला प्रवेश परवानगी नाही.';await signOut(auth);return}user=u;el('login-panel').classList.add('hidden');el('cloud-panel').classList.remove('hidden');el('cloud-identity').textContent=`${u.email} · ${owner?'Owner':'Staff (नवीन नोंद व वाचन)'}`;watch('transactions');watch('stockistTransactions')}catch(e){el('login-error').textContent='परवानगी तपासता आली नाही: '+(e.code||e.message)}});
+async function submit(which){if(!user)return;const main=which==='main',prefix=main?'cm':'cs',coll=main?'transactions':'stockistTransactions',edit=main?editMain:editStock;if(edit&&!owner){alert('दुरुस्ती फक्त Owner करू शकतो');return}const fields=main?['date','type','note','mode','amount']:['date','name','type','note','amount'];const data={};for(const k of fields)data[k]=el(prefix+'-'+k).value.trim();data.amount=Number(data.amount);if(!data.date||!(data.amount>0)||(main?!data.note:!data.name)){alert('सर्व आवश्यक माहिती भरा');return}const btn=el(prefix+'-submit');btn.disabled=true;try{const ref=edit?doc(db,coll,edit):doc(collection(db,coll));await setDoc(ref,{...data,...(edit?{}:{createdBy:user.uid}),updatedBy:user.uid,updatedAt:serverTimestamp()},{merge:!!edit});reset(which)}catch(e){safeError(e)}finally{btn.disabled=false}}
+el('cloud-main-form').onsubmit=e=>{e.preventDefault();submit('main')};el('cloud-stock-form').onsubmit=e=>{e.preventDefault();submit('stock')};
+</script></body></html>
