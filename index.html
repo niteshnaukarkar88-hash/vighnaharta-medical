@@ -12,6 +12,10 @@
 .attendance-salary>label{margin:0}
 .attendance-salary>button{grid-column:1/-1;margin:0}
 #attendance-payroll{margin-top:16px}
+
+.ledger-older{margin-top:8px}
+.ledger-older>summary{cursor:pointer;color:#075e48;font-weight:700;padding:8px 0}
+#export-main,#export-stock{width:auto;padding:7px 12px}
 </style></head><body><header><h1>✚ विघ्नहर्ता मेडिकल</h1>वर्धा • सुरक्षित Cloud जमा-खर्च व स्टॉकिस्ट खाते</header><main><section id="login-panel"><h2 class="section-title">🔐 लॉगिन</h2><label>ईमेल</label><input id="login-email" type="email" autocomplete="username"><label>पासवर्ड</label><input id="login-password" type="password" autocomplete="current-password"><button id="login-btn" type="button">लॉगिन करा</button><p id="login-error" class="muted"></p></section>
 <div id="cloud-panel" class="hidden"><section><div id="cloud-identity" class="muted"></div><button id="logout-btn" class="secondary" type="button">लॉगआउट</button><p id="sync-state" class="warn">Cloud कनेक्शन तपासत आहे…</p><p class="muted">ऑफलाइन असताना सिंक बाकी असू शकते. सर्व्हरशी सिंक झाल्याची खात्री होईपर्यंत ब्राउझर डेटा साफ करू नका. जुने CSV बॅकअप स्वतंत्र सुरक्षित ठेवा.</p></section>
 <section id="attendance-panel" class="hidden" aria-labelledby="attendance-title">
@@ -69,8 +73,44 @@ el('month-filter').value=new Date().toLocaleDateString('en-CA').slice(0,7);el('m
 function downloadCSV(rows,name){const csv='\ufeff'+rows.map(r=>r.map(x=>'"'+String(x??'').replace(/"/g,'""')+'"').join(',')).join('\r\n');const a=document.createElement('a');const u=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));a.href=u;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(u),1000)}
 el('export-main').onclick=()=>downloadCSV([['Date','Type','Description','Mode','Amount'],...cloudMain.map(r=>[r.date,r.type,r.note,r.mode,r.amount])],'Vighnaharta_Khata_Cloud.csv');
 el('export-stock').onclick=()=>downloadCSV([['Date','Stockist','Type','Bill/Details','Amount'],...cloudStock.map(r=>[r.date,r.name,r.type,r.note,r.amount])],'Vighnaharta_Stockist_Cloud.csv');
-function display(coll,docs,meta){const main=coll==='transactions',prefix=main?'cm':'cs',list=el(prefix+'-list');list.replaceChildren();let title=document.createElement('p');title.className='muted';title.textContent=`Cloud नोंदी: ${docs.length} | ${meta.fromCache?'स्थानिक कॅश':'सर्व्हर'}${meta.hasPendingWrites?' | सिंक बाकी':''}`;list.append(title);for(const d of docs){const r=d.data(),line=document.createElement('div');line.className='line';const txt=document.createElement('div');txt.textContent=main?`${r.date} · ${r.type} · ${r.note} · ${r.mode} · ₹${r.amount}`:`${r.date} · ${r.name} · ${r.type} · ${r.note||''} · ₹${r.amount}`;line.append(txt);if(owner){const bar=document.createElement('div');bar.className='buttons';const edit=document.createElement('button');edit.type='button';edit.textContent='Edit';edit.onclick=()=>{if(main){editMain=d.id;for(const k of ['date','type','note','mode','amount'])el('cm-'+k).value=r[k]}else{editStock=d.id;for(const k of ['date','name','type','note','amount'])el('cs-'+k).value=r[k]||''}el(prefix+'-submit').textContent='बदल सेव्ह करा';el(prefix+'-cancel').classList.remove('hidden');el('cloud-'+(main?'main':'stock')+'-form').scrollIntoView({behavior:'smooth'})};const del=document.createElement('button');del.type='button';del.className='secondary';del.textContent='काढा';del.onclick=async()=>{if(confirm('ही Cloud नोंद कायमची काढायची?'))try{await deleteDoc(doc(db,coll,d.id))}catch(e){safeError(e)}};bar.append(edit,del);line.append(bar)}list.append(line)}}
-function watch(coll){const prefix=coll==='transactions'?'cm':'cs';unsubs.push(onSnapshot(collection(db,coll),{includeMetadataChanges:true},snap=>{const ds=snap.docs.sort((a,b)=>(b.data().date||'').localeCompare(a.data().date||''));if(coll==='transactions')cloudMain=ds.map(d=>d.data());else cloudStock=ds.map(d=>d.data());updateDashboard();display(coll,ds,snap.metadata);el('sync-state').textContent=snap.metadata.hasPendingWrites?'⏳ काही Cloud नोंदींचे सिंक बाकी आहे':snap.metadata.fromCache?'📱 स्थानिक कॅश दिसत आहे; सर्व्हरशी संपर्क तपासा':'✅ Firestore सर्व्हरशी कनेक्शन आहे'},e=>{el('sync-state').textContent='⚠️ Cloud वाचन अयशस्वी: '+(e.code||e.message);el(prefix+'-list').textContent='डेटा वाचता आला नाही'}))}
+function ledgerRow(coll,d){
+ const main=coll==='transactions',prefix=main?'cm':'cs';
+ const r=d.data(),line=document.createElement('div');line.className='line';const txt=document.createElement('div');txt.textContent=main?`${r.date} · ${r.type} · ${r.note} · ${r.mode} · ₹${r.amount}`:`${r.date} · ${r.name} · ${r.type} · ${r.note||''} · ₹${r.amount}`;line.append(txt);if(owner){const bar=document.createElement('div');bar.className='buttons';const edit=document.createElement('button');edit.type='button';edit.textContent='Edit';edit.onclick=()=>{if(main){editMain=d.id;for(const k of ['date','type','note','mode','amount'])el('cm-'+k).value=r[k]}else{editStock=d.id;for(const k of ['date','name','type','note','amount'])el('cs-'+k).value=r[k]||''}el(prefix+'-submit').textContent='बदल सेव्ह करा';el(prefix+'-cancel').classList.remove('hidden');el('cloud-'+(main?'main':'stock')+'-form').scrollIntoView({behavior:'smooth'})};const del=document.createElement('button');del.type='button';del.className='secondary';del.textContent='काढा';del.onclick=async()=>{if(confirm('ही Cloud नोंद कायमची काढायची?'))try{await deleteDoc(doc(db,coll,d.id))}catch(e){safeError(e)}};bar.append(edit,del);line.append(bar)}
+ return line;
+}
+function display(coll,docs,meta){
+ const list=el((coll==='transactions'?'cm':'cs')+'-list');
+ const title=document.createElement('p');
+ title.className='muted';
+ title.textContent=`Cloud नोंदी: ${docs.length} | ${meta.fromCache?'स्थानिक कॅश':'सर्व्हर'}${meta.hasPendingWrites?' | सिंक बाकी':''}`;
+ const olderWasOpen=list.querySelector('details')?.open??false;
+ list.replaceChildren(title,...docs.slice(0,3).map(d=>ledgerRow(coll,d)));
+ const older=docs.slice(3);
+ if(!older.length)return;
+ const details=document.createElement('details');
+ details.className='ledger-older';
+ const summary=document.createElement('summary');
+ details.append(summary);
+ details.open=olderWasOpen;
+ const rows=document.createElement('div');
+ details.append(rows);
+ const updateOlder=()=>{
+   summary.textContent=details.open?'जुन्या नोंदी लपवा':`जुन्या नोंदी पहा (${older.length})`;
+   if(details.open && !rows.firstChild){
+     const fragment=document.createDocumentFragment();
+     for(const d of older)fragment.append(ledgerRow(coll,d));
+     rows.append(fragment);
+   }
+ };
+ updateOlder();
+ details.ontoggle=updateOlder;
+ list.append(details);
+}
+function watch(coll){const prefix=coll==='transactions'?'cm':'cs';unsubs.push(onSnapshot(collection(db,coll),{includeMetadataChanges:true},snap=>{const ds=[...snap.docs].sort((a,b)=>{
+ const left=a.data(),right=b.data();
+ return (right.date||'').localeCompare(left.date||'')
+   || (right.updatedAt?.toMillis?.()??0)-(left.updatedAt?.toMillis?.()??0);
+ });if(coll==='transactions')cloudMain=ds.map(d=>d.data());else cloudStock=ds.map(d=>d.data());updateDashboard();display(coll,ds,snap.metadata);el('sync-state').textContent=snap.metadata.hasPendingWrites?'⏳ काही Cloud नोंदींचे सिंक बाकी आहे':snap.metadata.fromCache?'📱 स्थानिक कॅश दिसत आहे; सर्व्हरशी संपर्क तपासा':'✅ Firestore सर्व्हरशी कनेक्शन आहे'},e=>{el('sync-state').textContent='⚠️ Cloud वाचन अयशस्वी: '+(e.code||e.message);el(prefix+'-list').textContent='डेटा वाचता आला नाही'}))}
 const attendanceStatus = {
   present: 'हजर', absent: 'गैरहजर', leave: 'रजा', holiday: 'सुट्टी',
   halfDay: 'अर्धा दिवस', unpaidLeave: 'विनापगारी रजा', unpaidHoliday: 'विनापगारी सुट्टी',
@@ -273,4 +313,5 @@ onAuthStateChanged(auth,async u=>{clearSubs();user=null;owner=false;showAttendan
 async function submit(which){if(!user)return;const main=which==='main',prefix=main?'cm':'cs',coll=main?'transactions':'stockistTransactions',edit=main?editMain:editStock;if(edit&&!owner){alert('दुरुस्ती फक्त Owner करू शकतो');return}const fields=main?['date','type','note','mode','amount']:['date','name','type','note','amount'];const data={};for(const k of fields)data[k]=el(prefix+'-'+k).value.trim();data.amount=Number(data.amount);if(!data.date||!(data.amount>0)||(main?!data.note:!data.name)){alert('सर्व आवश्यक माहिती भरा');return}const btn=el(prefix+'-submit');btn.disabled=true;try{const ref=edit?doc(db,coll,edit):doc(collection(db,coll));await setDoc(ref,{...data,...(edit?{}:{createdBy:user.uid}),updatedBy:user.uid,updatedAt:serverTimestamp()},{merge:!!edit});reset(which)}catch(e){safeError(e)}finally{btn.disabled=false}}
 el('cloud-main-form').onsubmit=e=>{e.preventDefault();submit('main')};el('cloud-stock-form').onsubmit=e=>{e.preventDefault();submit('stock')};
 </script></body></html>
+
 
