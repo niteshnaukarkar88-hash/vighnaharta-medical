@@ -16,6 +16,39 @@
 .ledger-older{margin-top:8px}
 .ledger-older>summary{cursor:pointer;color:#075e48;font-weight:700;padding:8px 0}
 #export-main,#export-stock{width:auto;padding:7px 12px}
+
+@media(min-width:1000px){main{max-width:1040px}}
+#report-title{cursor:pointer}
+.report-controls{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,155px),1fr));gap:8px}
+.report-controls label{margin:8px 0 0;min-width:0}
+.report-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.report-actions button{width:auto;margin:0;padding:8px 12px}
+.report-block{margin-top:20px}
+.report-block h4{margin:0 0 8px}
+.report-table{max-width:100%;overflow:auto;border:1px solid #d9e8e0;border-radius:8px}
+.report-table:focus-visible{outline:2px solid #075e48;outline-offset:2px}
+.report-table table{border-collapse:collapse;width:100%;font-size:14px;text-align:start}
+.report-table th,.report-table td{padding:8px 10px;vertical-align:top;border-bottom:1px solid #e4eee9}
+.report-table thead th{background:#e7f3ed;text-align:start}
+.report-table td:not(:first-child){text-align:end}
+.report-table td.report-text{text-align:start;overflow-wrap:anywhere}
+.report-table td.report-number,.report-table th[scope=row]{white-space:nowrap;text-align:start}
+.report-table td.report-number{text-align:end}
+.report-table tr:last-child td,.report-table tbody tr:last-child th{border-bottom:0}
+.report-table .report-month-link{background:none;color:#075e48;text-decoration:underline;margin:0;padding:0;width:auto;text-align:start}
+.report-print-month{display:none}
+.report-example-group>summary{cursor:pointer;color:#075e48;font-weight:700;margin-bottom:8px}
+@media print{
+ body.report-print main{max-width:none;padding:0}
+ body.report-print main #cloud-panel>section:not(#period-report){display:none!important}
+ body.report-print .report-controls,body.report-print .report-actions,body.report-print #report-title{display:none}
+ body.report-print .report-table{overflow:visible}
+ body.report-print .report-table table{font-size:9pt}
+ body.report-print .report-table th,body.report-print .report-table td{padding:4px;white-space:normal}
+ body.report-print .report-print-month{display:inline}
+ body.report-print .report-actions+ p:empty{display:none}
+ body.report-print .report-table tr{break-inside:avoid}
+}
 </style></head><body><header><h1>✚ विघ्नहर्ता मेडिकल</h1>वर्धा • सुरक्षित Cloud जमा-खर्च व स्टॉकिस्ट खाते</header><main><section id="login-panel"><h2 class="section-title">🔐 लॉगिन</h2><label>ईमेल</label><input id="login-email" type="email" autocomplete="username"><label>पासवर्ड</label><input id="login-password" type="password" autocomplete="current-password"><button id="login-btn" type="button">लॉगिन करा</button><p id="login-error" class="muted"></p></section>
 <div id="cloud-panel" class="hidden"><section><div id="cloud-identity" class="muted"></div><button id="logout-btn" class="secondary" type="button">लॉगआउट</button><p id="sync-state" class="warn">Cloud कनेक्शन तपासत आहे…</p><p class="muted">ऑफलाइन असताना सिंक बाकी असू शकते. सर्व्हरशी सिंक झाल्याची खात्री होईपर्यंत ब्राउझर डेटा साफ करू नका. जुने CSV बॅकअप स्वतंत्र सुरक्षित ठेवा.</p></section>
 <section id="attendance-panel" class="hidden" aria-labelledby="attendance-title">
@@ -42,6 +75,38 @@
   </details>
 </section>
 <section><h2 class="section-title">📊 मुख्य डॅशबोर्ड</h2><div class="cards"><div class="tile">एकूण जमा<strong id="sum-income">₹0</strong></div><div class="tile">एकूण खर्च<strong id="sum-expense">₹0</strong></div><div class="tile">रोख शिल्लक<strong id="sum-cash">₹0</strong></div><div class="tile">उधारी बाकी<strong id="sum-due">₹0</strong></div></div><p class="muted">रोख शिल्लक = रोख सुरुवातीची रक्कम + रोख जमा/वसुली − रोख खर्च. इतर पेमेंट माध्यमांचा यात समावेश नाही.</p></section>
+<section id="period-report" aria-labelledby="report-title">
+  <details id="report-panel">
+    <summary id="report-title" class="section-title">मासिक व वार्षिक सारांश</summary>
+    <div class="report-controls">
+      <label>रिपोर्ट
+        <select id="report-mode"><option value="month">मासिक</option><option value="year">वार्षिक</option></select>
+      </label>
+      <label id="report-month-label">महिना
+        <select id="report-month">
+          <option value="01">जानेवारी</option><option value="02">फेब्रुवारी</option><option value="03">मार्च</option>
+          <option value="04">एप्रिल</option><option value="05">मे</option><option value="06">जून</option>
+          <option value="07">जुलै</option><option value="08">ऑगस्ट</option><option value="09">सप्टेंबर</option>
+          <option value="10">ऑक्टोबर</option><option value="11">नोव्हेंबर</option><option value="12">डिसेंबर</option>
+        </select>
+      </label>
+      <label id="report-month-year-label">वर्ष <input id="report-month-year" type="number" min="1900" max="9998" step="1" inputmode="numeric" required></label>
+      <label id="report-year-type-label" class="hidden">वर्षाचा प्रकार
+        <select id="report-year-type"><option value="financial">आर्थिक वर्ष (एप्रिल–मार्च)</option><option value="calendar">कॅलेंडर वर्ष (जानेवारी–डिसेंबर)</option></select>
+      </label>
+      <label id="report-year-label" class="hidden"><span id="report-year-caption">सुरुवातीचे वर्ष</span>
+        <input id="report-year" type="number" min="1900" max="9998" step="1" inputmode="numeric" required>
+      </label>
+    </div>
+    <div class="report-actions">
+      <button id="report-back" type="button" class="secondary hidden">वार्षिक सारांशाकडे परत</button>
+      <button id="report-print" type="button" class="secondary" disabled>रिपोर्ट प्रिंट करा</button>
+      <button id="report-export" type="button" class="secondary" disabled>रिपोर्ट CSV डाउनलोड</button>
+    </div>
+    <p id="report-state" class="muted" role="status"></p>
+    <div id="report-content"></div>
+  </details>
+</section>
 <section><h2 class="section-title">📦 स्टॉकिस्ट महिन्याचा सारांश</h2><label>महिना</label><input id="month-filter" type="month"><div class="cards"><div class="tile">महिन्याची खरेदी<strong id="sum-purchase">₹0</strong></div><div class="tile">महिन्याचे पेमेंट<strong id="sum-payment">₹0</strong></div><div class="tile">महिनाअखेर बाकी<strong id="sum-stockdue">₹0</strong></div></div></section>
 <section><h2 class="section-title">☁️ जमा-खर्च व्यवहार</h2><form id="cloud-main-form"><label>तारीख</label><input id="cm-date" type="date" required><label>व्यवहार</label><select id="cm-type"><option value="income">जमा / विक्री</option><option value="expense">खर्च</option><option value="credit">उधारी</option><option value="repayment">उधारी वसुली</option><option value="opening">सुरुवातीची रोख</option></select><label>तपशील</label><input id="cm-note" required><label>पेमेंट माध्यम</label><select id="cm-mode"><option>Cash</option><option>UPI</option><option>Bank</option></select><label>रक्कम ₹</label><input id="cm-amount" type="number" min="0.01" step="0.01" required><button id="cm-submit" type="submit">Cloud मध्ये नोंद सेव्ह करा</button><button id="cm-cancel" class="secondary hidden" type="button">दुरुस्ती रद्द</button></form><button id="export-main" type="button" class="secondary">CSV बॅकअप डाउनलोड</button><div id="cm-list"></div></section>
 <section><h2 class="section-title">☁️ स्टॉकिस्ट व्यवहार</h2><form id="cloud-stock-form"><label>तारीख</label><input id="cs-date" type="date" required><label>स्टॉकिस्ट नाव</label><input id="cs-name" required><label>व्यवहार</label><select id="cs-type"><option value="purchase">माल खरेदी</option><option value="payment">पेमेंट</option><option value="opening">मागील बाकी</option></select><label>बिल / तपशील</label><input id="cs-note"><label>रक्कम ₹</label><input id="cs-amount" type="number" min="0.01" step="0.01" required><button id="cs-submit" type="submit">Cloud मध्ये नोंद सेव्ह करा</button><button id="cs-cancel" class="secondary hidden" type="button">दुरुस्ती रद्द</button></form><button id="export-stock" type="button" class="secondary">CSV बॅकअप डाउनलोड</button><div id="cs-list"></div></section><section><button type="button" onclick="window.print()" class="secondary">रिपोर्ट प्रिंट करा</button></section></div></main><script type="module">
@@ -110,7 +175,7 @@ function watch(coll){const prefix=coll==='transactions'?'cm':'cs';unsubs.push(on
  const left=a.data(),right=b.data();
  return (right.date||'').localeCompare(left.date||'')
    || (right.updatedAt?.toMillis?.()??0)-(left.updatedAt?.toMillis?.()??0);
- });if(coll==='transactions')cloudMain=ds.map(d=>d.data());else cloudStock=ds.map(d=>d.data());updateDashboard();display(coll,ds,snap.metadata);el('sync-state').textContent=snap.metadata.hasPendingWrites?'⏳ काही Cloud नोंदींचे सिंक बाकी आहे':snap.metadata.fromCache?'📱 स्थानिक कॅश दिसत आहे; सर्व्हरशी संपर्क तपासा':'✅ Firestore सर्व्हरशी कनेक्शन आहे'},e=>{el('sync-state').textContent='⚠️ Cloud वाचन अयशस्वी: '+(e.code||e.message);el(prefix+'-list').textContent='डेटा वाचता आला नाही'}))}
+ });if(coll==='transactions')cloudMain=ds.map(d=>d.data());else cloudStock=ds.map(d=>d.data());updateDashboard();display(coll,ds,snap.metadata);setReportSource(coll,snap.metadata);el('sync-state').textContent=snap.metadata.hasPendingWrites?'⏳ काही Cloud नोंदींचे सिंक बाकी आहे':snap.metadata.fromCache?'📱 स्थानिक कॅश दिसत आहे; सर्व्हरशी संपर्क तपासा':'✅ Firestore सर्व्हरशी कनेक्शन आहे'},e=>{el('sync-state').textContent='⚠️ Cloud वाचन अयशस्वी: '+(e.code||e.message);el(prefix+'-list').textContent='डेटा वाचता आला नाही';setReportSource(coll,null)}))}
 const attendanceStatus = {
   present: 'हजर', absent: 'गैरहजर', leave: 'रजा', holiday: 'सुट्टी',
   halfDay: 'अर्धा दिवस', unpaidLeave: 'विनापगारी रजा', unpaidHoliday: 'विनापगारी सुट्टी',
@@ -156,6 +221,7 @@ function saveAttendanceValue(key, value) {
     else localStorage.setItem(key, value);
     attendanceMessage('नोंद जतन झाली.');
     renderAttendance();
+    renderReport();
   } catch {
     attendanceMessage('नोंद जतन झाली नाही. ब्राउझरची स्टोरेज परवानगी आणि उपलब्ध जागा तपासा.');
   }
@@ -189,31 +255,40 @@ function attendanceNumberField(labelText, name, value, min, step, max) {
   return label;
 }
 
-function attendanceSalaryRow(person, month) {
-  const row = attendanceElement('div', '', 'attendance-row');
+function attendanceMonthDetails(person, month) {
   const key = attendanceKey('salary', person.id, month);
-  const stored = localStorage.getItem(key);
-  const [salary = '', paidDays = ''] = stored ? JSON.parse(stored) : [];
+  const saved = localStorage.getItem(key);
+  const [salary = '', paidDays = ''] = saved ? JSON.parse(saved) : [];
   const [year, monthNumber] = month.split('-').map(Number);
   const monthDays = new Date(Date.UTC(year, monthNumber, 0)).getUTCDate();
+  const days = {};
   let deductedDays = 0;
   for (let number = 1; number <= monthDays; number++) {
     const date = month + '-' + String(number).padStart(2, '0');
-    if (!isAttendanceSunday(date) && unpaidAttendance.has(localStorage.getItem(attendanceKey('day', person.id, date)))) {
-      deductedDays++;
-    }
+    const status = isAttendanceSunday(date) ? 'holiday' : localStorage.getItem(attendanceKey('day', person.id, date));
+    if (!Object.hasOwn(attendanceStatus, status)) continue;
+    days[status] = (days[status] ?? 0) + 1;
+    if (unpaidAttendance.has(status)) deductedDays++;
   }
+  const valid = Boolean(saved) && Number.isFinite(salary) && salary >= 0
+    && Number.isInteger(paidDays) && paidDays >= 1 && paidDays <= monthDays && deductedDays <= paidDays;
+  const grossPaise = valid ? Math.round(salary * 100) : 0;
+  const deductionPaise = valid ? Math.round(grossPaise * deductedDays / paidDays) : 0;
+  const due = valid ? grossPaise - deductionPaise : null;
+  return {key, saved, salary, paidDays, monthDays, days, deductedDays, deductionPaise, due};
+}
 
+function attendanceSalaryRow(person, month) {
+  const row = attendanceElement('div', '', 'attendance-row');
+  const {key, saved, salary, paidDays, monthDays, deductedDays, deductionPaise, due} = attendanceMonthDetails(person, month);
   row.append(attendanceElement('strong', person.name));
   const daysText = 'कपातीचे दिवस ' + deductedDays;
   let paymentText = 'पगार आणि पगाराचे दिवस भरा.';
-  if (stored && deductedDays <= paidDays) {
-    const grossPaise = Math.round(Number(salary) * 100);
-    const deductionPaise = Math.round(grossPaise * deductedDays / Number(paidDays));
+  if (due !== null) {
     paymentText = 'कपात ' + attendanceMoney.format(deductionPaise / 100)
-      + ' · देय पगार ' + attendanceMoney.format((grossPaise - deductionPaise) / 100);
-  } else if (stored) {
-    paymentText = 'कपातीचे दिवस पगाराच्या दिवसांपेक्षा जास्त आहेत. नोंदी तपासा.';
+      + ' · देय पगार ' + attendanceMoney.format(due / 100);
+  } else if (saved) {
+    paymentText = 'पगार आणि पगाराच्या दिवसांची नोंद तपासा.';
   }
   row.append(attendanceElement('p', daysText + ' · ' + paymentText, 'muted'));
 
@@ -289,7 +364,10 @@ el('attendance-add').onsubmit = event => {
   }
 };
 window.addEventListener('storage', event => {
-  if (owner && user && (event.key === null || event.key.startsWith(attendanceKey('')))) renderAttendance();
+  if (owner && user && (event.key === null || event.key.startsWith(attendanceKey('')))) {
+    renderAttendance();
+    renderReport();
+  }
 });
 
 function showAttendance(enabled) {
@@ -309,9 +387,398 @@ function showAttendance(enabled) {
   attendanceDate.value = todayInWardha();
 }
 
-onAuthStateChanged(auth,async u=>{clearSubs();user=null;owner=false;showAttendance(false);el('cloud-panel').classList.add('hidden');el('login-panel').classList.remove('hidden');if(!u)return;try{owner=u.uid===ownerUID;const staff=owner|| (await getDoc(doc(db,'authorizedStaff',u.uid))).exists();if(!staff){el('login-error').textContent='या खात्याला प्रवेश परवानगी नाही.';await signOut(auth);return}user=u;el('login-panel').classList.add('hidden');el('cloud-panel').classList.remove('hidden');el('cloud-identity').textContent=`${u.email} · ${owner?'Owner':'Staff (नवीन नोंद व वाचन)'}`;showAttendance(owner);watch('transactions');watch('stockistTransactions')}catch(e){el('login-error').textContent='परवानगी तपासता आली नाही: '+(e.code||e.message)}});
+const reportPanel = el('report-panel');
+const reportMode = el('report-mode');
+const reportMonth = el('report-month');
+const reportMonthYear = el('report-month-year');
+const reportYear = el('report-year');
+const reportYearType = el('report-year-type');
+const reportMonthFormat = new Intl.DateTimeFormat('mr-IN', {month: 'long', year: 'numeric', timeZone: 'UTC'});
+const reportLedgerTypes = {
+  income: 'जमा / विक्री', expense: 'खर्च', credit: 'नवीन उधारी',
+  repayment: 'उधारी वसुली', opening: 'सुरुवातीची रोख',
+};
+const reportStockTypes = {purchase: 'माल खरेदी', payment: 'पेमेंट', opening: 'मागील बाकी'};
+const reportModes = {Cash: 'कॅश', UPI: 'UPI', Bank: 'बँक', Other: 'इतर / माध्यम रिकामे'};
+const reportSources = new Map();
+let currentReport = null;
+let reportFromYear = false;
+const [thisReportYear, thisReportMonth] = todayInWardha().split('-');
+reportMonthYear.value = thisReportYear;
+reportMonth.value = thisReportMonth;
+
+function reportDefaultYear() {
+  const year = reportMonthYear.validity.valid ? reportMonthYear.valueAsNumber : Number(thisReportYear);
+  const month = Number(reportMonth.value);
+  return reportYearType.value === 'financial' && month < 4 && year > 1900 ? year - 1 : year;
+}
+reportYear.value = reportDefaultYear();
+
+function reportMonthAt(first, offset) {
+  const [year, month] = first.split('-').map(Number);
+  const date = new Date(Date.UTC(year, month - 1 + offset, 1));
+  return date.toISOString().slice(0, 7);
+}
+
+function reportMonthName(month) {
+  return reportMonthFormat.format(new Date(month + '-01T00:00:00Z'));
+}
+
+function reportPaise(amount) {
+  const value = Number(amount);
+  return Number.isFinite(value) ? Math.round(value * 100) : 0;
+}
+
+function reportMoney(amount) {
+  return attendanceMoney.format(amount / 100);
+}
+
+function reportLedger(first, end, transactions, stock) {
+  const total = {
+    income: 0, expense: 0, credit: 0, repayment: 0, openingCash: 0, cash: 0, creditOpening: 0,
+    purchases: 0, payments: 0, stockOpening: 0, stockPrior: 0,
+  };
+  const modes = new Map(Object.keys(reportModes).map(mode => [mode, {in: 0, out: 0}]));
+  const stockists = new Map();
+  const ledgerRows = [];
+  const stockRows = [];
+  const monthlyTotals = new Map();
+  function monthFlow(month) {
+    if (!monthlyTotals.has(month)) monthlyTotals.set(month, {receipts: 0, expense: 0, repayment: 0, payments: 0});
+    return monthlyTotals.get(month);
+  }
+  for (const row of transactions) {
+    const month = row.date?.slice(0, 7);
+    if (!month || month >= end) continue;
+    const amount = reportPaise(row.amount);
+    const {type, mode} = row;
+    if (mode === 'Cash') {
+      if (['income', 'repayment', 'opening'].includes(type)) total.cash += amount;
+      if (type === 'expense') total.cash -= amount;
+    }
+    if (month < first) {
+      if (type === 'credit') total.creditOpening += amount;
+      if (type === 'repayment') total.creditOpening -= amount;
+      continue;
+    }
+    ledgerRows.push(row);
+    if (type === 'opening' && mode === 'Cash') total.openingCash += amount;
+    if (['income', 'repayment', 'expense', 'credit'].includes(type)) total[type] += amount;
+    const method = modes.get(mode) ?? modes.get('Other');
+    const monthly = monthFlow(month);
+    if (type === 'income' || type === 'repayment') {
+      method.in += amount;
+      monthly.receipts += amount;
+    }
+    if (type === 'repayment') monthly.repayment += amount;
+    if (type === 'expense') {
+      method.out += amount;
+      monthly.expense += amount;
+    }
+  }
+
+  for (const row of stock) {
+    const month = row.date?.slice(0, 7);
+    if (!month || month >= end || !Object.hasOwn(reportStockTypes, row.type)) continue;
+    const amount = reportPaise(row.amount);
+    const name = row.name?.trim() || 'नाव नोंदलेले नाही';
+    const key = name.toLocaleLowerCase('en-IN');
+    const record = stockists.get(key) ?? {name, prior: 0, purchases: 0, payments: 0, opening: 0};
+    stockists.set(key, record);
+    if (month < first) {
+      const balance = row.type === 'payment' ? -amount : amount;
+      record.prior += balance;
+      total.stockPrior += balance;
+      continue;
+    }
+    stockRows.push(row);
+    if (row.type === 'payment') monthFlow(month).payments += amount;
+    const field = {payment: 'payments', purchase: 'purchases', opening: 'opening'}[row.type];
+    record[field] += amount;
+    total[field === 'opening' ? 'stockOpening' : field] += amount;
+  }
+
+  const stockistRows = [...stockists.values()]
+    .sort((a, b) => a.name.localeCompare(b.name, 'mr'))
+    .filter(row => row.prior || row.purchases || row.payments || row.opening);
+  for (const row of stockistRows) row.balance = row.prior + row.opening + row.purchases - row.payments;
+  total.receipts = total.income + total.repayment;
+  total.net = total.receipts - total.expense;
+  total.creditBalance = total.creditOpening + total.credit - total.repayment;
+  total.stockBalance = total.stockPrior + total.stockOpening + total.purchases - total.payments;
+  return {total, modes, stockistRows, ledgerRows, stockRows, monthlyTotals};
+}
+
+function reportPayroll(first, numberOfMonths, people) {
+  const months = Array.from({length: numberOfMonths}, (_, index) => reportMonthAt(first, index));
+  const byMonth = new Map(months.map(month => [month, {due: 0, saved: 0}]));
+  const rows = people.map(person => {
+    const row = {name: person.name, days: {}, deduction: 0, due: 0, saved: 0};
+    for (const month of months) {
+      const stats = attendanceMonthDetails(person, month);
+      for (const [status, count] of Object.entries(stats.days)) row.days[status] = (row.days[status] ?? 0) + count;
+      row.days.deducted = (row.days.deducted ?? 0) + stats.deductedDays;
+      if (stats.due === null) continue;
+      row.saved++;
+      row.deduction += stats.deductionPaise;
+      row.due += stats.due;
+      const monthly = byMonth.get(month);
+      monthly.saved++;
+      monthly.due += stats.due;
+    }
+    return row;
+  });
+  return {byMonth, rows};
+}
+
+function reportTable(headers, rows, label) {
+  const wrapper = attendanceElement('div', '', 'report-table');
+  wrapper.tabIndex = 0;
+  wrapper.setAttribute('role', 'region');
+  wrapper.setAttribute('aria-label', label);
+  const table = attendanceElement('table');
+  const head = table.createTHead().insertRow();
+  for (const heading of headers) {
+    const cell = attendanceElement('th', heading);
+    cell.scope = 'col';
+    head.append(cell);
+  }
+  const body = table.createTBody();
+  for (const cells of rows) {
+    const tr = body.insertRow();
+    for (const [index, value] of cells.entries()) {
+      const cell = attendanceElement(index === 0 ? 'th' : 'td');
+      if (index === 0) cell.scope = 'row';
+      if (typeof value === 'number') {
+        cell.textContent = reportMoney(value);
+        cell.classList.add('report-number');
+      } else if (typeof value === 'string') {
+        cell.textContent = value;
+        cell.classList.add('report-text');
+      } else cell.append(value);
+      tr.append(cell);
+    }
+  }
+  wrapper.append(table);
+  return wrapper;
+}
+
+function reportBlock(parent, name, headers, rows, note = '') {
+  const block = attendanceElement('div', '', 'report-block');
+  block.append(attendanceElement('h4', name));
+  if (note) block.append(attendanceElement('p', note, 'muted'));
+  if (rows.length) block.append(reportTable(headers, rows, name));
+  else block.append(attendanceElement('p', 'या कालावधीत दाखवण्यासाठी नोंदी नाहीत.', 'muted'));
+  parent.append(block);
+}
+
+function reportDetailRows(parent, label, stock, rows) {
+  const open = attendanceElement('details', '', 'report-block report-example-group');
+  open.append(attendanceElement('summary', label + ' (' + rows.length + ')'));
+  const target = attendanceElement('div');
+  open.append(target);
+  let page = 0;
+  const pageSize = 10;
+  const options = stock ? reportStockTypes : reportLedgerTypes;
+  const headers = ['तारीख', stock ? 'स्टॉकिस्ट' : 'माध्यम', 'व्यवहार', 'तपशील', 'रक्कम'];
+  function draw() {
+    const displayed = rows.slice(page * pageSize, (page + 1) * pageSize).map(row => [
+      row.date, stock ? row.name || '—' : reportModes[row.mode] || '—',
+      options[row.type] || row.type || '—', row.note || '—', reportPaise(row.amount),
+    ]);
+    target.replaceChildren();
+    reportBlock(target, label, headers, displayed);
+    if (rows.length <= pageSize) return;
+    const actions = attendanceElement('div', '', 'report-actions');
+    const previous = attendanceElement('button', 'मागील', 'secondary');
+    const next = attendanceElement('button', 'पुढील', 'secondary');
+    previous.type = next.type = 'button';
+    previous.disabled = page === 0;
+    next.disabled = (page + 1) * pageSize >= rows.length;
+    previous.onclick = () => { page--; draw(); };
+    next.onclick = () => { page++; draw(); };
+    actions.append(previous, next, attendanceElement('p', 'पान ' + (page + 1) + ' / ' + Math.ceil(rows.length / pageSize), 'muted'));
+    target.append(actions);
+  }
+  open.ontoggle = () => { if (open.open && !target.firstChild) draw(); };
+  parent.append(open);
+}
+
+function reportTables(data, payroll, annual) {
+  const {total, modes, stockistRows} = data;
+  const overview = [
+    ['जमा / विक्री', total.income], ['उधारी वसुली', total.repayment], ['एकूण जमा', total.receipts],
+    ['एकूण खर्च', total.expense], ['निव्वळ जमा-खर्च', total.net],
+    ['अखेरीची रोख (नोंदींनुसार)', total.cash],
+    ['ग्राहक उधारी — सुरुवातीची बाकी', total.creditOpening],
+    ['ग्राहक उधारी — नवीन', total.credit], ['ग्राहक उधारी — अखेरची बाकी', total.creditBalance],
+    ['स्टॉकिस्ट — सुरुवातीची बाकी', total.stockPrior], ['स्टॉकिस्ट — या काळात नोंदवलेली मागील बाकी', total.stockOpening],
+    ['स्टॉकिस्ट — माल खरेदी', total.purchases], ['स्टॉकिस्ट — दिलेले पेमेंट', total.payments],
+    ['स्टॉकिस्ट — अखेरची बाकी', total.stockBalance],
+  ];
+  const paymentRows = [...modes.entries()].filter(([mode, value]) => mode !== 'Other' || value.in || value.out)
+    .map(([mode, value]) => [reportModes[mode], value.in, value.out, value.in - value.out]);
+  const supplierRows = stockistRows.map(row => [row.name, row.prior, row.opening, row.purchases, row.payments, row.balance]);
+  const tables = [
+    {name: 'एकूण आकडे', headers: ['नोंद प्रकार', 'रक्कम ₹'], rows: overview,
+      note: 'निव्वळ जमा-खर्चासाठी जमा-खर्च खात्यातील प्राप्ती आणि खर्च वापरले आहेत. स्टॉकिस्ट पेमेंट स्वतंत्रपणे दाखवले आहे.'},
+    {name: 'पेमेंट पद्धतीनुसार', headers: ['माध्यम', 'आले ₹', 'गेले ₹', 'फरक ₹'], rows: paymentRows,
+      note: total.openingCash ? 'या काळात नोंदवलेली सुरुवातीची रोख ' + reportMoney(total.openingCash) + ' आहे. ती पेमेंटच्या आकड्यांपासून स्वतंत्र आहे.' : ''},
+    {name: 'स्टॉकिस्टनिहाय बाकी', headers: ['स्टॉकिस्ट', 'सुरुवातीची ₹', 'नोंदवलेली मागील ₹', 'खरेदी ₹', 'पेमेंट ₹', 'अखेरची ₹'], rows: supplierRows},
+  ];
+  if (payroll) {
+    const payrollRows = payroll.rows.map(row => [
+      row.name, ...['present','absent','leave','holiday','halfDay','unpaidLeave','unpaidHoliday','deducted'].map(key => String(row.days[key] || 0)),
+      ...(annual ? [String(row.saved)] : []), row.saved ? row.deduction : '—', row.saved ? row.due : '—',
+    ]);
+    tables.push({
+      name: 'स्टाफ हजेरी व पगार',
+      headers: ['कर्मचारी','हजर','गैरहजर','रजा','सुट्टी','अर्धा दिवस','विनापगारी रजा','विनापगारी सुट्टी','कपातीचे दिवस',
+        ...(annual ? ['पगार भरलेले महिने'] : []),'कपात ₹','देय पगार ₹'],
+      rows: payrollRows,
+      note: 'या ब्राउझरमधल्या नोंदी. रविवार सुट्टीत धरले आहेत. पगाराची माहिती भरलेल्या आणि गणना शक्य असलेल्या महिन्यांचे आकडे दाखवले आहेत.',
+    });
+  }
+  return tables;
+}
+
+function reportAnnualRows(first, monthlyTotals, payroll) {
+  return Array.from({length: 12}, (_, index) => {
+    const month = reportMonthAt(first, index);
+    const {receipts = 0, expense = 0, repayment = 0, payments = 0} = monthlyTotals.get(month) ?? {};
+    const wages = payroll?.byMonth.get(month);
+    const row = [reportMonthName(month), receipts, expense, receipts - expense, repayment, payments];
+    if (payroll) row.push(wages.saved ? wages.due : '—');
+    return {month, row};
+  });
+}
+
+function reportMonthLink(month, name) {
+  const label = attendanceElement('span');
+  const button = attendanceElement('button', name, 'report-month-link');
+  button.type = 'button';
+  button.onclick = () => {
+    [reportMonthYear.value, reportMonth.value] = month.split('-');
+    reportFromYear = true;
+    reportMode.value = 'month';
+    renderReport();
+    el('report-content').scrollIntoView({block: 'start'});
+  };
+  label.append(button, attendanceElement('span', name, 'report-print-month'));
+  return label;
+}
+
+function renderReport() {
+  const annual = reportMode.value === 'year';
+  const financial = reportYearType.value === 'financial';
+  el('report-month-label').classList.toggle('hidden', annual);
+  el('report-month-year-label').classList.toggle('hidden', annual);
+  el('report-year-label').classList.toggle('hidden', !annual);
+  el('report-year-type-label').classList.toggle('hidden', !annual);
+  el('report-year-caption').textContent = financial ? 'सुरुवातीचे वर्ष' : 'वर्ष';
+  el('report-back').classList.toggle('hidden', annual || !reportFromYear);
+  if (!reportPanel.open) return;
+  const target = el('report-content');
+  const state = el('report-state');
+  const picker = annual ? reportYear : reportMonthYear;
+  const first = String(picker.valueAsNumber) + (annual ? (financial ? '-04' : '-01') : '-' + reportMonth.value);
+  currentReport = null;
+  target.replaceChildren();
+  el('report-print').disabled = el('report-export').disabled = true;
+  if (!user || !picker.validity.valid) {
+    state.textContent = user ? 'योग्य महिना किंवा वर्ष निवडा.' : '';
+    return;
+  }
+  if ([...reportSources.values()].some(meta => meta === null)) {
+    state.textContent = 'Cloud नोंदी वाचता आल्या नाहीत. कनेक्शन तपासा.';
+    return;
+  }
+  if (reportSources.size < 2) {
+    state.textContent = 'जमा-खर्च आणि स्टॉकिस्ट नोंदी येत आहेत…';
+    return;
+  }
+
+  const statuses = [...reportSources.values()];
+  const notices = [];
+  if (statuses.some(meta => meta.fromCache)) notices.push('Cloud च्या स्थानिक कॅशवरून रिपोर्ट. ताज्या सर्व नोंदी उपलब्ध असतीलच असे नाही.');
+  if (statuses.some(meta => meta.hasPendingWrites)) notices.push('काही व्यवहारांचे Cloud सिंक बाकी आहे.');
+  let payroll = null;
+  if (owner) {
+    try {
+      payroll = reportPayroll(first, annual ? 12 : 1, attendanceStaff());
+    } catch {
+      notices.push('या ब्राउझरमधली हजेरी किंवा पगाराची माहिती वाचता आली नाही.');
+    }
+  }
+  state.textContent = notices.join(' ');
+  const end = reportMonthAt(first, annual ? 12 : 1);
+  const data = reportLedger(first, end, cloudMain, cloudStock);
+  const periodName = annual ? reportMonthName(first) + ' ते ' + reportMonthName(reportMonthAt(end, -1)) : reportMonthName(first);
+  target.append(attendanceElement('h3', (annual ? 'वार्षिक सारांश · ' : 'मासिक सारांश · ') + periodName));
+  const cards = attendanceElement('div', '', 'cards');
+  for (const [name, amount] of [
+    ['एकूण जमा', data.total.receipts], ['एकूण खर्च', data.total.expense],
+    ['निव्वळ जमा-खर्च', data.total.net], ['अखेरची ग्राहक उधारी', data.total.creditBalance],
+  ]) {
+    const card = attendanceElement('div', name, 'tile');
+    card.append(attendanceElement('strong', reportMoney(amount)));
+    cards.append(card);
+  }
+  target.append(cards);
+  const tables = reportTables(data, payroll, annual);
+  if (annual) {
+    const monthly = reportAnnualRows(first, data.monthlyTotals, payroll);
+    const headers = ['महिना', 'जमा ₹', 'खर्च ₹', 'निव्वळ ₹', 'उधारी वसुली ₹', 'स्टॉकिस्ट पेमेंट ₹'];
+    if (payroll) headers.push('देय पगार ₹');
+    reportBlock(target, 'महिनानिहाय तुलना', headers, monthly.map(({month, row}) => [
+      reportMonthLink(month, row[0]), ...row.slice(1),
+    ]), 'सविस्तर रिपोर्टसाठी महिन्याच्या नावावर टॅप करा.');
+    tables.unshift({name: 'महिनानिहाय तुलना', headers, rows: monthly.map(entry => entry.row)});
+  }
+  for (const table of tables.slice(annual ? 1 : 0)) {
+    reportBlock(target, table.name, table.headers, table.rows, table.note);
+  }
+  reportDetailRows(target, 'जमा-खर्च व्यवहारांचा तपशील', false, data.ledgerRows);
+  reportDetailRows(target, 'स्टॉकिस्ट व्यवहारांचा तपशील', true, data.stockRows);
+  currentReport = {periodName, filename: (annual ? 'Year_' : 'Month_') + first, tables, notice: state.textContent};
+  el('report-print').disabled = el('report-export').disabled = false;
+}
+
+function setReportSource(collectionName, metadata) {
+  reportSources.set(collectionName, metadata);
+  renderReport();
+}
+
+reportPanel.ontoggle = () => { if (reportPanel.open) renderReport(); };
+reportMode.onchange = () => {
+  reportFromYear = false;
+  if (reportMode.value === 'year') reportYear.value = reportDefaultYear();
+  renderReport();
+};
+reportMonth.onchange = reportMonthYear.onchange = reportYearType.onchange = reportYear.onchange = renderReport;
+el('report-back').onclick = () => { reportMode.value = 'year'; renderReport(); };
+el('report-print').onclick = () => {
+  if (!currentReport) return;
+  document.body.classList.add('report-print');
+  try { window.print(); } finally { document.body.classList.remove('report-print'); }
+};
+el('report-export').onclick = () => {
+  if (!currentReport) return;
+  const {periodName, filename, tables, notice} = currentReport;
+  const rows = [['विघ्नहर्ता मेडिकल, वर्धा'], ['कालावधी', periodName]];
+  if (notice) rows.push([notice]);
+  for (const table of tables) rows.push([], [table.name], table.headers, ...table.rows);
+  const csvRows = rows.map(row => row.map(value => {
+    if (typeof value === 'number') return value / 100;
+    return /^[\s]*[=+@-]/.test(value) ? "'" + value : value;
+  }));
+  downloadCSV(csvRows, 'Vighnaharta_Report_' + filename + '.csv');
+};
+
+onAuthStateChanged(auth,async u=>{clearSubs();user=null;owner=false;showAttendance(false);reportSources.clear();currentReport=null;reportPanel.open=false;el('report-content').replaceChildren();el('report-state').textContent='';el('cloud-panel').classList.add('hidden');el('login-panel').classList.remove('hidden');if(!u)return;try{owner=u.uid===ownerUID;const staff=owner|| (await getDoc(doc(db,'authorizedStaff',u.uid))).exists();if(!staff){el('login-error').textContent='या खात्याला प्रवेश परवानगी नाही.';await signOut(auth);return}user=u;el('login-panel').classList.add('hidden');el('cloud-panel').classList.remove('hidden');el('cloud-identity').textContent=`${u.email} · ${owner?'Owner':'Staff (नवीन नोंद व वाचन)'}`;showAttendance(owner);watch('transactions');watch('stockistTransactions')}catch(e){el('login-error').textContent='परवानगी तपासता आली नाही: '+(e.code||e.message)}});
 async function submit(which){if(!user)return;const main=which==='main',prefix=main?'cm':'cs',coll=main?'transactions':'stockistTransactions',edit=main?editMain:editStock;if(edit&&!owner){alert('दुरुस्ती फक्त Owner करू शकतो');return}const fields=main?['date','type','note','mode','amount']:['date','name','type','note','amount'];const data={};for(const k of fields)data[k]=el(prefix+'-'+k).value.trim();data.amount=Number(data.amount);if(!data.date||!(data.amount>0)||(main?!data.note:!data.name)){alert('सर्व आवश्यक माहिती भरा');return}const btn=el(prefix+'-submit');btn.disabled=true;try{const ref=edit?doc(db,coll,edit):doc(collection(db,coll));await setDoc(ref,{...data,...(edit?{}:{createdBy:user.uid}),updatedBy:user.uid,updatedAt:serverTimestamp()},{merge:!!edit});reset(which)}catch(e){safeError(e)}finally{btn.disabled=false}}
 el('cloud-main-form').onsubmit=e=>{e.preventDefault();submit('main')};el('cloud-stock-form').onsubmit=e=>{e.preventDefault();submit('stock')};
 </script></body></html>
+
 
 
