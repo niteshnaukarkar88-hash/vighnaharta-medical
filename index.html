@@ -1,7 +1,42 @@
 <!doctype html><html lang="mr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#075e48"><title>विघ्नहर्ता मेडिकल | Cloud खाता</title><style>
 *{box-sizing:border-box}body{font-family:system-ui,-apple-system,sans-serif;margin:0;background:#f2f7f5;color:#16382e}header{background:#075e48;color:white;padding:20px 16px}header h1{font-size:22px;margin:0 0 4px}main{max-width:820px;margin:auto;padding:14px}section,.tile{background:white;border-radius:12px;padding:15px;margin-bottom:13px;box-shadow:0 1px 5px #0001}.cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.tile{margin:0;min-width:0}.tile strong{font-size:22px;display:block;overflow-wrap:anywhere}.muted{font-size:13px;color:#60746a}.warn{background:#fff3cd;border-radius:8px;padding:12px;font-size:13px}.hidden{display:none!important}label{display:block;margin:10px 0 4px}input,select,button{font:inherit;width:100%;padding:11px;border:1px solid #cad8d2;border-radius:8px}button{background:#075e48;color:white;border:0;margin:10px 0;font-weight:700;cursor:pointer}.secondary{background:#e5f2ed;color:#075e48}button:disabled{opacity:.5}.line{padding:12px 0;border-bottom:1px solid #ddd;overflow-wrap:anywhere}.buttons{display:flex;gap:8px}.buttons button{width:auto;padding:7px 12px}.section-title{margin-top:0;font-size:19px}#cloud-identity{overflow-wrap:anywhere}#sync-state{margin-top:12px}@media(min-width:680px){.cards{grid-template-columns:repeat(4,minmax(0,1fr))}}@media print{button,form,#login-panel,#logout-btn{display:none!important}body{background:white}section{box-shadow:none}}
+
+#attendance-panel summary{cursor:pointer}
+.attendance-date,.attendance-form{display:flex;align-items:end;gap:8px}
+.attendance-date>label,.attendance-form>label{flex:1;min-width:0}
+.attendance-date>button,.attendance-form>button{width:auto;margin:0}
+.attendance-date>button{min-width:44px;font-size:18px;padding:10px}
+.attendance-row{border-top:1px solid #e2ebe7;padding:10px 0}
+.attendance-row>label{margin:0}
+.attendance-salary{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.attendance-salary>label{margin:0}
+.attendance-salary>button{grid-column:1/-1;margin:0}
+#attendance-payroll{margin-top:16px}
 </style></head><body><header><h1>✚ विघ्नहर्ता मेडिकल</h1>वर्धा • सुरक्षित Cloud जमा-खर्च व स्टॉकिस्ट खाते</header><main><section id="login-panel"><h2 class="section-title">🔐 लॉगिन</h2><label>ईमेल</label><input id="login-email" type="email" autocomplete="username"><label>पासवर्ड</label><input id="login-password" type="password" autocomplete="current-password"><button id="login-btn" type="button">लॉगिन करा</button><p id="login-error" class="muted"></p></section>
 <div id="cloud-panel" class="hidden"><section><div id="cloud-identity" class="muted"></div><button id="logout-btn" class="secondary" type="button">लॉगआउट</button><p id="sync-state" class="warn">Cloud कनेक्शन तपासत आहे…</p><p class="muted">ऑफलाइन असताना सिंक बाकी असू शकते. सर्व्हरशी सिंक झाल्याची खात्री होईपर्यंत ब्राउझर डेटा साफ करू नका. जुने CSV बॅकअप स्वतंत्र सुरक्षित ठेवा.</p></section>
+<section id="attendance-panel" class="hidden" aria-labelledby="attendance-title">
+  <details id="attendance-details">
+    <summary id="attendance-title" class="section-title">स्टाफ हजेरी व पगार</summary>
+    <p class="muted">हजेरी आणि पगाराच्या नोंदी या ब्राउझरमध्ये जतन होतात.</p>
+    <div class="attendance-date">
+      <button id="attendance-prev" type="button" class="secondary" aria-label="मागचा दिवस">‹</button>
+      <label>हजेरीची तारीख<input id="attendance-date" type="date" required></label>
+      <button id="attendance-next" type="button" class="secondary" aria-label="पुढचा दिवस">›</button>
+    </div>
+    <p id="attendance-message" class="muted" role="status"></p>
+    <p id="attendance-summary" class="muted" aria-live="polite"></p>
+    <div id="attendance-list"></div>
+    <form id="attendance-add" class="attendance-form">
+      <label>नवीन कर्मचाऱ्याचे नाव<input id="attendance-name" required maxlength="80" autocomplete="off"></label>
+      <button type="submit" class="secondary">कर्मचारी जोडा</button>
+    </form>
+    <details id="attendance-payroll">
+      <summary class="section-title">निवडलेल्या महिन्याचा पगार</summary>
+      <p class="muted">गैरहजर, विनापगारी रजा आणि विनापगारी सुट्टीसाठी कपात होते. रविवार आपोआप सुट्टी.</p>
+      <div id="attendance-salaries"></div>
+    </details>
+  </details>
+</section>
 <section><h2 class="section-title">📊 मुख्य डॅशबोर्ड</h2><div class="cards"><div class="tile">एकूण जमा<strong id="sum-income">₹0</strong></div><div class="tile">एकूण खर्च<strong id="sum-expense">₹0</strong></div><div class="tile">रोख शिल्लक<strong id="sum-cash">₹0</strong></div><div class="tile">उधारी बाकी<strong id="sum-due">₹0</strong></div></div><p class="muted">रोख शिल्लक = रोख सुरुवातीची रक्कम + रोख जमा/वसुली − रोख खर्च. इतर पेमेंट माध्यमांचा यात समावेश नाही.</p></section>
 <section><h2 class="section-title">📦 स्टॉकिस्ट महिन्याचा सारांश</h2><label>महिना</label><input id="month-filter" type="month"><div class="cards"><div class="tile">महिन्याची खरेदी<strong id="sum-purchase">₹0</strong></div><div class="tile">महिन्याचे पेमेंट<strong id="sum-payment">₹0</strong></div><div class="tile">महिनाअखेर बाकी<strong id="sum-stockdue">₹0</strong></div></div></section>
 <section><h2 class="section-title">☁️ जमा-खर्च व्यवहार</h2><form id="cloud-main-form"><label>तारीख</label><input id="cm-date" type="date" required><label>व्यवहार</label><select id="cm-type"><option value="income">जमा / विक्री</option><option value="expense">खर्च</option><option value="credit">उधारी</option><option value="repayment">उधारी वसुली</option><option value="opening">सुरुवातीची रोख</option></select><label>तपशील</label><input id="cm-note" required><label>पेमेंट माध्यम</label><select id="cm-mode"><option>Cash</option><option>UPI</option><option>Bank</option></select><label>रक्कम ₹</label><input id="cm-amount" type="number" min="0.01" step="0.01" required><button id="cm-submit" type="submit">Cloud मध्ये नोंद सेव्ह करा</button><button id="cm-cancel" class="secondary hidden" type="button">दुरुस्ती रद्द</button></form><button id="export-main" type="button" class="secondary">CSV बॅकअप डाउनलोड</button><div id="cm-list"></div></section>
@@ -36,7 +71,206 @@ el('export-main').onclick=()=>downloadCSV([['Date','Type','Description','Mode','
 el('export-stock').onclick=()=>downloadCSV([['Date','Stockist','Type','Bill/Details','Amount'],...cloudStock.map(r=>[r.date,r.name,r.type,r.note,r.amount])],'Vighnaharta_Stockist_Cloud.csv');
 function display(coll,docs,meta){const main=coll==='transactions',prefix=main?'cm':'cs',list=el(prefix+'-list');list.replaceChildren();let title=document.createElement('p');title.className='muted';title.textContent=`Cloud नोंदी: ${docs.length} | ${meta.fromCache?'स्थानिक कॅश':'सर्व्हर'}${meta.hasPendingWrites?' | सिंक बाकी':''}`;list.append(title);for(const d of docs){const r=d.data(),line=document.createElement('div');line.className='line';const txt=document.createElement('div');txt.textContent=main?`${r.date} · ${r.type} · ${r.note} · ${r.mode} · ₹${r.amount}`:`${r.date} · ${r.name} · ${r.type} · ${r.note||''} · ₹${r.amount}`;line.append(txt);if(owner){const bar=document.createElement('div');bar.className='buttons';const edit=document.createElement('button');edit.type='button';edit.textContent='Edit';edit.onclick=()=>{if(main){editMain=d.id;for(const k of ['date','type','note','mode','amount'])el('cm-'+k).value=r[k]}else{editStock=d.id;for(const k of ['date','name','type','note','amount'])el('cs-'+k).value=r[k]||''}el(prefix+'-submit').textContent='बदल सेव्ह करा';el(prefix+'-cancel').classList.remove('hidden');el('cloud-'+(main?'main':'stock')+'-form').scrollIntoView({behavior:'smooth'})};const del=document.createElement('button');del.type='button';del.className='secondary';del.textContent='काढा';del.onclick=async()=>{if(confirm('ही Cloud नोंद कायमची काढायची?'))try{await deleteDoc(doc(db,coll,d.id))}catch(e){safeError(e)}};bar.append(edit,del);line.append(bar)}list.append(line)}}
 function watch(coll){const prefix=coll==='transactions'?'cm':'cs';unsubs.push(onSnapshot(collection(db,coll),{includeMetadataChanges:true},snap=>{const ds=snap.docs.sort((a,b)=>(b.data().date||'').localeCompare(a.data().date||''));if(coll==='transactions')cloudMain=ds.map(d=>d.data());else cloudStock=ds.map(d=>d.data());updateDashboard();display(coll,ds,snap.metadata);el('sync-state').textContent=snap.metadata.hasPendingWrites?'⏳ काही Cloud नोंदींचे सिंक बाकी आहे':snap.metadata.fromCache?'📱 स्थानिक कॅश दिसत आहे; सर्व्हरशी संपर्क तपासा':'✅ Firestore सर्व्हरशी कनेक्शन आहे'},e=>{el('sync-state').textContent='⚠️ Cloud वाचन अयशस्वी: '+(e.code||e.message);el(prefix+'-list').textContent='डेटा वाचता आला नाही'}))}
-onAuthStateChanged(auth,async u=>{clearSubs();user=null;owner=false;el('cloud-panel').classList.add('hidden');el('login-panel').classList.remove('hidden');if(!u)return;try{owner=u.uid===ownerUID;const staff=owner|| (await getDoc(doc(db,'authorizedStaff',u.uid))).exists();if(!staff){el('login-error').textContent='या खात्याला प्रवेश परवानगी नाही.';await signOut(auth);return}user=u;el('login-panel').classList.add('hidden');el('cloud-panel').classList.remove('hidden');el('cloud-identity').textContent=`${u.email} · ${owner?'Owner':'Staff (नवीन नोंद व वाचन)'}`;watch('transactions');watch('stockistTransactions')}catch(e){el('login-error').textContent='परवानगी तपासता आली नाही: '+(e.code||e.message)}});
+const attendanceStatus = {
+  present: 'हजर', absent: 'गैरहजर', leave: 'रजा', holiday: 'सुट्टी',
+  halfDay: 'अर्धा दिवस', unpaidLeave: 'विनापगारी रजा', unpaidHoliday: 'विनापगारी सुट्टी',
+};
+const unpaidAttendance = new Set(['absent', 'unpaidLeave', 'unpaidHoliday']);
+const attendanceMoney = new Intl.NumberFormat('en-IN', {style: 'currency', currency: 'INR'});
+const attendanceDateFormat = new Intl.DateTimeFormat('en-GB', {
+  timeZone: 'Asia/Kolkata', year: 'numeric', month: '2-digit', day: '2-digit',
+});
+const attendanceDate = el('attendance-date');
+const todayInWardha = () => attendanceDateFormat.format(new Date()).split('/').reverse().join('-');
+const isAttendanceSunday = date => new Date(date + 'T12:00:00Z').getUTCDay() === 0;
+attendanceDate.value = todayInWardha();
+
+function attendanceKey(kind, ...parts) {
+  return ['vighnaharta-attendance-v1', user.uid, kind, ...parts].join(':');
+}
+
+function attendanceStaff() {
+  const prefix = attendanceKey('staff', '');
+  return Object.keys(localStorage)
+    .filter(key => key.startsWith(prefix))
+    .map(key => ({id: key.slice(prefix.length), name: localStorage.getItem(key)}))
+    .filter(person => person.name)
+    .sort((a, b) => a.name.localeCompare(b.name));
+}
+
+function attendanceElement(tag, text, className) {
+  const node = document.createElement(tag);
+  if (text) node.textContent = text;
+  if (className) node.className = className;
+  return node;
+}
+
+function attendanceMessage(text) {
+  el('attendance-message').textContent = text;
+}
+
+function saveAttendanceValue(key, value) {
+  if (!owner || !user) return;
+  try {
+    if (value === '') localStorage.removeItem(key);
+    else localStorage.setItem(key, value);
+    attendanceMessage('नोंद जतन झाली.');
+    renderAttendance();
+  } catch {
+    attendanceMessage('नोंद जतन झाली नाही. ब्राउझरची स्टोरेज परवानगी आणि उपलब्ध जागा तपासा.');
+  }
+}
+
+function attendanceRow(person, date) {
+  const row = attendanceElement('div', '', 'attendance-row');
+  if (isAttendanceSunday(date)) {
+    row.textContent = person.name + ' · रविवार सुट्टी';
+    return row;
+  }
+  const key = attendanceKey('day', person.id, date);
+  const label = attendanceElement('label', person.name);
+  const select = attendanceElement('select');
+  select.add(new Option('नोंद बाकी', ''));
+  for (const [value, labelText] of Object.entries(attendanceStatus)) {
+    select.add(new Option(labelText, value));
+  }
+  select.value = localStorage.getItem(key) ?? '';
+  select.onchange = () => saveAttendanceValue(key, select.value);
+  label.append(select);
+  row.append(label);
+  return row;
+}
+
+function attendanceNumberField(labelText, name, value, min, step, max) {
+  const label = attendanceElement('label', labelText);
+  const input = attendanceElement('input');
+  Object.assign(input, {type: 'number', name, value, min, step, max, required: true});
+  label.append(input);
+  return label;
+}
+
+function attendanceSalaryRow(person, month) {
+  const row = attendanceElement('div', '', 'attendance-row');
+  const key = attendanceKey('salary', person.id, month);
+  const stored = localStorage.getItem(key);
+  const [salary = '', paidDays = ''] = stored ? JSON.parse(stored) : [];
+  const [year, monthNumber] = month.split('-').map(Number);
+  const monthDays = new Date(Date.UTC(year, monthNumber, 0)).getUTCDate();
+  let deductedDays = 0;
+  for (let number = 1; number <= monthDays; number++) {
+    const date = month + '-' + String(number).padStart(2, '0');
+    if (!isAttendanceSunday(date) && unpaidAttendance.has(localStorage.getItem(attendanceKey('day', person.id, date)))) {
+      deductedDays++;
+    }
+  }
+
+  row.append(attendanceElement('strong', person.name));
+  const daysText = 'कपातीचे दिवस ' + deductedDays;
+  let paymentText = 'पगार आणि पगाराचे दिवस भरा.';
+  if (stored && deductedDays <= paidDays) {
+    const grossPaise = Math.round(Number(salary) * 100);
+    const deductionPaise = Math.round(grossPaise * deductedDays / Number(paidDays));
+    paymentText = 'कपात ' + attendanceMoney.format(deductionPaise / 100)
+      + ' · देय पगार ' + attendanceMoney.format((grossPaise - deductionPaise) / 100);
+  } else if (stored) {
+    paymentText = 'कपातीचे दिवस पगाराच्या दिवसांपेक्षा जास्त आहेत. नोंदी तपासा.';
+  }
+  row.append(attendanceElement('p', daysText + ' · ' + paymentText, 'muted'));
+
+  const form = attendanceElement('form', '', 'attendance-salary');
+  const button = attendanceElement('button', 'पगाराची माहिती जतन करा', 'secondary');
+  button.type = 'submit';
+  form.append(
+    attendanceNumberField('मासिक पगार ₹', 'salary', salary, '0', '0.01', '9999999'),
+    attendanceNumberField('पगार मोजायचे दिवस', 'paidDays', paidDays, '1', '1', String(monthDays)),
+    button,
+  );
+  form.onsubmit = event => {
+    event.preventDefault();
+    const values = new FormData(form);
+    saveAttendanceValue(key, JSON.stringify([Number(values.get('salary')), Number(values.get('paidDays'))]));
+  };
+  row.append(form);
+  return row;
+}
+
+function renderAttendance() {
+  if (!owner || !user) return;
+  const date = attendanceDate.value;
+  if (!date) return;
+  try {
+    const staff = attendanceStaff();
+    const sunday = isAttendanceSunday(date);
+    const counts = new Map();
+    for (const person of staff) {
+      const status = sunday ? 'holiday' : localStorage.getItem(attendanceKey('day', person.id, date)) || 'pending';
+      counts.set(status, (counts.get(status) ?? 0) + 1);
+    }
+    el('attendance-summary').textContent = staff.length
+      ? [...counts].map(([status, count]) => (attendanceStatus[status] ?? 'नोंद बाकी') + ' ' + count).join(' · ')
+      : 'हजेरी सुरू करण्यासाठी पहिले कर्मचारी नाव जोडा.';
+    el('attendance-list').replaceChildren(...staff.map(person => attendanceRow(person, date)));
+    el('attendance-salaries').replaceChildren(...staff.map(person => attendanceSalaryRow(person, date.slice(0, 7))));
+  } catch {
+    attendanceMessage('या ब्राउझरमधल्या हजेरीच्या नोंदी वाचता आल्या नाहीत.');
+  }
+}
+
+function changeAttendanceDate(days) {
+  const date = new Date((attendanceDate.value || todayInWardha()) + 'T12:00:00Z');
+  date.setUTCDate(date.getUTCDate() + days);
+  attendanceDate.value = date.toISOString().slice(0, 10);
+  attendanceMessage('');
+  renderAttendance();
+}
+
+el('attendance-prev').onclick = () => changeAttendanceDate(-1);
+el('attendance-next').onclick = () => changeAttendanceDate(1);
+attendanceDate.onchange = () => {
+  if (!attendanceDate.value) attendanceDate.value = todayInWardha();
+  attendanceMessage('');
+  renderAttendance();
+};
+el('attendance-add').onsubmit = event => {
+  event.preventDefault();
+  if (!owner || !user) return;
+  const input = el('attendance-name');
+  const name = input.value.trim();
+  if (!name) return;
+  try {
+    if (attendanceStaff().some(person => person.name.toLocaleLowerCase() === name.toLocaleLowerCase())) {
+      attendanceMessage('या नावाचा कर्मचारी आधीच आहे.');
+      return;
+    }
+    saveAttendanceValue(attendanceKey('staff', crypto.randomUUID()), name);
+    if (el('attendance-message').textContent === 'नोंद जतन झाली.') input.value = '';
+  } catch {
+    attendanceMessage('कर्मचारी जोडता आला नाही. ब्राउझरची स्टोरेज परवानगी तपासा.');
+  }
+};
+window.addEventListener('storage', event => {
+  if (owner && user && (event.key === null || event.key.startsWith(attendanceKey('')))) renderAttendance();
+});
+
+function showAttendance(enabled) {
+  const panel = el('attendance-panel');
+  panel.classList.toggle('hidden', !enabled);
+  if (enabled) {
+    renderAttendance();
+    return;
+  }
+  el('attendance-list').replaceChildren();
+  el('attendance-salaries').replaceChildren();
+  el('attendance-add').reset();
+  el('attendance-details').open = false;
+  el('attendance-payroll').open = false;
+  el('attendance-summary').textContent = '';
+  attendanceMessage('');
+  attendanceDate.value = todayInWardha();
+}
+
+onAuthStateChanged(auth,async u=>{clearSubs();user=null;owner=false;showAttendance(false);el('cloud-panel').classList.add('hidden');el('login-panel').classList.remove('hidden');if(!u)return;try{owner=u.uid===ownerUID;const staff=owner|| (await getDoc(doc(db,'authorizedStaff',u.uid))).exists();if(!staff){el('login-error').textContent='या खात्याला प्रवेश परवानगी नाही.';await signOut(auth);return}user=u;el('login-panel').classList.add('hidden');el('cloud-panel').classList.remove('hidden');el('cloud-identity').textContent=`${u.email} · ${owner?'Owner':'Staff (नवीन नोंद व वाचन)'}`;showAttendance(owner);watch('transactions');watch('stockistTransactions')}catch(e){el('login-error').textContent='परवानगी तपासता आली नाही: '+(e.code||e.message)}});
 async function submit(which){if(!user)return;const main=which==='main',prefix=main?'cm':'cs',coll=main?'transactions':'stockistTransactions',edit=main?editMain:editStock;if(edit&&!owner){alert('दुरुस्ती फक्त Owner करू शकतो');return}const fields=main?['date','type','note','mode','amount']:['date','name','type','note','amount'];const data={};for(const k of fields)data[k]=el(prefix+'-'+k).value.trim();data.amount=Number(data.amount);if(!data.date||!(data.amount>0)||(main?!data.note:!data.name)){alert('सर्व आवश्यक माहिती भरा');return}const btn=el(prefix+'-submit');btn.disabled=true;try{const ref=edit?doc(db,coll,edit):doc(collection(db,coll));await setDoc(ref,{...data,...(edit?{}:{createdBy:user.uid}),updatedBy:user.uid,updatedAt:serverTimestamp()},{merge:!!edit});reset(which)}catch(e){safeError(e)}finally{btn.disabled=false}}
 el('cloud-main-form').onsubmit=e=>{e.preventDefault();submit('main')};el('cloud-stock-form').onsubmit=e=>{e.preventDefault();submit('stock')};
 </script></body></html>
+
