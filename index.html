@@ -40,7 +40,7 @@
 .report-example-group>summary{cursor:pointer;color:#075e48;font-weight:700;margin-bottom:8px}
 @media print{
  body.report-print main{max-width:none;padding:0}
- body.report-print main #cloud-panel>section:not(#period-report){display:none!important}
+ 
  body.report-print .report-controls,body.report-print .report-actions,body.report-print #report-title{display:none}
  body.report-print .report-table{overflow:visible}
  body.report-print .report-table table{font-size:9pt}
@@ -49,9 +49,203 @@
  body.report-print .report-actions+ p:empty{display:none}
  body.report-print .report-table tr{break-inside:avoid}
 }
-</style></head><body><header><h1>✚ विघ्नहर्ता मेडिकल</h1>वर्धा • सुरक्षित Cloud जमा-खर्च व स्टॉकिस्ट खाते</header><main><section id="login-panel"><h2 class="section-title">🔐 लॉगिन</h2><label>ईमेल</label><input id="login-email" type="email" autocomplete="username"><label>पासवर्ड</label><input id="login-password" type="password" autocomplete="current-password"><button id="login-btn" type="button">लॉगिन करा</button><p id="login-error" class="muted"></p></section>
-<div id="cloud-panel" class="hidden"><section><div id="cloud-identity" class="muted"></div><button id="logout-btn" class="secondary" type="button">लॉगआउट</button><p id="sync-state" class="warn">Cloud कनेक्शन तपासत आहे…</p><p class="muted">ऑफलाइन असताना सिंक बाकी असू शकते. सर्व्हरशी सिंक झाल्याची खात्री होईपर्यंत ब्राउझर डेटा साफ करू नका. जुने CSV बॅकअप स्वतंत्र सुरक्षित ठेवा.</p></section>
-<section id="attendance-panel" class="hidden" aria-labelledby="attendance-title">
+
+:root{
+  --surface:#fff;--paper:#f3f7f5;--ink:#18342c;--text-muted:#526961;
+  --edge:#dce7e1;--green:#09644f;--deep:#103b30;--accent:#d6eb8d;
+  --radius:16px;--header-height:70px;
+}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:"Nirmala UI","Noto Sans Devanagari",Mangal,system-ui,sans-serif;line-height:1.5}
+.app-header{position:sticky;top:0;z-index:5;background:#f9fcfa;color:var(--ink);padding:0;border-bottom:1px solid var(--edge)}
+.header-inner{width:min(100%,1440px);height:var(--header-height);margin:auto;padding:0 clamp(14px,3vw,34px);display:flex;align-items:center;justify-content:space-between;gap:14px}
+.brand{display:inline-flex;align-items:center;gap:12px;color:var(--ink);text-decoration:none}
+.brand strong,.brand small{display:block}
+.brand strong{font-size:clamp(16px,2vw,20px);line-height:1.2}
+.brand small,.header-date{font-size:13px;color:var(--text-muted)}
+.brand small{margin-top:3px}
+.brand-mark{position:relative;width:38px;height:38px;flex:none;background:var(--deep);border-radius:11px}
+.brand-mark::before,.brand-mark::after{content:"";position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:var(--accent);border-radius:2px}
+.brand-mark::before{width:19px;height:6px}
+.brand-mark::after{width:6px;height:19px}
+.header-date{text-align:end}
+main{width:min(100%,1440px);max-width:none;margin:auto;padding:clamp(12px,2.75vw,34px)}
+#cloud-panel{display:grid;grid-template-columns:minmax(0,1fr);gap:16px;align-items:start}
+.workspace{min-width:0;display:grid;gap:16px}
+.workspace>section{min-width:0;margin:0;scroll-margin-top:calc(var(--header-height) + 74px)}
+#cm-list,#cs-list,.ledger-form{scroll-margin-top:calc(var(--header-height) + 74px)}
+#app-nav{position:sticky;top:var(--header-height);z-index:4;min-width:0;display:flex;gap:4px;align-items:center;overflow:auto;scrollbar-width:thin;padding:5px;background:#fff;border:1px solid var(--edge);border-radius:12px;box-shadow:0 4px 14px #16342a0a}
+#app-nav a{display:flex;align-items:center;gap:8px;flex:none;min-height:42px;padding:8px 11px;border-radius:8px;color:#325849;font-size:14px;font-weight:650;text-decoration:none;white-space:nowrap}
+#app-nav a:hover{background:#ecf5ef}
+#app-nav a[aria-current]{background:#dcefe5;color:#07513f}
+.nav-icon{display:inline-grid;place-items:center;width:18px;font-size:17px;line-height:1}
+section,.tile{background:var(--surface);border-radius:var(--radius);border:1px solid var(--edge);box-shadow:0 3px 12px #223f3506}
+section{padding:clamp(14px,2.2vw,23px)}
+.section-title{font-size:clamp(17px,2vw,21px);font-weight:750;line-height:1.4;margin:0 0 14px}
+.muted{color:var(--text-muted);font-size:13px}
+button,input,select{min-height:43px;border-radius:9px}
+input,select{min-width:0;background:#fbfdfb;border-color:#cbdcd3;color:var(--ink);padding:9px 11px}
+button{background:var(--green);padding:9px 13px}
+button.secondary{background:#e7f2ed;color:#06513e}
+button:not(:disabled):hover,.primary-link:hover{filter:brightness(.96)}
+:focus-visible{outline:2px solid #13765b;outline-offset:3px}
+.account-main{display:flex;align-items:center;gap:11px}
+#account-panel{padding:12px clamp(13px,2vw,20px)}
+.account-avatar{display:grid;place-items:center;width:34px;height:34px;background:#e4f1e8;border-radius:10px;color:#097459;flex:none;font-size:16px}
+#cloud-identity{flex:1;font-size:13px;font-weight:650}
+#logout-btn{width:auto;margin:0;padding:7px 11px;min-height:36px;flex:none}
+.sync-details{margin-top:8px}
+.sync-details summary{cursor:pointer;font-size:13px;color:#2d674e;line-height:1.65}
+#sync-state{display:inline;background:#edf5ee;border-radius:5px;padding:3px 6px;font-size:12px;color:#215841}
+.sync-details p{margin:7px 0 0}
+#dashboard-panel{padding:0;border:0;background:transparent;box-shadow:none}
+.dashboard-hero{min-height:112px;padding:clamp(17px,3vw,30px);display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;border-radius:var(--radius);background:var(--deep);color:#fff}
+.dashboard-hero h2{font-size:clamp(24px,3.7vw,40px);line-height:1.18;margin:0;font-weight:750}
+.hero-actions{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.hero-actions a{display:inline-flex;align-items:center;gap:6px;min-height:40px;padding:8px 12px;border-radius:9px;font-size:14px;font-weight:700;text-decoration:none;white-space:nowrap}
+.primary-link{background:var(--accent);color:#214435}
+.quiet-link{border:1px solid #78a693;color:#f1fcf4}
+.dashboard-cards{margin:13px 0;gap:10px}
+.dashboard-cards .metric{min-height:100px;position:relative;min-width:0;padding:16px 12px 12px}
+.metric::before{content:"";position:absolute;left:12px;top:-1px;width:31px;height:3px;border-radius:0 0 3px 3px;background:#31956b}
+.metric.expense::before{background:#b26d49}
+.metric.cash::before{background:#2b867e}
+.metric.due::before{background:#977726}
+.metric span{color:var(--text-muted);font-size:13px;display:block}
+.metric strong{font-size:clamp(17px,3.1vw,32px);line-height:1.2;margin-top:5px;font-variant-numeric:tabular-nums;letter-spacing:-.025em}
+.trend-panel{margin:0;padding:clamp(13px,2vw,20px)}
+.trend-heading{display:flex;justify-content:space-between;gap:10px;align-items:start;flex-wrap:wrap;margin-bottom:12px}
+.trend-heading h3{margin:0;font-size:clamp(16px,2.25vw,20px)}
+.trend-heading p{margin:3px 0 0}
+.trend-legend{display:flex;gap:11px;align-items:center;font-size:12px;color:var(--text-muted)}
+.trend-legend span::before{content:"";display:inline-block;width:9px;height:9px;border-radius:3px;background:#178669;margin-inline-end:5px}
+.trend-legend .legend-expense::before{background:#af724d}
+.trend-plot{list-style:none;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));margin:0;padding:0}
+.trend-plot li{display:grid;grid-template-rows:126px auto;min-width:0;text-align:center}
+.trend-bars{display:flex;gap:clamp(2px,1vw,9px);justify-content:center;align-items:end;height:100%;border-bottom:1px solid #ccded4;background:repeating-linear-gradient(to top,transparent 0,transparent 30px,#e6eee9 30px,#e6eee9 31px)}
+.trend-bar{display:block;width:20%;min-width:8px;max-width:32px;background:#178669;border-radius:4px 4px 0 0}
+.trend-bar.expense{background:#af724d}
+.trend-month{display:block;min-width:0;overflow-wrap:anywhere;padding:5px 2px;font-size:clamp(10px,1.5vw,13px);color:var(--text-muted)}
+.trend-values summary{cursor:pointer;color:var(--green);font-size:13px;font-weight:700;margin:7px 0}
+.cash-note{margin:8px 2px 0}
+#attendance-panel>details>summary,#period-report>details>summary{cursor:pointer;margin-bottom:0}
+#attendance-panel>details[open]>summary,#period-report>details[open]>summary{margin-bottom:14px}
+#month-filter{max-width:215px;margin-bottom:12px}
+.ledger-layout{display:grid;gap:17px;align-items:start}
+.ledger-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.ledger-form label{min-width:0;margin:0;font-size:13px;font-weight:650}
+.ledger-form input,.ledger-form select{margin-top:4px}
+.ledger-form label.ledger-wide,.ledger-form>button{grid-column:1/-1}
+.ledger-form>button{margin:0}
+.ledger-records{min-width:0;background:#f8fbf9;padding:12px;border:1px solid var(--edge);border-radius:12px}
+.ledger-records h3{font-size:16px;margin:0}
+.ledger-records .line{padding:9px 0;border-color:#dde9e2}
+.ledger-records .buttons button{min-height:32px;margin:5px 0 0;font-size:12px}
+#export-main,#export-stock{margin:8px 0 3px;min-height:34px}
+#login-panel{max-width:470px;margin:clamp(18px,8vh,85px) auto;padding:clamp(17px,4vw,35px)}
+#login-panel label{font-weight:650}
+@media(max-width:440px){.header-date{max-width:33%;font-size:11px}.brand{gap:8px}.brand-mark{width:33px;height:33px}.hero-actions a{font-size:12px;padding-inline:9px}.account-main{gap:7px}}
+@media(min-width:640px){.dashboard-cards{grid-template-columns:repeat(4,minmax(0,1fr))}.trend-plot li{grid-template-rows:160px auto}}
+@media(min-width:850px){
+  #cloud-panel{grid-template-columns:minmax(182px,220px) minmax(0,1fr);gap:22px}
+  #app-nav{display:grid;gap:6px;top:calc(var(--header-height) + 22px);background:#153c32;border:0;padding:13px;overflow:visible;color:#fff}
+  #app-nav a{color:#e8f2ec;white-space:normal}
+  #app-nav a:hover{background:#255446}
+  #app-nav a[aria-current]{background:#dbeedb;color:#184935}
+  #app-nav a:focus-visible{outline-color:#d8ed94}
+  .workspace>section,#cm-list,#cs-list,.ledger-form{scroll-margin-top:calc(var(--header-height) + 18px)}
+}
+@media(min-width:1060px){
+  .ledger-layout{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:20px}
+  .dashboard-cards{gap:14px}
+  .dashboard-cards .metric{padding:19px 16px 16px}
+}
+@media print{
+  .app-header{position:static}
+  #app-nav,#account-panel,.hero-actions,.trend-values,.trend-legend{display:none!important}
+  #cloud-panel,.workspace{display:block}
+  .workspace>section{margin-bottom:12px}
+  section,.tile{box-shadow:none}
+  .dashboard-hero{min-height:0;padding:10px;background:none;color:var(--ink)}
+  body.report-print .workspace>section:not(#period-report){display:none!important}
+}
+</style></head><body><header class="app-header">
+  <div class="header-inner">
+    <a class="brand" href="#dashboard-panel" aria-label="विघ्नहर्ता मेडिकल · मुख्य डॅशबोर्ड">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span><strong>विघ्नहर्ता मेडिकल</strong><small>वर्धा · डिजिटल खाता</small></span>
+    </a>
+    <time id="workspace-date" class="header-date"></time>
+  </div>
+</header><main><section id="login-panel"><h2 class="section-title">🔐 लॉगिन</h2><label>ईमेल</label><input id="login-email" type="email" autocomplete="username"><label>पासवर्ड</label><input id="login-password" type="password" autocomplete="current-password"><button id="login-btn" type="button">लॉगिन करा</button><p id="login-error" class="muted"></p></section>
+<div id="cloud-panel" class="hidden">
+<nav id="app-nav" class="app-nav" aria-label="अॅपचे विभाग">
+  <a href="#dashboard-panel" aria-current="location"><span class="nav-icon" aria-hidden="true">◫</span>डॅशबोर्ड</a>
+  <a href="#ledger-panel"><span class="nav-icon" aria-hidden="true">⇄</span>जमा–खर्च</a>
+  <a href="#stock-summary"><span class="nav-icon" aria-hidden="true">▦</span>स्टॉकिस्ट</a>
+  <a id="nav-attendance" class="hidden" href="#attendance-panel"><span class="nav-icon" aria-hidden="true">◷</span>हजेरी व पगार</a>
+  <a href="#period-report"><span class="nav-icon" aria-hidden="true">▤</span>मासिक व वार्षिक रिपोर्ट</a>
+</nav>
+<div class="workspace">
+<section id="account-panel" aria-label="खाते आणि सिंक">
+  <div class="account-main">
+    <div class="account-avatar" aria-hidden="true">●</div>
+    <div id="cloud-identity" class="muted"></div>
+    <button id="logout-btn" class="secondary" type="button">लॉगआउट</button>
+  </div>
+  <details class="sync-details">
+    <summary><span id="sync-state" class="warn" role="status">Cloud कनेक्शन तपासत आहे…</span></summary>
+    <p class="muted">ऑफलाइन असताना सिंक बाकी असू शकते. सर्व्हरशी सिंक झाल्याची खात्री होईपर्यंत ब्राउझर डेटा साफ करू नका. जुने CSV बॅकअप स्वतंत्र सुरक्षित ठिकाणी ठेवा.</p>
+  </details>
+</section>
+<section id="dashboard-panel" class="dashboard-panel" aria-labelledby="dashboard-heading">
+  <div class="dashboard-hero">
+    <h2 id="dashboard-heading">मुख्य डॅशबोर्ड</h2>
+    <div class="hero-actions">
+      <a class="primary-link" href="#ledger-panel"><span aria-hidden="true">+</span> नवीन व्यवहार</a>
+      <a class="quiet-link" href="#period-report">सारांश पहा <span aria-hidden="true">↗</span></a>
+    </div>
+  </div>
+  <div class="cards dashboard-cards">
+    <div class="tile metric income"><span>एकूण जमा</span><strong id="sum-income">₹0</strong></div>
+    <div class="tile metric expense"><span>एकूण खर्च</span><strong id="sum-expense">₹0</strong></div>
+    <div class="tile metric cash"><span>रोख शिल्लक</span><strong id="sum-cash">₹0</strong></div>
+    <div class="tile metric due"><span>उधारी बाकी</span><strong id="sum-due">₹0</strong></div>
+  </div>
+  <section class="trend-panel" aria-labelledby="trend-title">
+    <div class="trend-heading">
+      <div><h3 id="trend-title">जमा–खर्चाचा कल</h3><p id="trend-period" class="muted"></p></div>
+      <div class="trend-legend"><span class="legend-income">जमा</span><span class="legend-expense">खर्च</span></div>
+    </div>
+    <p class="muted" id="trend-state" role="status">व्यवहार लोड होत आहेत…</p>
+    <div id="trend-chart" class="hidden"></div>
+    <details class="trend-values hidden" id="trend-values">
+      <summary>महिनानिहाय आकडे</summary>
+      <div id="trend-values-table"></div>
+    </details>
+  </section>
+  <p class="cash-note muted">रोख शिल्लक = सुरुवातीची रोख + रोख जमा व वसुली − रोख खर्च.</p>
+</section>
+<section id="ledger-panel" aria-labelledby="ledger-panel-title">
+  <h2 class="section-title" id="ledger-panel-title">जमा-खर्च व्यवहार</h2>
+  <div class="ledger-layout">
+    <form id="cloud-main-form" class="ledger-form"><label>तारीख<input id="cm-date" type="date" required></label><label>व्यवहार<select id="cm-type"><option value="income">जमा / विक्री</option><option value="expense">खर्च</option><option value="credit">उधारी</option><option value="repayment">उधारी वसुली</option><option value="opening">सुरुवातीची रोख</option></select></label><label class="ledger-wide">तपशील<input id="cm-note" required></label><label>पेमेंट माध्यम<select id="cm-mode"><option>Cash</option><option>UPI</option><option>Bank</option></select></label><label>रक्कम ₹<input id="cm-amount" type="number" min="0.01" step="0.01" required></label><button id="cm-submit" type="submit">Cloud मध्ये नोंद सेव्ह करा</button><button id="cm-cancel" class="secondary hidden" type="button">दुरुस्ती रद्द</button></form>
+    <div class="ledger-records">
+      <h3>व्यवहार नोंदी</h3>
+      <button id="export-main" type="button" class="secondary">CSV बॅकअप डाउनलोड</button><div id="cm-list"></div>
+    </div>
+  </div>
+</section>
+<section id="stock-summary"><h2 class="section-title">स्टॉकिस्ट महिन्याचा सारांश</h2><label>महिना</label><input id="month-filter" type="month"><div class="cards"><div class="tile">महिन्याची खरेदी<strong id="sum-purchase">₹0</strong></div><div class="tile">महिन्याचे पेमेंट<strong id="sum-payment">₹0</strong></div><div class="tile">महिनाअखेर बाकी<strong id="sum-stockdue">₹0</strong></div></div></section>
+<section id="stock-panel" aria-labelledby="stock-panel-title">
+  <h2 class="section-title" id="stock-panel-title">स्टॉकिस्ट व्यवहार</h2>
+  <div class="ledger-layout">
+    <form id="cloud-stock-form" class="ledger-form"><label>तारीख<input id="cs-date" type="date" required></label><label class="ledger-wide">स्टॉकिस्ट नाव<input id="cs-name" required></label><label>व्यवहार<select id="cs-type"><option value="purchase">माल खरेदी</option><option value="payment">पेमेंट</option><option value="opening">मागील बाकी</option></select></label><label class="ledger-wide">बिल / तपशील<input id="cs-note"></label><label>रक्कम ₹<input id="cs-amount" type="number" min="0.01" step="0.01" required></label><button id="cs-submit" type="submit">Cloud मध्ये नोंद सेव्ह करा</button><button id="cs-cancel" class="secondary hidden" type="button">दुरुस्ती रद्द</button></form>
+    <div class="ledger-records">
+      <h3>व्यवहार नोंदी</h3>
+      <button id="export-stock" type="button" class="secondary">CSV बॅकअप डाउनलोड</button><div id="cs-list"></div>
+    </div>
+  </div>
+</section><section id="attendance-panel" class="hidden" aria-labelledby="attendance-title">
   <details id="attendance-details">
     <summary id="attendance-title" class="section-title">स्टाफ हजेरी व पगार</summary>
     <p class="muted">हजेरी आणि पगाराच्या नोंदी या ब्राउझरमध्ये जतन होतात.</p>
@@ -74,7 +268,6 @@
     </details>
   </details>
 </section>
-<section><h2 class="section-title">📊 मुख्य डॅशबोर्ड</h2><div class="cards"><div class="tile">एकूण जमा<strong id="sum-income">₹0</strong></div><div class="tile">एकूण खर्च<strong id="sum-expense">₹0</strong></div><div class="tile">रोख शिल्लक<strong id="sum-cash">₹0</strong></div><div class="tile">उधारी बाकी<strong id="sum-due">₹0</strong></div></div><p class="muted">रोख शिल्लक = रोख सुरुवातीची रक्कम + रोख जमा/वसुली − रोख खर्च. इतर पेमेंट माध्यमांचा यात समावेश नाही.</p></section>
 <section id="period-report" aria-labelledby="report-title">
   <details id="report-panel">
     <summary id="report-title" class="section-title">मासिक व वार्षिक सारांश</summary>
@@ -107,9 +300,7 @@
     <div id="report-content"></div>
   </details>
 </section>
-<section><h2 class="section-title">📦 स्टॉकिस्ट महिन्याचा सारांश</h2><label>महिना</label><input id="month-filter" type="month"><div class="cards"><div class="tile">महिन्याची खरेदी<strong id="sum-purchase">₹0</strong></div><div class="tile">महिन्याचे पेमेंट<strong id="sum-payment">₹0</strong></div><div class="tile">महिनाअखेर बाकी<strong id="sum-stockdue">₹0</strong></div></div></section>
-<section><h2 class="section-title">☁️ जमा-खर्च व्यवहार</h2><form id="cloud-main-form"><label>तारीख</label><input id="cm-date" type="date" required><label>व्यवहार</label><select id="cm-type"><option value="income">जमा / विक्री</option><option value="expense">खर्च</option><option value="credit">उधारी</option><option value="repayment">उधारी वसुली</option><option value="opening">सुरुवातीची रोख</option></select><label>तपशील</label><input id="cm-note" required><label>पेमेंट माध्यम</label><select id="cm-mode"><option>Cash</option><option>UPI</option><option>Bank</option></select><label>रक्कम ₹</label><input id="cm-amount" type="number" min="0.01" step="0.01" required><button id="cm-submit" type="submit">Cloud मध्ये नोंद सेव्ह करा</button><button id="cm-cancel" class="secondary hidden" type="button">दुरुस्ती रद्द</button></form><button id="export-main" type="button" class="secondary">CSV बॅकअप डाउनलोड</button><div id="cm-list"></div></section>
-<section><h2 class="section-title">☁️ स्टॉकिस्ट व्यवहार</h2><form id="cloud-stock-form"><label>तारीख</label><input id="cs-date" type="date" required><label>स्टॉकिस्ट नाव</label><input id="cs-name" required><label>व्यवहार</label><select id="cs-type"><option value="purchase">माल खरेदी</option><option value="payment">पेमेंट</option><option value="opening">मागील बाकी</option></select><label>बिल / तपशील</label><input id="cs-note"><label>रक्कम ₹</label><input id="cs-amount" type="number" min="0.01" step="0.01" required><button id="cs-submit" type="submit">Cloud मध्ये नोंद सेव्ह करा</button><button id="cs-cancel" class="secondary hidden" type="button">दुरुस्ती रद्द</button></form><button id="export-stock" type="button" class="secondary">CSV बॅकअप डाउनलोड</button><div id="cs-list"></div></section><section><button type="button" onclick="window.print()" class="secondary">रिपोर्ट प्रिंट करा</button></section></div></main><script type="module">
+<section><button type="button" onclick="window.print()" class="secondary">खाता प्रिंट करा</button></section></div></div></main><script type="module">
 import {initializeApp} from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js';
 import {getAuth,onAuthStateChanged,signInWithEmailAndPassword,signOut} from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js';
 import {initializeFirestore,persistentLocalCache,persistentMultipleTabManager,collection,doc,setDoc,deleteDoc,onSnapshot,getDoc,serverTimestamp} from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js';
@@ -175,7 +366,7 @@ function watch(coll){const prefix=coll==='transactions'?'cm':'cs';unsubs.push(on
  const left=a.data(),right=b.data();
  return (right.date||'').localeCompare(left.date||'')
    || (right.updatedAt?.toMillis?.()??0)-(left.updatedAt?.toMillis?.()??0);
- });if(coll==='transactions')cloudMain=ds.map(d=>d.data());else cloudStock=ds.map(d=>d.data());updateDashboard();display(coll,ds,snap.metadata);setReportSource(coll,snap.metadata);el('sync-state').textContent=snap.metadata.hasPendingWrites?'⏳ काही Cloud नोंदींचे सिंक बाकी आहे':snap.metadata.fromCache?'📱 स्थानिक कॅश दिसत आहे; सर्व्हरशी संपर्क तपासा':'✅ Firestore सर्व्हरशी कनेक्शन आहे'},e=>{el('sync-state').textContent='⚠️ Cloud वाचन अयशस्वी: '+(e.code||e.message);el(prefix+'-list').textContent='डेटा वाचता आला नाही';setReportSource(coll,null)}))}
+ });if(coll==='transactions'){cloudMain=ds.map(d=>d.data());drawWorkspaceTrend('ready')}else cloudStock=ds.map(d=>d.data());updateDashboard();display(coll,ds,snap.metadata);setReportSource(coll,snap.metadata);el('sync-state').textContent=snap.metadata.hasPendingWrites?'⏳ काही Cloud नोंदींचे सिंक बाकी आहे':snap.metadata.fromCache?'📱 स्थानिक कॅश दिसत आहे; सर्व्हरशी संपर्क तपासा':'✅ Firestore सर्व्हरशी कनेक्शन आहे'},e=>{el('sync-state').textContent='⚠️ Cloud वाचन अयशस्वी: '+(e.code||e.message);el(prefix+'-list').textContent='डेटा वाचता आला नाही';setReportSource(coll,null);if(coll==='transactions')drawWorkspaceTrend('error')}))}
 const attendanceStatus = {
   present: 'हजर', absent: 'गैरहजर', leave: 'रजा', holiday: 'सुट्टी',
   halfDay: 'अर्धा दिवस', unpaidLeave: 'विनापगारी रजा', unpaidHoliday: 'विनापगारी सुट्टी',
@@ -373,6 +564,7 @@ window.addEventListener('storage', event => {
 function showAttendance(enabled) {
   const panel = el('attendance-panel');
   panel.classList.toggle('hidden', !enabled);
+  el('nav-attendance').classList.toggle('hidden', !enabled);
   if (enabled) {
     renderAttendance();
     return;
@@ -775,10 +967,106 @@ el('report-export').onclick = () => {
   downloadCSV(csvRows, 'Vighnaharta_Report_' + filename + '.csv');
 };
 
-onAuthStateChanged(auth,async u=>{clearSubs();user=null;owner=false;showAttendance(false);reportSources.clear();currentReport=null;reportPanel.open=false;el('report-content').replaceChildren();el('report-state').textContent='';el('cloud-panel').classList.add('hidden');el('login-panel').classList.remove('hidden');if(!u)return;try{owner=u.uid===ownerUID;const staff=owner|| (await getDoc(doc(db,'authorizedStaff',u.uid))).exists();if(!staff){el('login-error').textContent='या खात्याला प्रवेश परवानगी नाही.';await signOut(auth);return}user=u;el('login-panel').classList.add('hidden');el('cloud-panel').classList.remove('hidden');el('cloud-identity').textContent=`${u.email} · ${owner?'Owner':'Staff (नवीन नोंद व वाचन)'}`;showAttendance(owner);watch('transactions');watch('stockistTransactions')}catch(e){el('login-error').textContent='परवानगी तपासता आली नाही: '+(e.code||e.message)}});
+const workspaceDate = el('workspace-date');
+const chartShortMonth = new Intl.DateTimeFormat('mr-IN', {month:'short', timeZone:'UTC'});
+const workspaceToday = todayInWardha();
+workspaceDate.dateTime = workspaceToday;
+workspaceDate.textContent = new Intl.DateTimeFormat('mr-IN', {
+  weekday:'long', day:'numeric', month:'short', year:'numeric', timeZone:'UTC',
+}).format(new Date(workspaceToday + 'T12:00:00Z'));
+
+const workspaceNavLinks = [...el('app-nav').querySelectorAll('a')];
+function navigateWorkspace(scroll = false) {
+  if (!user) return;
+  const fragment = location.hash.slice(1);
+  const target = el(fragment);
+  let section = target?.closest('.workspace>section');
+  if (section?.classList.contains('hidden')) section = null;
+  const selected = section?.id === 'stock-panel' ? 'stock-summary' : section?.id ?? 'dashboard-panel';
+  for (const link of workspaceNavLinks) {
+    if (link.hash === '#' + selected) {
+      link.setAttribute('aria-current', 'location');
+      if (getComputedStyle(el('app-nav')).display === 'flex') {
+        const nav = el('app-nav');
+        if (link.offsetLeft < nav.scrollLeft || link.offsetLeft + link.offsetWidth > nav.scrollLeft + nav.clientWidth) {
+          nav.scrollLeft = Math.max(0, link.offsetLeft - 6);
+        }
+      }
+    } else link.removeAttribute('aria-current');
+  }
+  if (!section) return;
+  if (selected === 'period-report') el('report-panel').open = true;
+  if (selected === 'attendance-panel') el('attendance-details').open = true;
+  if (scroll) requestAnimationFrame(() => { if (user) target.scrollIntoView({block:'start'}); });
+}
+window.addEventListener('hashchange', () => navigateWorkspace(true));
+for (const link of workspaceNavLinks) {
+  link.addEventListener('click', () => { if (location.hash === link.hash) navigateWorkspace(true); });
+}
+for (const link of document.querySelectorAll('.hero-actions a,.brand')) {
+  link.addEventListener('click', () => { if (location.hash === link.hash) navigateWorkspace(true); });
+}
+
+function workspaceTrendRows(currentMonth, rows) {
+  const months = new Map(Array.from({length:6}, (_, index) => [
+    reportMonthAt(currentMonth, index - 5), {income:0, expense:0},
+  ]));
+  for (const row of rows) {
+    const values = months.get(row.date?.slice(0, 7));
+    if (!values) continue;
+    if (row.type === 'income' || row.type === 'repayment') values.income += reportPaise(row.amount);
+    if (row.type === 'expense') values.expense += reportPaise(row.amount);
+  }
+  return [...months.entries()].map(([month, totals]) => ({month, ...totals}));
+}
+
+function drawWorkspaceTrend(status) {
+  const output = el('trend-chart');
+  const values = el('trend-values');
+  const state = el('trend-state');
+  const table = el('trend-values-table');
+  output.replaceChildren();
+  table.replaceChildren();
+  output.classList.add('hidden');
+  values.classList.add('hidden');
+  el('trend-period').textContent = '';
+  if (status !== 'ready') {
+    values.open = false;
+    state.textContent = status === 'error' ? 'व्यवहार लोड करता आले नाहीत.' : 'व्यवहार लोड होत आहेत…';
+    return;
+  }
+
+  const rows = workspaceTrendRows(todayInWardha().slice(0, 7), cloudMain);
+  el('trend-period').textContent = reportMonthName(rows[0].month) + ' ते ' + reportMonthName(rows.at(-1).month);
+  const largest = Math.max(0, ...rows.flatMap(row => [row.income, row.expense]));
+  state.textContent = largest ? '' : 'या सहा महिन्यांत जमा किंवा खर्चाच्या नोंदी नाहीत.';
+  if (!largest) return;
+  const plot = attendanceElement('ol', '', 'trend-plot');
+  plot.setAttribute('aria-hidden','true');
+  for (const row of rows) {
+    const group = attendanceElement('li');
+    group.title = reportMonthName(row.month) + ' · जमा ' + reportMoney(row.income) + ' · खर्च ' + reportMoney(row.expense);
+    const bars = attendanceElement('div', '', 'trend-bars');
+    for (const type of ['income','expense']) {
+      const bar = attendanceElement('span', '', 'trend-bar ' + type);
+      bar.style.height = Math.max(0, row[type] / largest * 100) + '%';
+      bars.append(bar);
+    }
+    group.append(bars, attendanceElement('span', chartShortMonth.format(new Date(row.month + '-01T00:00:00Z')), 'trend-month'));
+    plot.append(group);
+  }
+  output.append(plot);
+  output.classList.remove('hidden');
+  table.append(reportTable(['महिना','जमा ₹','खर्च ₹'], rows.map(row => [
+    reportMonthName(row.month), row.income, row.expense,
+  ]), 'गेल्या सहा महिन्यांचे जमा-खर्च'));
+  values.classList.remove('hidden');
+}
+onAuthStateChanged(auth,async u=>{clearSubs();user=null;owner=false;showAttendance(false);reportSources.clear();currentReport=null;reportPanel.open=false;el('report-content').replaceChildren();el('report-state').textContent='';el('cloud-panel').classList.add('hidden');el('login-panel').classList.remove('hidden');cloudMain=[];cloudStock=[];updateDashboard();el('cm-list').replaceChildren();el('cs-list').replaceChildren();drawWorkspaceTrend('loading');if(!u)return;try{owner=u.uid===ownerUID;const staff=owner|| (await getDoc(doc(db,'authorizedStaff',u.uid))).exists();if(!staff){el('login-error').textContent='या खात्याला प्रवेश परवानगी नाही.';await signOut(auth);return}user=u;el('login-panel').classList.add('hidden');el('cloud-panel').classList.remove('hidden');el('cloud-identity').textContent=`${u.email} · ${owner?'Owner':'Staff (नवीन नोंद व वाचन)'}`;showAttendance(owner);watch('transactions');watch('stockistTransactions');navigateWorkspace(true)}catch(e){el('login-error').textContent='परवानगी तपासता आली नाही: '+(e.code||e.message)}});
 async function submit(which){if(!user)return;const main=which==='main',prefix=main?'cm':'cs',coll=main?'transactions':'stockistTransactions',edit=main?editMain:editStock;if(edit&&!owner){alert('दुरुस्ती फक्त Owner करू शकतो');return}const fields=main?['date','type','note','mode','amount']:['date','name','type','note','amount'];const data={};for(const k of fields)data[k]=el(prefix+'-'+k).value.trim();data.amount=Number(data.amount);if(!data.date||!(data.amount>0)||(main?!data.note:!data.name)){alert('सर्व आवश्यक माहिती भरा');return}const btn=el(prefix+'-submit');btn.disabled=true;try{const ref=edit?doc(db,coll,edit):doc(collection(db,coll));await setDoc(ref,{...data,...(edit?{}:{createdBy:user.uid}),updatedBy:user.uid,updatedAt:serverTimestamp()},{merge:!!edit});reset(which)}catch(e){safeError(e)}finally{btn.disabled=false}}
 el('cloud-main-form').onsubmit=e=>{e.preventDefault();submit('main')};el('cloud-stock-form').onsubmit=e=>{e.preventDefault();submit('stock')};
 </script></body></html>
+
 
 
 
