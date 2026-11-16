@@ -270,13 +270,23 @@ button:not(:disabled):hover,.primary-link:hover{filter:brightness(.96)}
     .trend-plot li{grid-template-rows:184px auto}
   }
 }
+
+.header-preferences{display:flex;align-items:center;justify-content:flex-end;gap:10px;min-width:0}
+.language-control{display:flex;align-items:center;gap:6px;margin:0;font-size:13px;font-weight:700;color:#315164}
+.language-control select{width:auto;min-height:36px;padding:5px 8px;background:#fff;color:#152637}
+@media(max-width:540px){.header-preferences .header-date{display:none}.language-control>span{display:none}.header-inner{gap:8px}.brand{min-width:0}.brand strong{overflow-wrap:anywhere}.language-control select{padding-inline:7px}}
+@media print{.language-control{display:none!important}}
 </style></head><body><header class="app-header">
   <div class="header-inner">
     <a class="brand" href="#dashboard-panel" aria-label="विघ्नहर्ता मेडिकल · मुख्य डॅशबोर्ड">
       <span class="brand-mark" aria-hidden="true"></span>
       <span><strong>विघ्नहर्ता मेडिकल</strong><small>वर्धा · डिजिटल खाता</small></span>
     </a>
-    <time id="workspace-date" class="header-date"></time>
+    <div class="header-preferences"><time id="workspace-date" class="header-date"></time>
+      <label class="language-control"><span>भाषा</span>
+        <select id="app-language" aria-label="भाषा"><option value="mr">मराठी</option><option value="en">English</option></select>
+      </label>
+    </div>
   </div>
 </header><main><section id="login-panel"><h2 class="section-title">🔐 लॉगिन</h2><label>ईमेल</label><input id="login-email" type="email" autocomplete="username"><label>पासवर्ड</label><input id="login-password" type="password" autocomplete="current-password"><button id="login-btn" type="button">लॉगिन करा</button><p id="login-error" class="muted"></p></section>
 <div id="cloud-panel" class="hidden">
@@ -330,7 +340,7 @@ button:not(:disabled):hover,.primary-link:hover{filter:brightness(.96)}
 <section id="ledger-panel" aria-labelledby="ledger-panel-title">
   <h2 class="section-title" id="ledger-panel-title">जमा-खर्च व्यवहार</h2>
   <div class="ledger-layout">
-    <form id="cloud-main-form" class="ledger-form"><label>तारीख<input id="cm-date" type="date" required></label><label>व्यवहार<select id="cm-type"><option value="income">जमा / विक्री</option><option value="expense">खर्च</option><option value="credit">उधारी</option><option value="repayment">उधारी वसुली</option><option value="opening">सुरुवातीची रोख</option></select></label><label class="ledger-wide">तपशील<input id="cm-note" required></label><label>पेमेंट माध्यम<select id="cm-mode"><option>Cash</option><option>UPI</option><option>Bank</option></select></label><label>रक्कम ₹<input id="cm-amount" type="number" min="0.01" step="0.01" required></label><button id="cm-submit" type="submit">Cloud मध्ये नोंद सेव्ह करा</button><button id="cm-cancel" class="secondary hidden" type="button">दुरुस्ती रद्द</button></form>
+    <form id="cloud-main-form" class="ledger-form"><label>तारीख<input id="cm-date" type="date" required></label><label>व्यवहार<select id="cm-type"><option value="income">जमा / विक्री</option><option value="expense">खर्च</option><option value="credit">उधारी</option><option value="repayment">उधारी वसुली</option><option value="opening">सुरुवातीची रोख</option></select></label><label class="ledger-wide">तपशील<input id="cm-note" required></label><label>पेमेंट माध्यम<select id="cm-mode"><option value="Cash">Cash</option><option value="UPI">UPI</option><option value="Bank">Bank</option></select></label><label>रक्कम ₹<input id="cm-amount" type="number" min="0.01" step="0.01" required></label><button id="cm-submit" type="submit">Cloud मध्ये नोंद सेव्ह करा</button><button id="cm-cancel" class="secondary hidden" type="button">दुरुस्ती रद्द</button></form>
     <div class="ledger-records">
       <h3>व्यवहार नोंदी</h3>
       <button id="export-main" type="button" class="secondary">CSV बॅकअप डाउनलोड</button><div id="cm-list"></div>
@@ -402,21 +412,280 @@ button:not(:disabled):hover,.primary-link:hover{filter:brightness(.96)}
     <div id="report-content"></div>
   </details>
 </section>
-<section><button type="button" onclick="window.print()" class="secondary">खाता प्रिंट करा</button></section></div></div></main><script type="module">
+<section><button type="button" onclick="window.print()" class="secondary">खाता प्रिंट करा</button></section></div></div></main><script>
+(() => {
+  const english = {
+  "CSV बॅकअप डाउनलोड": "Download CSV Backup",
+  "Cloud कनेक्शन तपासत आहे…": "Checking cloud connection…",
+  "Cloud च्या स्थानिक कॅशवरून रिपोर्ट. ताज्या सर्व नोंदी उपलब्ध असतीलच असे नाही.": "This report uses cached cloud data. Some recent entries may be missing.",
+  "Cloud नोंदी वाचता आल्या नाहीत. कनेक्शन तपासा.": "Could not read cloud records. Check your connection.",
+  "Cloud मध्ये नोंद सेव्ह करा": "Save Entry to Cloud",
+  "Cloud नोंदी": "Cloud records",
+  "Staff (नवीन नोंद व वाचन)": "Staff (add and view)",
+  "| सिंक बाकी": "| Sync pending",
+  "· खर्च": "· Expenses",
+  "· जमा": "· Receipts",
+  "· देय पगार": "· Net pay",
+  "· रविवार सुट्टी": "· Sunday off",
+  "अखेरची ग्राहक उधारी": "Closing Customer Credit",
+  "अखेरची ₹": "Closing Balance ₹",
+  "अखेरीची रोख (नोंदींनुसार)": "Closing Cash (per ledger)",
+  "अर्धा दिवस": "Half Day",
+  "अॅपचे विभाग": "App navigation",
+  "आर्थिक वर्ष (एप्रिल–मार्च)": "Financial Year (April–March)",
+  "आले ₹": "Inflow ₹",
+  "आहे. ती पेमेंटच्या आकड्यांपासून स्वतंत्र आहे.": ". This is shown separately from payment totals.",
+  "इतर / माध्यम रिकामे": "Other / Unspecified",
+  "ईमेल": "Email",
+  "उधारी": "Credit Sale",
+  "उधारी बाकी": "Outstanding Credit",
+  "उधारी वसुली": "Credit Collections",
+  "उधारी वसुली ₹": "Credit Collections ₹",
+  "एकूण आकडे": "Summary Totals",
+  "एकूण खर्च": "Total Expenses",
+  "एकूण जमा": "Total Receipts",
+  "एप्रिल": "April",
+  "ऑक्टोबर": "October",
+  "ऑगस्ट": "August",
+  "ऑफलाइन असताना सिंक बाकी असू शकते. सर्व्हरशी सिंक झाल्याची खात्री होईपर्यंत ब्राउझर डेटा साफ करू नका. जुने CSV बॅकअप स्वतंत्र सुरक्षित ठिकाणी ठेवा.": "Offline entries may still be waiting to sync. Keep your browser data until they reach the server. Store older CSV backups separately.",
+  "ऑफलाइन स्टोरेज उपलब्ध नाही:": "Offline storage is unavailable:",
+  "कपात": "Deduction",
+  "कपात ₹": "Deduction ₹",
+  "कपातीचे दिवस": "Deduction Days",
+  "कर्मचारी": "Employee",
+  "कर्मचारी जोडता आला नाही. ब्राउझरची स्टोरेज परवानगी तपासा.": "Could not add the employee. Check browser storage permissions.",
+  "कर्मचारी जोडा": "Add Employee",
+  "काढा": "Delete",
+  "कारवाई पूर्ण झाली नाही:": "Could not complete the action:",
+  "कालावधी": "Period",
+  "काही व्यवहारांचे Cloud सिंक बाकी आहे.": "Some transactions are waiting to sync.",
+  "कॅलेंडर वर्ष (जानेवारी–डिसेंबर)": "Calendar Year (January–December)",
+  "कॅश": "Cash",
+  "खरेदी ₹": "Purchases ₹",
+  "खर्च": "Expenses",
+  "खर्च ₹": "Expenses ₹",
+  "खाता प्रिंट करा": "Print Ledger",
+  "खाते आणि सिंक": "Account and Sync",
+  "गेले ₹": "Outflow ₹",
+  "गेल्या सहा महिन्यांचे जमा-खर्च": "Receipts and Expenses for the Last Six Months",
+  "गैरहजर": "Absent",
+  "गैरहजर, विनापगारी रजा आणि विनापगारी सुट्टीसाठी कपात होते. रविवार आपोआप सुट्टी.": "Deductions apply to absences, unpaid leave, and unpaid holidays. Sundays are automatically marked as days off.",
+  "ग्राहक उधारी — अखेरची बाकी": "Customer Credit — Closing Balance",
+  "ग्राहक उधारी — नवीन": "Customer Credit — New Credit",
+  "ग्राहक उधारी — सुरुवातीची बाकी": "Customer Credit — Opening Balance",
+  "जमा": "Receipts",
+  "जमा / विक्री": "Receipt / Sale",
+  "जमा ₹": "Receipts ₹",
+  "जमा-खर्च आणि स्टॉकिस्ट नोंदी येत आहेत…": "Loading ledger and stockist records…",
+  "जमा-खर्च व्यवहार": "Income and Expense Transactions",
+  "जमा-खर्च व्यवहारांचा तपशील": "Ledger Details",
+  "जमा–खर्च": "Income & Expenses",
+  "जमा–खर्चाचा कल": "Income and Expense Trend",
+  "जानेवारी": "January",
+  "जुन्या नोंदी लपवा": "Hide Older Entries",
+  "जुन्या नोंदी पहा": "Show Older Entries",
+  "जुलै": "July",
+  "जून": "June",
+  "डिसेंबर": "December",
+  "डॅशबोर्ड": "Dashboard",
+  "डेटा वाचता आला नाही": "Could not load the data.",
+  "तपशील": "Details",
+  "तारीख": "Date",
+  "ते": "to",
+  "दुरुस्ती फक्त Owner करू शकतो": "Only the owner can edit entries.",
+  "दुरुस्ती रद्द": "Cancel Edit",
+  "देय पगार ₹": "Net Pay ₹",
+  "नवीन उधारी": "New Credit",
+  "नवीन कर्मचाऱ्याचे नाव": "New Employee Name",
+  "नवीन व्यवहार": "New Transaction",
+  "नाव नोंदलेले नाही": "Name not recorded",
+  "निवडलेल्या महिन्याचा पगार": "Payroll for the Selected Month",
+  "निव्वळ जमा-खर्च": "Net Receipts",
+  "निव्वळ जमा-खर्चासाठी जमा-खर्च खात्यातील प्राप्ती आणि खर्च वापरले आहेत. स्टॉकिस्ट पेमेंट स्वतंत्रपणे दाखवले आहे.": "Net receipts use the income and expenses recorded in the ledger. Stockist payments are shown separately.",
+  "निव्वळ ₹": "Net ₹",
+  "नोंद जतन झाली नाही. ब्राउझरची स्टोरेज परवानगी आणि उपलब्ध जागा तपासा.": "Could not save the entry. Check browser storage permissions and free space.",
+  "नोंद जतन झाली.": "Entry saved.",
+  "नोंद प्रकार": "Entry Type",
+  "नोंद बाकी": "Not Marked",
+  "नोंदवलेली मागील ₹": "Prior Balance Recorded ₹",
+  "नोव्हेंबर": "November",
+  "पगार आणि पगाराचे दिवस भरा.": "Enter the salary and number of paid days.",
+  "पगार आणि पगाराच्या दिवसांची नोंद तपासा.": "Check the salary and paid days.",
+  "पगार भरलेले महिने": "Months With Payroll",
+  "पगार मोजायचे दिवस": "Paid Days",
+  "पगाराची माहिती जतन करा": "Save Payroll Details",
+  "परवानगी तपासता आली नाही:": "Could not verify access:",
+  "पान": "Page",
+  "पासवर्ड": "Password",
+  "पुढचा दिवस": "Next Day",
+  "पुढील": "Next",
+  "पेमेंट": "Payment",
+  "पेमेंट पद्धतीनुसार": "By Payment Method",
+  "पेमेंट माध्यम": "Payment Method",
+  "पेमेंट ₹": "Payments ₹",
+  "फरक ₹": "Net ₹",
+  "फेब्रुवारी": "February",
+  "बँक": "Bank",
+  "बदल सेव्ह करा": "Save Changes",
+  "बिल / तपशील": "Bill / Details",
+  "महिना": "Month",
+  "महिनाअखेर बाकी": "Month-End Balance",
+  "महिनानिहाय आकडे": "Monthly Figures",
+  "महिनानिहाय तुलना": "Monthly Comparison",
+  "महिन्याची खरेदी": "Monthly Purchases",
+  "महिन्याचे पेमेंट": "Monthly Payments",
+  "मागचा दिवस": "Previous Day",
+  "मागील": "Previous",
+  "मागील बाकी": "Prior Balance",
+  "माध्यम": "Method",
+  "मार्च": "March",
+  "माल खरेदी": "Stock Purchase",
+  "मासिक": "Monthly",
+  "मासिक पगार ₹": "Monthly Salary ₹",
+  "मासिक व वार्षिक रिपोर्ट": "Monthly & Annual Reports",
+  "मासिक व वार्षिक सारांश": "Monthly & Annual Summary",
+  "मासिक सारांश ·": "Monthly Summary ·",
+  "मुख्य डॅशबोर्ड": "Main Dashboard",
+  "मे": "May",
+  "या कालावधीत दाखवण्यासाठी नोंदी नाहीत.": "There are no entries for this period.",
+  "या काळात नोंदवलेली सुरुवातीची रोख": "Opening cash recorded this period:",
+  "या खात्याला प्रवेश परवानगी नाही.": "This account does not have access.",
+  "या नावाचा कर्मचारी आधीच आहे.": "An employee with this name already exists.",
+  "या ब्राउझरमधली हजेरी किंवा पगाराची माहिती वाचता आली नाही.": "Could not read attendance or payroll data in this browser.",
+  "या ब्राउझरमधल्या नोंदी. रविवार सुट्टीत धरले आहेत. पगाराची माहिती भरलेल्या आणि गणना शक्य असलेल्या महिन्यांचे आकडे दाखवले आहेत.": "These records are stored in this browser. Sundays count as days off. Payroll totals include months with enough information to calculate pay.",
+  "या ब्राउझरमधल्या हजेरीच्या नोंदी वाचता आल्या नाहीत.": "Could not read attendance records in this browser.",
+  "या सहा महिन्यांत जमा किंवा खर्चाच्या नोंदी नाहीत.": "No receipts or expenses were recorded in these six months.",
+  "योग्य महिना किंवा वर्ष निवडा.": "Select a valid month or year.",
+  "रक्कम": "Amount",
+  "रक्कम ₹": "Amount ₹",
+  "रजा": "Leave",
+  "रिपोर्ट": "Report",
+  "रिपोर्ट CSV डाउनलोड": "Download Report CSV",
+  "रिपोर्ट प्रिंट करा": "Print Report",
+  "रोख शिल्लक": "Cash Balance",
+  "रोख शिल्लक = सुरुवातीची रोख + रोख जमा व वसुली − रोख खर्च.": "Cash balance = opening cash + cash receipts and collections − cash expenses.",
+  "लॉगआउट": "Log Out",
+  "लॉगिन अयशस्वी:": "Login failed:",
+  "लॉगिन करा": "Log In",
+  "लॉगिन सुरू आहे…": "Logging in…",
+  "वर्धा · डिजिटल खाता": "Wardha · Digital Ledger",
+  "वर्ष": "Year",
+  "वर्षाचा प्रकार": "Year Type",
+  "वार्षिक": "Annual",
+  "वार्षिक सारांश ·": "Annual Summary ·",
+  "वार्षिक सारांशाकडे परत": "Back to Annual Summary",
+  "विघ्नहर्ता मेडिकल": "Vighnaharta Medical",
+  "विघ्नहर्ता मेडिकल | Cloud खाता": "Vighnaharta Medical | Cloud Ledger",
+  "विघ्नहर्ता मेडिकल · मुख्य डॅशबोर्ड": "Vighnaharta Medical · Main Dashboard",
+  "विघ्नहर्ता मेडिकल, वर्धा": "Vighnaharta Medical, Wardha",
+  "विनापगारी रजा": "Unpaid Leave",
+  "विनापगारी सुट्टी": "Unpaid Holiday",
+  "व्यवहार": "Transaction",
+  "व्यवहार नोंदी": "Transaction Records",
+  "व्यवहार लोड करता आले नाहीत.": "Could not load transactions.",
+  "व्यवहार लोड होत आहेत…": "Loading transactions…",
+  "सप्टेंबर": "September",
+  "सर्व आवश्यक माहिती भरा": "Complete all required fields.",
+  "सर्व्हर": "Server",
+  "सविस्तर रिपोर्टसाठी महिन्याच्या नावावर टॅप करा.": "Select a month to open its detailed report.",
+  "सारांश पहा": "View Summary",
+  "सुट्टी": "Day Off",
+  "सुरुवातीची रोख": "Opening Cash",
+  "सुरुवातीची ₹": "Opening Balance ₹",
+  "सुरुवातीचे वर्ष": "Start Year",
+  "स्टाफ हजेरी व पगार": "Staff Attendance & Payroll",
+  "स्टॉकिस्ट": "Stockist",
+  "स्टॉकिस्ट नाव": "Stockist Name",
+  "स्टॉकिस्ट पेमेंट ₹": "Stockist Payments ₹",
+  "स्टॉकिस्ट महिन्याचा सारांश": "Monthly Stockist Summary",
+  "स्टॉकिस्ट व्यवहार": "Stockist Transactions",
+  "स्टॉकिस्ट व्यवहारांचा तपशील": "Stockist Transaction Details",
+  "स्टॉकिस्ट — अखेरची बाकी": "Stockist — Closing Balance",
+  "स्टॉकिस्ट — दिलेले पेमेंट": "Stockist — Payments Made",
+  "स्टॉकिस्ट — माल खरेदी": "Stockist — Purchases",
+  "स्टॉकिस्ट — या काळात नोंदवलेली मागील बाकी": "Stockist — Prior Balance Recorded This Period",
+  "स्टॉकिस्ट — सुरुवातीची बाकी": "Stockist — Opening Balance",
+  "स्टॉकिस्टनिहाय बाकी": "Balance by Stockist",
+  "स्थानिक कॅश": "Local Cache",
+  "हजर": "Present",
+  "हजेरी आणि पगाराच्या नोंदी या ब्राउझरमध्ये जतन होतात.": "Attendance and payroll records are saved in this browser.",
+  "हजेरी व पगार": "Attendance & Payroll",
+  "हजेरी सुरू करण्यासाठी पहिले कर्मचारी नाव जोडा.": "Add your first employee to start tracking attendance.",
+  "हजेरीची तारीख": "Attendance Date",
+  "ही Cloud नोंद कायमची काढायची?": "Permanently delete this cloud entry?",
+  "⏳ काही Cloud नोंदींचे सिंक बाकी आहे": "⏳ Some cloud entries are waiting to sync",
+  "⚠️ Cloud वाचन अयशस्वी:": "⚠️ Could not read cloud records:",
+  "✅ Firestore सर्व्हरशी कनेक्शन आहे": "✅ Connected to Firestore",
+  "📱 स्थानिक कॅश दिसत आहे; सर्व्हरशी संपर्क तपासा": "📱 Showing cached data. Check your connection.",
+  "🔐 लॉगिन": "🔐 Log In",
+  "भाषा": "Language"
+};
+  const marathi = {Cash:'कॅश', Bank:'बँक', Edit:'दुरुस्त करा', Owner:'मालक'};
+  const selector = document.getElementById('app-language');
+  const preference = 'vighnaharta-ui-language-v1';
+  let language = 'mr';
+  try { if (localStorage.getItem(preference) === 'en') language = 'en'; } catch {}
+  const t = value => {
+    if (typeof value !== 'string') return value;
+    const normalized = value.trim();
+    const translations = language === 'en' ? english : marathi;
+    if (!Object.hasOwn(translations, normalized)) return value;
+    const first = value.indexOf(normalized);
+    return value.slice(0, first) + translations[normalized] + value.slice(first + normalized.length);
+  };
+  const locale = () => language === 'en' ? 'en-IN' : 'mr-IN';
+  const staticText = [];
+  const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+  for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+    if (node.parentElement.closest('script,style')) continue;
+    const value = node.nodeValue;
+    const key = value.trim();
+    if (Object.hasOwn(english, key) || Object.hasOwn(marathi, key)) staticText.push([node,value]);
+  }
+  const labels = [...document.querySelectorAll('[aria-label]')].map(node => [node,node.getAttribute('aria-label')]);
+  const title = document.title;
+  function updateStatic() {
+    document.documentElement.lang = language;
+    document.title = t(title);
+    selector.value = language;
+    for (const [node,value] of staticText) node.nodeValue = t(value);
+    for (const [node,value] of labels) node.setAttribute('aria-label', t(value));
+  }
+  updateStatic();
+  selector.addEventListener('change', () => {
+    language = selector.value === 'en' ? 'en' : 'mr';
+    try { localStorage.setItem(preference, language); } catch {}
+    updateStatic();
+    window.dispatchEvent(new Event('ledger-language-change'));
+  });
+  window.ledgerLanguage = {t, locale};
+})();
+</script>
+<script type="module">
 import {initializeApp} from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js';
 import {getAuth,onAuthStateChanged,signInWithEmailAndPassword,signOut} from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js';
 import {initializeFirestore,persistentLocalCache,persistentMultipleTabManager,collection,doc,setDoc,deleteDoc,onSnapshot,getDoc,serverTimestamp} from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js';
+const {t,locale} = window.ledgerLanguage;
+const localizedMessages = new Map();
+const localizedSnapshots = new Map();
+function localMessage(id,key,suffix='') {
+  localizedMessages.set(id,{key,suffix});
+  document.getElementById(id).textContent = t(key) + suffix;
+}
+function renderCloudIdentity() {
+  if (user) el('cloud-identity').textContent = `${user.email} · ${t(owner ? 'Owner' : t('Staff (नवीन नोंद व वाचन)'))}`;
+}
 const config={apiKey:'AIzaSyCjCVQcMGzmN-Cmld_di_Vz0q2tRu7VkwA',authDomain:'vighnaharta-medical.firebaseapp.com',projectId:'vighnaharta-medical',storageBucket:'vighnaharta-medical.firebasestorage.app',messagingSenderId:'879096407229',appId:'1:879096407229:web:6861bca7fb7b7dd43603d4',measurementId:'G-3ND0BFH2VK'};
 const ownerUID='daFV9pOYYqMs3C9APuPtGiOZvhD2';
 const app=initializeApp(config),auth=getAuth(app);let db;
-try{db=initializeFirestore(app,{localCache:persistentLocalCache({tabManager:persistentMultipleTabManager()})})}catch(e){document.getElementById('login-error').textContent='ऑफलाइन स्टोरेज उपलब्ध नाही: '+e.message;throw e}
+try{db=initializeFirestore(app,{localCache:persistentLocalCache({tabManager:persistentMultipleTabManager()})})}catch(e){localMessage('login-error','ऑफलाइन स्टोरेज उपलब्ध नाही: ',e.message);throw e}
 const el=id=>document.getElementById(id);let owner=false,user=null,unsubs=[],editMain=null,editStock=null;let cloudMain=[],cloudStock=[];
-const safeError=e=>{const msg=e?.code||e?.message||String(e);alert('कारवाई पूर्ण झाली नाही: '+msg)};
+const safeError=e=>{const msg=e?.code||e?.message||String(e);alert(t('कारवाई पूर्ण झाली नाही: ')+msg)};
 el('cm-date').value=el('cs-date').value=new Date().toLocaleDateString('en-CA');
-el('login-btn').onclick=async()=>{el('login-error').textContent='लॉगिन सुरू आहे…';try{await signInWithEmailAndPassword(auth,el('login-email').value.trim(),el('login-password').value);el('login-password').value='';el('login-error').textContent=''}catch(e){el('login-error').textContent='लॉगिन अयशस्वी: '+(e.code||e.message)}};
+el('login-btn').onclick=async()=>{localMessage('login-error','लॉगिन सुरू आहे…');try{await signInWithEmailAndPassword(auth,el('login-email').value.trim(),el('login-password').value);el('login-password').value='';localMessage('login-error','')}catch(e){localMessage('login-error','लॉगिन अयशस्वी: ',e.code||e.message)}};
 el('logout-btn').onclick=()=>signOut(auth).catch(safeError);
 function clearSubs(){unsubs.forEach(f=>f());unsubs=[]}
-function reset(which){const main=which==='main',prefix=main?'cm':'cs';if(main)editMain=null;else editStock=null;el(prefix+'-cancel').classList.add('hidden');el(prefix+'-submit').textContent='Cloud मध्ये नोंद सेव्ह करा';el('cloud-'+(main?'main':'stock')+'-form').reset();el(prefix+'-date').value=new Date().toLocaleDateString('en-CA')}
+function reset(which){const main=which==='main',prefix=main?'cm':'cs';if(main)editMain=null;else editStock=null;el(prefix+'-cancel').classList.add('hidden');el(prefix+'-submit').textContent=t('Cloud मध्ये नोंद सेव्ह करा');el('cloud-'+(main?'main':'stock')+'-form').reset();el(prefix+'-date').value=new Date().toLocaleDateString('en-CA')}
 el('cm-cancel').onclick=()=>reset('main');el('cs-cancel').onclick=()=>reset('stock');
 function updateDashboard(){
  let income=0,expense=0,cash=0,credit=0,repay=0;
@@ -433,14 +702,15 @@ el('export-main').onclick=()=>downloadCSV([['Date','Type','Description','Mode','
 el('export-stock').onclick=()=>downloadCSV([['Date','Stockist','Type','Bill/Details','Amount'],...cloudStock.map(r=>[r.date,r.name,r.type,r.note,r.amount])],'Vighnaharta_Stockist_Cloud.csv');
 function ledgerRow(coll,d){
  const main=coll==='transactions',prefix=main?'cm':'cs';
- const r=d.data(),line=document.createElement('div');line.className='line';const txt=document.createElement('div');txt.textContent=main?`${r.date} · ${r.type} · ${r.note} · ${r.mode} · ₹${r.amount}`:`${r.date} · ${r.name} · ${r.type} · ${r.note||''} · ₹${r.amount}`;line.append(txt);if(owner){const bar=document.createElement('div');bar.className='buttons';const edit=document.createElement('button');edit.type='button';edit.textContent='Edit';edit.onclick=()=>{if(main){editMain=d.id;for(const k of ['date','type','note','mode','amount'])el('cm-'+k).value=r[k]}else{editStock=d.id;for(const k of ['date','name','type','note','amount'])el('cs-'+k).value=r[k]||''}el(prefix+'-submit').textContent='बदल सेव्ह करा';el(prefix+'-cancel').classList.remove('hidden');el('cloud-'+(main?'main':'stock')+'-form').scrollIntoView({behavior:'smooth'})};const del=document.createElement('button');del.type='button';del.className='secondary';del.textContent='काढा';del.onclick=async()=>{if(confirm('ही Cloud नोंद कायमची काढायची?'))try{await deleteDoc(doc(db,coll,d.id))}catch(e){safeError(e)}};bar.append(edit,del);line.append(bar)}
+ const r=d.data(),line=document.createElement('div');line.className='line';const txt=document.createElement('div');txt.textContent=main?`${r.date} · ${t(reportLedgerTypes[r.type] ?? r.type)} · ${r.note} · ${t(reportModes[r.mode] ?? r.mode)} · ₹${r.amount}`:`${r.date} · ${r.name} · ${t(reportStockTypes[r.type] ?? r.type)} · ${r.note||''} · ₹${r.amount}`;line.append(txt);if(owner){const bar=document.createElement('div');bar.className='buttons';const edit=document.createElement('button');edit.type='button';edit.textContent=t('Edit');edit.onclick=()=>{if(main){editMain=d.id;for(const k of ['date','type','note','mode','amount'])el('cm-'+k).value=r[k]}else{editStock=d.id;for(const k of ['date','name','type','note','amount'])el('cs-'+k).value=r[k]||''}el(prefix+'-submit').textContent=t('बदल सेव्ह करा');el(prefix+'-cancel').classList.remove('hidden');el('cloud-'+(main?'main':'stock')+'-form').scrollIntoView({behavior:'smooth'})};const del=document.createElement('button');del.type='button';del.className='secondary';del.textContent=t('काढा');del.onclick=async()=>{if(confirm(t('ही Cloud नोंद कायमची काढायची?')))try{await deleteDoc(doc(db,coll,d.id))}catch(e){safeError(e)}};bar.append(edit,del);line.append(bar)}
  return line;
 }
 function display(coll,docs,meta){
+ localizedSnapshots.set(coll,{docs,metadata:meta});
  const list=el((coll==='transactions'?'cm':'cs')+'-list');
  const title=document.createElement('p');
  title.className='muted';
- title.textContent=`Cloud नोंदी: ${docs.length} | ${meta.fromCache?'स्थानिक कॅश':'सर्व्हर'}${meta.hasPendingWrites?' | सिंक बाकी':''}`;
+ title.textContent=`${t("Cloud नोंदी")}: ${docs.length} | ${meta.fromCache?t('स्थानिक कॅश'):t('सर्व्हर')}${meta.hasPendingWrites?t(' | सिंक बाकी'):''}`;
  const olderWasOpen=list.querySelector('details')?.open??false;
  list.replaceChildren(title,...docs.slice(0,3).map(d=>ledgerRow(coll,d)));
  const older=docs.slice(3);
@@ -453,7 +723,7 @@ function display(coll,docs,meta){
  const rows=document.createElement('div');
  details.append(rows);
  const updateOlder=()=>{
-   summary.textContent=details.open?'जुन्या नोंदी लपवा':`जुन्या नोंदी पहा (${older.length})`;
+   summary.textContent=details.open?t('जुन्या नोंदी लपवा'):`${t("जुन्या नोंदी पहा")} (${older.length})`;
    if(details.open && !rows.firstChild){
      const fragment=document.createDocumentFragment();
      for(const d of older)fragment.append(ledgerRow(coll,d));
@@ -468,7 +738,7 @@ function watch(coll){const prefix=coll==='transactions'?'cm':'cs';unsubs.push(on
  const left=a.data(),right=b.data();
  return (right.date||'').localeCompare(left.date||'')
    || (right.updatedAt?.toMillis?.()??0)-(left.updatedAt?.toMillis?.()??0);
- });if(coll==='transactions'){cloudMain=ds.map(d=>d.data());drawWorkspaceTrend('ready')}else cloudStock=ds.map(d=>d.data());updateDashboard();display(coll,ds,snap.metadata);setReportSource(coll,snap.metadata);el('sync-state').textContent=snap.metadata.hasPendingWrites?'⏳ काही Cloud नोंदींचे सिंक बाकी आहे':snap.metadata.fromCache?'📱 स्थानिक कॅश दिसत आहे; सर्व्हरशी संपर्क तपासा':'✅ Firestore सर्व्हरशी कनेक्शन आहे'},e=>{el('sync-state').textContent='⚠️ Cloud वाचन अयशस्वी: '+(e.code||e.message);el(prefix+'-list').textContent='डेटा वाचता आला नाही';setReportSource(coll,null);if(coll==='transactions')drawWorkspaceTrend('error')}))}
+ });if(coll==='transactions'){cloudMain=ds.map(d=>d.data());drawWorkspaceTrend('ready')}else cloudStock=ds.map(d=>d.data());updateDashboard();display(coll,ds,snap.metadata);setReportSource(coll,snap.metadata);localMessage('sync-state',snap.metadata.hasPendingWrites?'⏳ काही Cloud नोंदींचे सिंक बाकी आहे':snap.metadata.fromCache?'📱 स्थानिक कॅश दिसत आहे; सर्व्हरशी संपर्क तपासा':'✅ Firestore सर्व्हरशी कनेक्शन आहे')},e=>{localMessage('sync-state','⚠️ Cloud वाचन अयशस्वी: ',e.code||e.message);localizedSnapshots.delete(coll);localMessage(prefix+'-list','डेटा वाचता आला नाही');setReportSource(coll,null);if(coll==='transactions')drawWorkspaceTrend('error')}))}
 const attendanceStatus = {
   present: 'हजर', absent: 'गैरहजर', leave: 'रजा', holiday: 'सुट्टी',
   halfDay: 'अर्धा दिवस', unpaidLeave: 'विनापगारी रजा', unpaidHoliday: 'विनापगारी सुट्टी',
@@ -504,7 +774,7 @@ function attendanceElement(tag, text, className) {
 }
 
 function attendanceMessage(text) {
-  el('attendance-message').textContent = text;
+  localMessage('attendance-message',text);
 }
 
 function saveAttendanceValue(key, value) {
@@ -523,15 +793,15 @@ function saveAttendanceValue(key, value) {
 function attendanceRow(person, date) {
   const row = attendanceElement('div', '', 'attendance-row');
   if (isAttendanceSunday(date)) {
-    row.textContent = person.name + ' · रविवार सुट्टी';
+    row.textContent = person.name + t(' · रविवार सुट्टी');
     return row;
   }
   const key = attendanceKey('day', person.id, date);
   const label = attendanceElement('label', person.name);
   const select = attendanceElement('select');
-  select.add(new Option('नोंद बाकी', ''));
+  select.add(new Option(t('नोंद बाकी'), ''));
   for (const [value, labelText] of Object.entries(attendanceStatus)) {
-    select.add(new Option(labelText, value));
+    select.add(new Option(t(labelText), value));
   }
   select.value = localStorage.getItem(key) ?? '';
   select.onchange = () => saveAttendanceValue(key, select.value);
@@ -575,22 +845,23 @@ function attendanceSalaryRow(person, month) {
   const row = attendanceElement('div', '', 'attendance-row');
   const {key, saved, salary, paidDays, monthDays, deductedDays, deductionPaise, due} = attendanceMonthDetails(person, month);
   row.append(attendanceElement('strong', person.name));
-  const daysText = 'कपातीचे दिवस ' + deductedDays;
-  let paymentText = 'पगार आणि पगाराचे दिवस भरा.';
+  const daysText = t('कपातीचे दिवस ') + deductedDays;
+  let paymentText = t('पगार आणि पगाराचे दिवस भरा.');
   if (due !== null) {
-    paymentText = 'कपात ' + attendanceMoney.format(deductionPaise / 100)
-      + ' · देय पगार ' + attendanceMoney.format(due / 100);
+    paymentText = t('कपात ') + attendanceMoney.format(deductionPaise / 100)
+      + t(' · देय पगार ') + attendanceMoney.format(due / 100);
   } else if (saved) {
-    paymentText = 'पगार आणि पगाराच्या दिवसांची नोंद तपासा.';
+    paymentText = t('पगार आणि पगाराच्या दिवसांची नोंद तपासा.');
   }
   row.append(attendanceElement('p', daysText + ' · ' + paymentText, 'muted'));
 
   const form = attendanceElement('form', '', 'attendance-salary');
-  const button = attendanceElement('button', 'पगाराची माहिती जतन करा', 'secondary');
+  form.dataset.staffId = person.id;
+  const button = attendanceElement('button', t('पगाराची माहिती जतन करा'), 'secondary');
   button.type = 'submit';
   form.append(
-    attendanceNumberField('मासिक पगार ₹', 'salary', salary, '0', '0.01', '9999999'),
-    attendanceNumberField('पगार मोजायचे दिवस', 'paidDays', paidDays, '1', '1', String(monthDays)),
+    attendanceNumberField(t('मासिक पगार ₹'), 'salary', salary, '0', '0.01', '9999999'),
+    attendanceNumberField(t('पगार मोजायचे दिवस'), 'paidDays', paidDays, '1', '1', String(monthDays)),
     button,
   );
   form.onsubmit = event => {
@@ -615,8 +886,8 @@ function renderAttendance() {
       counts.set(status, (counts.get(status) ?? 0) + 1);
     }
     el('attendance-summary').textContent = staff.length
-      ? [...counts].map(([status, count]) => (attendanceStatus[status] ?? 'नोंद बाकी') + ' ' + count).join(' · ')
-      : 'हजेरी सुरू करण्यासाठी पहिले कर्मचारी नाव जोडा.';
+      ? [...counts].map(([status, count]) => (t(attendanceStatus[status]) ?? t('नोंद बाकी')) + ' ' + count).join(' · ')
+      : t('हजेरी सुरू करण्यासाठी पहिले कर्मचारी नाव जोडा.');
     el('attendance-list').replaceChildren(...staff.map(person => attendanceRow(person, date)));
     el('attendance-salaries').replaceChildren(...staff.map(person => attendanceSalaryRow(person, date.slice(0, 7))));
   } catch {
@@ -651,7 +922,7 @@ el('attendance-add').onsubmit = event => {
       return;
     }
     saveAttendanceValue(attendanceKey('staff', crypto.randomUUID()), name);
-    if (el('attendance-message').textContent === 'नोंद जतन झाली.') input.value = '';
+    if (el('attendance-message').textContent === t('नोंद जतन झाली.')) input.value = '';
   } catch {
     attendanceMessage('कर्मचारी जोडता आला नाही. ब्राउझरची स्टोरेज परवानगी तपासा.');
   }
@@ -687,7 +958,7 @@ const reportMonth = el('report-month');
 const reportMonthYear = el('report-month-year');
 const reportYear = el('report-year');
 const reportYearType = el('report-year-type');
-const reportMonthFormat = new Intl.DateTimeFormat('mr-IN', {month: 'long', year: 'numeric', timeZone: 'UTC'});
+const reportMonthFormat = () => new Intl.DateTimeFormat(locale(), {month:'long',year:'numeric',timeZone:'UTC'});
 const reportLedgerTypes = {
   income: 'जमा / विक्री', expense: 'खर्च', credit: 'नवीन उधारी',
   repayment: 'उधारी वसुली', opening: 'सुरुवातीची रोख',
@@ -715,7 +986,7 @@ function reportMonthAt(first, offset) {
 }
 
 function reportMonthName(month) {
-  return reportMonthFormat.format(new Date(month + '-01T00:00:00Z'));
+  return reportMonthFormat().format(new Date(month + '-01T00:00:00Z'));
 }
 
 function reportPaise(amount) {
@@ -775,7 +1046,7 @@ function reportLedger(first, end, transactions, stock) {
     const month = row.date?.slice(0, 7);
     if (!month || month >= end || !Object.hasOwn(reportStockTypes, row.type)) continue;
     const amount = reportPaise(row.amount);
-    const name = row.name?.trim() || 'नाव नोंदलेले नाही';
+    const name = row.name?.trim() || t('नाव नोंदलेले नाही');
     const key = name.toLocaleLowerCase('en-IN');
     const record = stockists.get(key) ?? {name, prior: 0, purchases: 0, payments: 0, opening: 0};
     stockists.set(key, record);
@@ -862,7 +1133,7 @@ function reportBlock(parent, name, headers, rows, note = '') {
   block.append(attendanceElement('h4', name));
   if (note) block.append(attendanceElement('p', note, 'muted'));
   if (rows.length) block.append(reportTable(headers, rows, name));
-  else block.append(attendanceElement('p', 'या कालावधीत दाखवण्यासाठी नोंदी नाहीत.', 'muted'));
+  else block.append(attendanceElement('p', t('या कालावधीत दाखवण्यासाठी नोंदी नाहीत.'), 'muted'));
   parent.append(block);
 }
 
@@ -874,24 +1145,24 @@ function reportDetailRows(parent, label, stock, rows) {
   let page = 0;
   const pageSize = 10;
   const options = stock ? reportStockTypes : reportLedgerTypes;
-  const headers = ['तारीख', stock ? 'स्टॉकिस्ट' : 'माध्यम', 'व्यवहार', 'तपशील', 'रक्कम'];
+  const headers = [t('तारीख'), stock ? t('स्टॉकिस्ट') : t('माध्यम'), t('व्यवहार'), t('तपशील'), t('रक्कम')];
   function draw() {
     const displayed = rows.slice(page * pageSize, (page + 1) * pageSize).map(row => [
-      row.date, stock ? row.name || '—' : reportModes[row.mode] || '—',
-      options[row.type] || row.type || '—', row.note || '—', reportPaise(row.amount),
+      row.date, stock ? row.name || '—' : t(reportModes[row.mode]) || '—',
+      t(options[row.type]) || row.type || '—', row.note || '—', reportPaise(row.amount),
     ]);
     target.replaceChildren();
     reportBlock(target, label, headers, displayed);
     if (rows.length <= pageSize) return;
     const actions = attendanceElement('div', '', 'report-actions');
-    const previous = attendanceElement('button', 'मागील', 'secondary');
-    const next = attendanceElement('button', 'पुढील', 'secondary');
+    const previous = attendanceElement('button', t('मागील'), 'secondary');
+    const next = attendanceElement('button', t('पुढील'), 'secondary');
     previous.type = next.type = 'button';
     previous.disabled = page === 0;
     next.disabled = (page + 1) * pageSize >= rows.length;
     previous.onclick = () => { page--; draw(); };
     next.onclick = () => { page++; draw(); };
-    actions.append(previous, next, attendanceElement('p', 'पान ' + (page + 1) + ' / ' + Math.ceil(rows.length / pageSize), 'muted'));
+    actions.append(previous, next, attendanceElement('p', t('पान ') + (page + 1) + ' / ' + Math.ceil(rows.length / pageSize), 'muted'));
     target.append(actions);
   }
   open.ontoggle = () => { if (open.open && !target.firstChild) draw(); };
@@ -901,24 +1172,24 @@ function reportDetailRows(parent, label, stock, rows) {
 function reportTables(data, payroll, annual) {
   const {total, modes, stockistRows} = data;
   const overview = [
-    ['जमा / विक्री', total.income], ['उधारी वसुली', total.repayment], ['एकूण जमा', total.receipts],
-    ['एकूण खर्च', total.expense], ['निव्वळ जमा-खर्च', total.net],
-    ['अखेरीची रोख (नोंदींनुसार)', total.cash],
-    ['ग्राहक उधारी — सुरुवातीची बाकी', total.creditOpening],
-    ['ग्राहक उधारी — नवीन', total.credit], ['ग्राहक उधारी — अखेरची बाकी', total.creditBalance],
-    ['स्टॉकिस्ट — सुरुवातीची बाकी', total.stockPrior], ['स्टॉकिस्ट — या काळात नोंदवलेली मागील बाकी', total.stockOpening],
-    ['स्टॉकिस्ट — माल खरेदी', total.purchases], ['स्टॉकिस्ट — दिलेले पेमेंट', total.payments],
-    ['स्टॉकिस्ट — अखेरची बाकी', total.stockBalance],
+    [t('जमा / विक्री'), total.income], [t('उधारी वसुली'), total.repayment], [t('एकूण जमा'), total.receipts],
+    [t('एकूण खर्च'), total.expense], [t('निव्वळ जमा-खर्च'), total.net],
+    [t('अखेरीची रोख (नोंदींनुसार)'), total.cash],
+    [t('ग्राहक उधारी — सुरुवातीची बाकी'), total.creditOpening],
+    [t('ग्राहक उधारी — नवीन'), total.credit], [t('ग्राहक उधारी — अखेरची बाकी'), total.creditBalance],
+    [t('स्टॉकिस्ट — सुरुवातीची बाकी'), total.stockPrior], [t('स्टॉकिस्ट — या काळात नोंदवलेली मागील बाकी'), total.stockOpening],
+    [t('स्टॉकिस्ट — माल खरेदी'), total.purchases], [t('स्टॉकिस्ट — दिलेले पेमेंट'), total.payments],
+    [t('स्टॉकिस्ट — अखेरची बाकी'), total.stockBalance],
   ];
   const paymentRows = [...modes.entries()].filter(([mode, value]) => mode !== 'Other' || value.in || value.out)
-    .map(([mode, value]) => [reportModes[mode], value.in, value.out, value.in - value.out]);
+    .map(([mode, value]) => [t(reportModes[mode]), value.in, value.out, value.in - value.out]);
   const supplierRows = stockistRows.map(row => [row.name, row.prior, row.opening, row.purchases, row.payments, row.balance]);
   const tables = [
-    {name: 'एकूण आकडे', headers: ['नोंद प्रकार', 'रक्कम ₹'], rows: overview,
-      note: 'निव्वळ जमा-खर्चासाठी जमा-खर्च खात्यातील प्राप्ती आणि खर्च वापरले आहेत. स्टॉकिस्ट पेमेंट स्वतंत्रपणे दाखवले आहे.'},
-    {name: 'पेमेंट पद्धतीनुसार', headers: ['माध्यम', 'आले ₹', 'गेले ₹', 'फरक ₹'], rows: paymentRows,
-      note: total.openingCash ? 'या काळात नोंदवलेली सुरुवातीची रोख ' + reportMoney(total.openingCash) + ' आहे. ती पेमेंटच्या आकड्यांपासून स्वतंत्र आहे.' : ''},
-    {name: 'स्टॉकिस्टनिहाय बाकी', headers: ['स्टॉकिस्ट', 'सुरुवातीची ₹', 'नोंदवलेली मागील ₹', 'खरेदी ₹', 'पेमेंट ₹', 'अखेरची ₹'], rows: supplierRows},
+    {name: t('एकूण आकडे'), headers: [t('नोंद प्रकार'), t('रक्कम ₹')], rows: overview,
+      note: t('निव्वळ जमा-खर्चासाठी जमा-खर्च खात्यातील प्राप्ती आणि खर्च वापरले आहेत. स्टॉकिस्ट पेमेंट स्वतंत्रपणे दाखवले आहे.')},
+    {name: t('पेमेंट पद्धतीनुसार'), headers: [t('माध्यम'), t('आले ₹'), t('गेले ₹'), t('फरक ₹')], rows: paymentRows,
+      note: total.openingCash ? t('या काळात नोंदवलेली सुरुवातीची रोख ') + reportMoney(total.openingCash) + (locale() === 'en-IN' ? '' : ' ') + t('आहे. ती पेमेंटच्या आकड्यांपासून स्वतंत्र आहे.') : ''},
+    {name: t('स्टॉकिस्टनिहाय बाकी'), headers: [t('स्टॉकिस्ट'), t('सुरुवातीची ₹'), t('नोंदवलेली मागील ₹'), t('खरेदी ₹'), t('पेमेंट ₹'), t('अखेरची ₹')], rows: supplierRows},
   ];
   if (payroll) {
     const payrollRows = payroll.rows.map(row => [
@@ -926,11 +1197,11 @@ function reportTables(data, payroll, annual) {
       ...(annual ? [String(row.saved)] : []), row.saved ? row.deduction : '—', row.saved ? row.due : '—',
     ]);
     tables.push({
-      name: 'स्टाफ हजेरी व पगार',
-      headers: ['कर्मचारी','हजर','गैरहजर','रजा','सुट्टी','अर्धा दिवस','विनापगारी रजा','विनापगारी सुट्टी','कपातीचे दिवस',
-        ...(annual ? ['पगार भरलेले महिने'] : []),'कपात ₹','देय पगार ₹'],
+      name: t('स्टाफ हजेरी व पगार'),
+      headers: [t('कर्मचारी'),t('हजर'),t('गैरहजर'),t('रजा'),t('सुट्टी'),t('अर्धा दिवस'),t('विनापगारी रजा'),t('विनापगारी सुट्टी'),t('कपातीचे दिवस'),
+        ...(annual ? [t('पगार भरलेले महिने')] : []),t('कपात ₹'),t('देय पगार ₹')],
       rows: payrollRows,
-      note: 'या ब्राउझरमधल्या नोंदी. रविवार सुट्टीत धरले आहेत. पगाराची माहिती भरलेल्या आणि गणना शक्य असलेल्या महिन्यांचे आकडे दाखवले आहेत.',
+      note: t('या ब्राउझरमधल्या नोंदी. रविवार सुट्टीत धरले आहेत. पगाराची माहिती भरलेल्या आणि गणना शक्य असलेल्या महिन्यांचे आकडे दाखवले आहेत.'),
     });
   }
   return tables;
@@ -969,7 +1240,7 @@ function renderReport() {
   el('report-month-year-label').classList.toggle('hidden', annual);
   el('report-year-label').classList.toggle('hidden', !annual);
   el('report-year-type-label').classList.toggle('hidden', !annual);
-  el('report-year-caption').textContent = financial ? 'सुरुवातीचे वर्ष' : 'वर्ष';
+  el('report-year-caption').textContent = financial ? t('सुरुवातीचे वर्ष') : t('वर्ष');
   el('report-back').classList.toggle('hidden', annual || !reportFromYear);
   if (!reportPanel.open) return;
   const target = el('report-content');
@@ -980,39 +1251,39 @@ function renderReport() {
   target.replaceChildren();
   el('report-print').disabled = el('report-export').disabled = true;
   if (!user || !picker.validity.valid) {
-    state.textContent = user ? 'योग्य महिना किंवा वर्ष निवडा.' : '';
+    state.textContent = user ? t('योग्य महिना किंवा वर्ष निवडा.') : '';
     return;
   }
   if ([...reportSources.values()].some(meta => meta === null)) {
-    state.textContent = 'Cloud नोंदी वाचता आल्या नाहीत. कनेक्शन तपासा.';
+    state.textContent = t('Cloud नोंदी वाचता आल्या नाहीत. कनेक्शन तपासा.');
     return;
   }
   if (reportSources.size < 2) {
-    state.textContent = 'जमा-खर्च आणि स्टॉकिस्ट नोंदी येत आहेत…';
+    state.textContent = t('जमा-खर्च आणि स्टॉकिस्ट नोंदी येत आहेत…');
     return;
   }
 
   const statuses = [...reportSources.values()];
   const notices = [];
-  if (statuses.some(meta => meta.fromCache)) notices.push('Cloud च्या स्थानिक कॅशवरून रिपोर्ट. ताज्या सर्व नोंदी उपलब्ध असतीलच असे नाही.');
-  if (statuses.some(meta => meta.hasPendingWrites)) notices.push('काही व्यवहारांचे Cloud सिंक बाकी आहे.');
+  if (statuses.some(meta => meta.fromCache)) notices.push(t('Cloud च्या स्थानिक कॅशवरून रिपोर्ट. ताज्या सर्व नोंदी उपलब्ध असतीलच असे नाही.'));
+  if (statuses.some(meta => meta.hasPendingWrites)) notices.push(t('काही व्यवहारांचे Cloud सिंक बाकी आहे.'));
   let payroll = null;
   if (owner) {
     try {
       payroll = reportPayroll(first, annual ? 12 : 1, attendanceStaff());
     } catch {
-      notices.push('या ब्राउझरमधली हजेरी किंवा पगाराची माहिती वाचता आली नाही.');
+      notices.push(t('या ब्राउझरमधली हजेरी किंवा पगाराची माहिती वाचता आली नाही.'));
     }
   }
   state.textContent = notices.join(' ');
   const end = reportMonthAt(first, annual ? 12 : 1);
   const data = reportLedger(first, end, cloudMain, cloudStock);
-  const periodName = annual ? reportMonthName(first) + ' ते ' + reportMonthName(reportMonthAt(end, -1)) : reportMonthName(first);
-  target.append(attendanceElement('h3', (annual ? 'वार्षिक सारांश · ' : 'मासिक सारांश · ') + periodName));
+  const periodName = annual ? reportMonthName(first) + t(' ते ') + reportMonthName(reportMonthAt(end, -1)) : reportMonthName(first);
+  target.append(attendanceElement('h3', (annual ? t('वार्षिक सारांश · ') : t('मासिक सारांश · ')) + periodName));
   const cards = attendanceElement('div', '', 'cards');
   for (const [name, amount] of [
-    ['एकूण जमा', data.total.receipts], ['एकूण खर्च', data.total.expense],
-    ['निव्वळ जमा-खर्च', data.total.net], ['अखेरची ग्राहक उधारी', data.total.creditBalance],
+    [t('एकूण जमा'), data.total.receipts], [t('एकूण खर्च'), data.total.expense],
+    [t('निव्वळ जमा-खर्च'), data.total.net], [t('अखेरची ग्राहक उधारी'), data.total.creditBalance],
   ]) {
     const card = attendanceElement('div', name, 'tile');
     card.append(attendanceElement('strong', reportMoney(amount)));
@@ -1022,18 +1293,18 @@ function renderReport() {
   const tables = reportTables(data, payroll, annual);
   if (annual) {
     const monthly = reportAnnualRows(first, data.monthlyTotals, payroll);
-    const headers = ['महिना', 'जमा ₹', 'खर्च ₹', 'निव्वळ ₹', 'उधारी वसुली ₹', 'स्टॉकिस्ट पेमेंट ₹'];
-    if (payroll) headers.push('देय पगार ₹');
-    reportBlock(target, 'महिनानिहाय तुलना', headers, monthly.map(({month, row}) => [
+    const headers = [t('महिना'), t('जमा ₹'), t('खर्च ₹'), t('निव्वळ ₹'), t('उधारी वसुली ₹'), t('स्टॉकिस्ट पेमेंट ₹')];
+    if (payroll) headers.push(t('देय पगार ₹'));
+    reportBlock(target, t('महिनानिहाय तुलना'), headers, monthly.map(({month, row}) => [
       reportMonthLink(month, row[0]), ...row.slice(1),
-    ]), 'सविस्तर रिपोर्टसाठी महिन्याच्या नावावर टॅप करा.');
-    tables.unshift({name: 'महिनानिहाय तुलना', headers, rows: monthly.map(entry => entry.row)});
+    ]), t('सविस्तर रिपोर्टसाठी महिन्याच्या नावावर टॅप करा.'));
+    tables.unshift({name: t('महिनानिहाय तुलना'), headers, rows: monthly.map(entry => entry.row)});
   }
   for (const table of tables.slice(annual ? 1 : 0)) {
     reportBlock(target, table.name, table.headers, table.rows, table.note);
   }
-  reportDetailRows(target, 'जमा-खर्च व्यवहारांचा तपशील', false, data.ledgerRows);
-  reportDetailRows(target, 'स्टॉकिस्ट व्यवहारांचा तपशील', true, data.stockRows);
+  reportDetailRows(target, t('जमा-खर्च व्यवहारांचा तपशील'), false, data.ledgerRows);
+  reportDetailRows(target, t('स्टॉकिस्ट व्यवहारांचा तपशील'), true, data.stockRows);
   currentReport = {periodName, filename: (annual ? 'Year_' : 'Month_') + first, tables, notice: state.textContent};
   el('report-print').disabled = el('report-export').disabled = false;
 }
@@ -1059,7 +1330,7 @@ el('report-print').onclick = () => {
 el('report-export').onclick = () => {
   if (!currentReport) return;
   const {periodName, filename, tables, notice} = currentReport;
-  const rows = [['विघ्नहर्ता मेडिकल, वर्धा'], ['कालावधी', periodName]];
+  const rows = [[t('विघ्नहर्ता मेडिकल, वर्धा')], [t('कालावधी'), periodName]];
   if (notice) rows.push([notice]);
   for (const table of tables) rows.push([], [table.name], table.headers, ...table.rows);
   const csvRows = rows.map(row => row.map(value => {
@@ -1070,12 +1341,15 @@ el('report-export').onclick = () => {
 };
 
 const workspaceDate = el('workspace-date');
-const chartShortMonth = new Intl.DateTimeFormat('mr-IN', {month:'short', timeZone:'UTC'});
+const chartShortMonth = () => new Intl.DateTimeFormat(locale(), {month:'short',timeZone:'UTC'});
 const workspaceToday = todayInWardha();
 workspaceDate.dateTime = workspaceToday;
-workspaceDate.textContent = new Intl.DateTimeFormat('mr-IN', {
-  weekday:'long', day:'numeric', month:'short', year:'numeric', timeZone:'UTC',
-}).format(new Date(workspaceToday + 'T12:00:00Z'));
+function renderWorkspaceDate() {
+  workspaceDate.textContent = new Intl.DateTimeFormat(locale(), {
+    weekday:'long',day:'numeric',month:'short',year:'numeric',timeZone:'UTC',
+  }).format(new Date(workspaceToday + 'T12:00:00Z'));
+}
+renderWorkspaceDate();
 
 const workspaceNavLinks = [...el('app-nav').querySelectorAll('a')];
 function navigateWorkspace(scroll = false) {
@@ -1122,7 +1396,9 @@ function workspaceTrendRows(currentMonth, rows) {
   return [...months.entries()].map(([month, totals]) => ({month, ...totals}));
 }
 
+let workspaceTrendStatus = 'loading';
 function drawWorkspaceTrend(status) {
+  workspaceTrendStatus = status;
   const output = el('trend-chart');
   const values = el('trend-values');
   const state = el('trend-state');
@@ -1134,40 +1410,61 @@ function drawWorkspaceTrend(status) {
   el('trend-period').textContent = '';
   if (status !== 'ready') {
     values.open = false;
-    state.textContent = status === 'error' ? 'व्यवहार लोड करता आले नाहीत.' : 'व्यवहार लोड होत आहेत…';
+    state.textContent = status === 'error' ? t('व्यवहार लोड करता आले नाहीत.') : t('व्यवहार लोड होत आहेत…');
     return;
   }
 
   const rows = workspaceTrendRows(todayInWardha().slice(0, 7), cloudMain);
-  el('trend-period').textContent = reportMonthName(rows[0].month) + ' ते ' + reportMonthName(rows.at(-1).month);
+  el('trend-period').textContent = reportMonthName(rows[0].month) + t(' ते ') + reportMonthName(rows.at(-1).month);
   const largest = Math.max(0, ...rows.flatMap(row => [row.income, row.expense]));
-  state.textContent = largest ? '' : 'या सहा महिन्यांत जमा किंवा खर्चाच्या नोंदी नाहीत.';
+  state.textContent = largest ? '' : t('या सहा महिन्यांत जमा किंवा खर्चाच्या नोंदी नाहीत.');
   if (!largest) return;
   const plot = attendanceElement('ol', '', 'trend-plot');
   plot.setAttribute('aria-hidden','true');
   for (const row of rows) {
     const group = attendanceElement('li');
-    group.title = reportMonthName(row.month) + ' · जमा ' + reportMoney(row.income) + ' · खर्च ' + reportMoney(row.expense);
+    group.title = reportMonthName(row.month) + t(' · जमा ') + reportMoney(row.income) + t(' · खर्च ') + reportMoney(row.expense);
     const bars = attendanceElement('div', '', 'trend-bars');
     for (const type of ['income','expense']) {
       const bar = attendanceElement('span', '', 'trend-bar ' + type);
       bar.style.height = Math.max(0, row[type] / largest * 100) + '%';
       bars.append(bar);
     }
-    group.append(bars, attendanceElement('span', chartShortMonth.format(new Date(row.month + '-01T00:00:00Z')), 'trend-month'));
+    group.append(bars, attendanceElement('span', chartShortMonth().format(new Date(row.month + '-01T00:00:00Z')), 'trend-month'));
     plot.append(group);
   }
   output.append(plot);
   output.classList.remove('hidden');
-  table.append(reportTable(['महिना','जमा ₹','खर्च ₹'], rows.map(row => [
+  table.append(reportTable([t('महिना'),t('जमा ₹'),t('खर्च ₹')], rows.map(row => [
     reportMonthName(row.month), row.income, row.expense,
-  ]), 'गेल्या सहा महिन्यांचे जमा-खर्च'));
+  ]), t('गेल्या सहा महिन्यांचे जमा-खर्च')));
   values.classList.remove('hidden');
 }
-onAuthStateChanged(auth,async u=>{clearSubs();user=null;owner=false;showAttendance(false);reportSources.clear();currentReport=null;reportPanel.open=false;el('report-content').replaceChildren();el('report-state').textContent='';el('cloud-panel').classList.add('hidden');el('login-panel').classList.remove('hidden');cloudMain=[];cloudStock=[];updateDashboard();el('cm-list').replaceChildren();el('cs-list').replaceChildren();drawWorkspaceTrend('loading');if(!u)return;try{owner=u.uid===ownerUID;const staff=owner|| (await getDoc(doc(db,'authorizedStaff',u.uid))).exists();if(!staff){el('login-error').textContent='या खात्याला प्रवेश परवानगी नाही.';await signOut(auth);return}user=u;el('login-panel').classList.add('hidden');el('cloud-panel').classList.remove('hidden');el('cloud-identity').textContent=`${u.email} · ${owner?'Owner':'Staff (नवीन नोंद व वाचन)'}`;showAttendance(owner);watch('transactions');watch('stockistTransactions');navigateWorkspace(true)}catch(e){el('login-error').textContent='परवानगी तपासता आली नाही: '+(e.code||e.message)}});
-async function submit(which){if(!user)return;const main=which==='main',prefix=main?'cm':'cs',coll=main?'transactions':'stockistTransactions',edit=main?editMain:editStock;if(edit&&!owner){alert('दुरुस्ती फक्त Owner करू शकतो');return}const fields=main?['date','type','note','mode','amount']:['date','name','type','note','amount'];const data={};for(const k of fields)data[k]=el(prefix+'-'+k).value.trim();data.amount=Number(data.amount);if(!data.date||!(data.amount>0)||(main?!data.note:!data.name)){alert('सर्व आवश्यक माहिती भरा');return}const btn=el(prefix+'-submit');btn.disabled=true;try{const ref=edit?doc(db,coll,edit):doc(collection(db,coll));await setDoc(ref,{...data,...(edit?{}:{createdBy:user.uid}),updatedBy:user.uid,updatedAt:serverTimestamp()},{merge:!!edit});reset(which)}catch(e){safeError(e)}finally{btn.disabled=false}}
+onAuthStateChanged(auth,async u=>{clearSubs();user=null;owner=false;showAttendance(false);reportSources.clear();currentReport=null;reportPanel.open=false;el('report-content').replaceChildren();el('report-state').textContent='';el('cloud-panel').classList.add('hidden');el('login-panel').classList.remove('hidden');cloudMain=[];cloudStock=[];localizedSnapshots.clear();localizedMessages.delete('cm-list');localizedMessages.delete('cs-list');localMessage('sync-state','Cloud कनेक्शन तपासत आहे…');updateDashboard();el('cm-list').replaceChildren();el('cs-list').replaceChildren();drawWorkspaceTrend('loading');if(!u)return;try{owner=u.uid===ownerUID;const staff=owner|| (await getDoc(doc(db,'authorizedStaff',u.uid))).exists();if(!staff){localMessage('login-error','या खात्याला प्रवेश परवानगी नाही.');await signOut(auth);return}user=u;el('login-panel').classList.add('hidden');el('cloud-panel').classList.remove('hidden');renderCloudIdentity();showAttendance(owner);watch('transactions');watch('stockistTransactions');navigateWorkspace(true)}catch(e){localMessage('login-error','परवानगी तपासता आली नाही: ',e.code||e.message)}});
+async function submit(which){if(!user)return;const main=which==='main',prefix=main?'cm':'cs',coll=main?'transactions':'stockistTransactions',edit=main?editMain:editStock;if(edit&&!owner){alert(t('दुरुस्ती फक्त Owner करू शकतो'));return}const fields=main?['date','type','note','mode','amount']:['date','name','type','note','amount'];const data={};for(const k of fields)data[k]=el(prefix+'-'+k).value.trim();data.amount=Number(data.amount);if(!data.date||!(data.amount>0)||(main?!data.note:!data.name)){alert(t('सर्व आवश्यक माहिती भरा'));return}const btn=el(prefix+'-submit');btn.disabled=true;try{const ref=edit?doc(db,coll,edit):doc(collection(db,coll));await setDoc(ref,{...data,...(edit?{}:{createdBy:user.uid}),updatedBy:user.uid,updatedAt:serverTimestamp()},{merge:!!edit});reset(which)}catch(e){safeError(e)}finally{btn.disabled=false}}
 el('cloud-main-form').onsubmit=e=>{e.preventDefault();submit('main')};el('cloud-stock-form').onsubmit=e=>{e.preventDefault();submit('stock')};
+window.addEventListener('ledger-language-change', () => {
+  renderWorkspaceDate();
+  for (const [id, {key,suffix}] of localizedMessages) el(id).textContent = t(key) + suffix;
+  if (!user) return;
+  renderCloudIdentity();
+  el('cm-submit').textContent = t(editMain ? 'बदल सेव्ह करा' : 'Cloud मध्ये नोंद सेव्ह करा');
+  el('cs-submit').textContent = t(editStock ? 'बदल सेव्ह करा' : 'Cloud मध्ये नोंद सेव्ह करा');
+  for (const [collectionName, {docs,metadata}] of localizedSnapshots) display(collectionName, docs, metadata);
+  drawWorkspaceTrend(workspaceTrendStatus);
+  const drafts = new Map([...el('attendance-salaries').querySelectorAll('form[data-staff-id]')].map(form =>
+    [form.dataset.staffId, [form.elements.salary.value, form.elements.paidDays.value]]
+  ));
+  renderAttendance();
+  for (const form of el('attendance-salaries').querySelectorAll('form[data-staff-id]')) {
+    const draft = drafts.get(form.dataset.staffId);
+    if (draft) [form.elements.salary.value, form.elements.paidDays.value] = draft;
+  }
+  renderReport();
+});
+
 </script></body></html>
+
 
 
 
