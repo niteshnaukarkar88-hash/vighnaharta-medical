@@ -168,6 +168,108 @@ button:not(:disabled):hover,.primary-link:hover{filter:brightness(.96)}
   .dashboard-hero{min-height:0;padding:10px;background:none;color:var(--ink)}
   body.report-print .workspace>section:not(#period-report){display:none!important}
 }
+
+@media screen {
+  :root {
+    --paper:#edf2f7;
+    --surface:#fff;
+    --ink:#152637;
+    --text-muted:#496073;
+    --edge:#d9e3ec;
+    --green:#087852;
+    --deep:#142a40;
+    --accent:#cbf3df;
+    --radius:19px;
+    --header-height:72px;
+  }
+  .app-header{background:#fff;border-bottom-color:#dce5ed}
+  .brand{gap:13px}
+  .brand-mark{border-radius:12px;background:#08734e;box-shadow:0 4px 10px #08734e24}
+  .brand-mark::before,.brand-mark::after{background:#fff}
+  .brand strong{letter-spacing:-.018em}
+  .header-date{padding:6px 10px;border-radius:9px;background:#eef5f9;color:#39566c;font-weight:650}
+  main{padding-top:clamp(12px,2vw,27px)}
+  #cloud-panel,.workspace{gap:16px}
+  #app-nav{position:sticky;background:#142b40;border-color:#142b40;padding:6px;border-radius:14px;box-shadow:0 5px 16px #142b4024}
+  #app-nav a{color:#e4eef7;font-weight:700;padding-inline:12px}
+  #app-nav a:hover{background:#234057}
+  #app-nav a[aria-current]{background:#d8f5e6;color:#07583f}
+  #app-nav a:focus-visible{outline-color:#9de4c3}
+  .nav-icon{line-height:1;flex:none;width:23px;height:23px;border-radius:6px;background:#ffffff12;color:inherit}
+  #app-nav a[aria-current] .nav-icon{background:#bdebd5}
+  #account-panel{background:#f9fcff;padding:10px 13px;flex-wrap:wrap}
+  .account-avatar{color:#08734e;background:#dbf4e8}
+  #cloud-identity{color:#314b60}
+  #logout-btn{border:1px solid #dce7ec;background:#fff;color:#264558}
+  .sync-details summary{color:#395a68}
+  #sync-state{background:#e1f5e8;color:#13543c;box-decoration-break:clone;-webkit-box-decoration-break:clone}
+  section,.tile{box-shadow:0 2px 9px #1d384e09}
+  .dashboard-hero{
+    min-height:124px;background:#fff;color:var(--ink);border:1px solid var(--edge);
+    position:relative;isolation:isolate;overflow:hidden;box-shadow:0 3px 14px #1d384e0c;
+  }
+  .dashboard-hero::after{
+    content:"";position:absolute;z-index:-1;right:-75px;top:-95px;width:300px;height:300px;
+    pointer-events:none;border-radius:50%;border:46px solid #e8f5ee;
+  }
+  .dashboard-hero h2{letter-spacing:-.035em;max-width:100%}
+  .hero-actions a{min-height:44px;border-radius:11px}
+  .primary-link{background:#086b49;color:#fff}
+  .quiet-link{background:#fff;color:#245141;border:1px solid #adcfc0}
+  .dashboard-cards{margin:14px 0;gap:10px}
+  .dashboard-cards .metric{display:grid;align-content:center;min-height:100px;isolation:isolate;overflow:hidden}
+  .dashboard-cards .metric::before{width:5px;height:31px;left:-1px;top:16px;border-radius:0 5px 5px 0}
+  .dashboard-cards .metric.income{background:#076548;color:#fff;border-color:#076548}
+  .dashboard-cards .metric.income span{color:#daf5e7}
+  .dashboard-cards .metric.income::before{background:#a4eac9}
+  .dashboard-cards .metric.income::after{
+    content:"";position:absolute;z-index:-1;right:-34px;bottom:-42px;width:117px;height:117px;
+    border-radius:50%;border:15px solid #ffffff1d;pointer-events:none
+  }
+  .dashboard-cards .metric.cash{background:#f7fcfa}
+  .dashboard-cards .metric.expense::before{background:#b45a38}
+  .dashboard-cards .metric.cash::before{background:#10846e}
+  .dashboard-cards .metric.due::before{background:#9c732b}
+  .metric strong{letter-spacing:-.036em}
+  .trend-panel{border-radius:var(--radius);padding:clamp(15px,2.5vw,26px)}
+  .trend-heading h3{font-size:clamp(17px,2.2vw,24px)}
+  .trend-legend{gap:8px}
+  .trend-legend span{background:#f1f6fa;padding:4px 8px;border-radius:6px;white-space:nowrap}
+  .trend-legend span::before,.trend-bar{background:#0d865f}
+  .trend-legend .legend-expense::before,.trend-bar.expense{background:#bb6847}
+  .trend-bars{border-color:#cbdbe6;background:repeating-linear-gradient(to top,transparent 0,transparent 30px,#e5edf3 30px,#e5edf3 31px)}
+  .trend-bar{border-radius:5px 5px 0 0;max-width:35px}
+  .cash-note{color:#50657a}
+  .ledger-records{background:#f6f9fc;border-color:#dce7ee}
+  .ledger-records .line{border-color:#d9e5ed}
+  .ledger-form input,.ledger-form select,.report-controls input,.report-controls select{background:#fbfdff;border-color:#c9dbe7}
+  button.secondary{background:#e8f2f8;color:#21485e}
+  .report-table thead th{background:#edf4f9}
+  .report-table,.report-table th,.report-table td{border-color:#dce7ef}
+  #attendance-panel>details>summary::marker,#period-report>details>summary::marker{color:#087452}
+  :focus-visible{outline-color:#087452}
+  @media(max-width:440px){
+    .header-date{padding:5px 7px;max-width:35%;overflow-wrap:anywhere}
+    .dashboard-hero{min-height:0;padding:17px 14px}
+    .dashboard-hero::after{width:195px;height:195px;right:-65px;top:-75px;border-width:26px}
+    .dashboard-cards .metric{min-height:88px}
+    .account-avatar{display:none}
+  }
+  @media(min-width:850px){
+    #cloud-panel{grid-template-columns:minmax(208px,234px) minmax(0,1fr);gap:23px}
+    #app-nav{align-content:start;min-height:min(420px,calc(100vh - 130px));top:calc(var(--header-height) + 20px);padding:13px}
+    #app-nav a{min-height:47px}
+    #account-panel{display:flex;align-items:start;justify-content:space-between;gap:11px 15px;padding:10px 14px}
+    .account-main{flex:1 1 280px;min-width:0}
+    .sync-details{flex:0 1 38%;margin:4px 0 0}
+    .dashboard-cards{gap:13px}
+  }
+  @media(min-width:1120px){
+    .dashboard-hero{padding-inline:29px}
+    .dashboard-cards .metric{min-height:113px;padding:16px 15px 14px}
+    .trend-plot li{grid-template-rows:184px auto}
+  }
+}
 </style></head><body><header class="app-header">
   <div class="header-inner">
     <a class="brand" href="#dashboard-panel" aria-label="विघ्नहर्ता मेडिकल · मुख्य डॅशबोर्ड">
@@ -1066,6 +1168,7 @@ onAuthStateChanged(auth,async u=>{clearSubs();user=null;owner=false;showAttendan
 async function submit(which){if(!user)return;const main=which==='main',prefix=main?'cm':'cs',coll=main?'transactions':'stockistTransactions',edit=main?editMain:editStock;if(edit&&!owner){alert('दुरुस्ती फक्त Owner करू शकतो');return}const fields=main?['date','type','note','mode','amount']:['date','name','type','note','amount'];const data={};for(const k of fields)data[k]=el(prefix+'-'+k).value.trim();data.amount=Number(data.amount);if(!data.date||!(data.amount>0)||(main?!data.note:!data.name)){alert('सर्व आवश्यक माहिती भरा');return}const btn=el(prefix+'-submit');btn.disabled=true;try{const ref=edit?doc(db,coll,edit):doc(collection(db,coll));await setDoc(ref,{...data,...(edit?{}:{createdBy:user.uid}),updatedBy:user.uid,updatedAt:serverTimestamp()},{merge:!!edit});reset(which)}catch(e){safeError(e)}finally{btn.disabled=false}}
 el('cloud-main-form').onsubmit=e=>{e.preventDefault();submit('main')};el('cloud-stock-form').onsubmit=e=>{e.preventDefault();submit('stock')};
 </script></body></html>
+
 
 
 
