@@ -276,6 +276,170 @@ button:not(:disabled):hover,.primary-link:hover{filter:brightness(.96)}
 .language-control select{width:auto;min-height:36px;padding:5px 8px;background:#fff;color:#152637}
 @media(max-width:540px){.header-preferences .header-date{display:none}.language-control>span{display:none}.header-inner{gap:8px}.brand{min-width:0}.brand strong{overflow-wrap:anywhere}.language-control select{padding-inline:7px}}
 @media print{.language-control{display:none!important}}
+</style><style id="pencil-dashboard-theme">
+@media screen{
+ :root{
+  --paper:#f6f3ec;--surface:#fffefa;--ink:#30352f;--text-muted:#686e64;
+  --edge:#dedfd2;--green:#286344;--deep:#303b32;--accent:#edc96f;--radius:19px;
+ }
+ body{
+  background-color:var(--paper);color:var(--ink);
+  background-image:radial-gradient(#afb5a04d .65px,transparent .65px);
+  background-size:15px 15px;
+  font-family:"Noto Sans Devanagari","Segoe UI",system-ui,sans-serif;
+ }
+ .app-header{background:#fffef9f5;border-bottom:1px solid #d7dacd;box-shadow:0 3px 0 #b7bcad0c}
+ .header-inner{max-width:1500px}
+ .brand strong{color:#293e30;letter-spacing:-.025em}
+ .brand small{color:#6b7665}
+ .brand-mark{
+  background:#2b6446;border:1px solid #19462e;border-radius:12px 15px 11px 14px;
+  box-shadow:3px 3px 0 #d5ddc8;transform:rotate(-3deg);
+ }
+ .brand-mark::before,.brand-mark::after{background:#fffdf2}
+ .header-date{color:#58634f;background:#eeefe5;border:1px solid #e0e3d5;box-shadow:none}
+ .language-control{color:#55614d}
+ .language-control select{background:#fffef9;border:1px solid #d4dac9;border-radius:9px}
+ main{max-width:1500px;padding-top:22px}
+ #app-nav{
+  background:#303d32;border:1px solid #223326;
+  border-radius:17px 21px 17px 19px;box-shadow:4px 5px 0 #cdd3bf;
+ }
+ #app-nav a{color:#e4e8da;gap:12px;border-radius:10px;font-weight:650}
+ #app-nav a:hover{background:#455343}
+ #app-nav a[aria-current]{background:#f1d583;color:#354229;box-shadow:2px 2px 0 #1b3026}
+ .nav-icon{
+  display:inline-grid;place-items:center;flex:none;width:32px;height:32px;
+  font-size:23px;font-family:system-ui;color:#f3eacc;background:#ffffff0c;
+  border:1px solid #ffffff30;border-radius:9px 11px 8px 10px;transform:rotate(-4deg);
+ }
+ #app-nav a[aria-current] .nav-icon{background:#fff5cd;color:#3c5134;border-color:#c4ad61}
+ section,.tile{border:1px solid #d8ddcd;background:#fffefa;box-shadow:0 3px 0 #c2c8b114,0 8px 20px #303c2805}
+ .workspace>section{border-radius:var(--radius)}
+ #account-panel{background:#fffefa;border-style:dashed;border-color:#c5ceba;box-shadow:none}
+ .account-avatar{background:#e6ead9;color:#3d6846;border:1px solid #cbd4ba;border-radius:9px 12px 8px 10px}
+ #cloud-identity{color:#516248}
+ #logout-btn{color:#4b5743;border:1px solid #d5dbca;background:#f5f5eb}
+ #sync-state{background:#edf3df;color:#365c38}
+ .sync-details summary{color:#506848}
+ .dashboard-hero{
+  min-height:160px;padding:25px 28px;background:#f1eccf;
+  border:1px solid #dad4ad;border-radius:17px 22px 18px 20px;
+  box-shadow:3px 4px 0 #e0ddc6;color:#303e2c;isolation:isolate;
+  background-image:repeating-linear-gradient(0deg,transparent,transparent 27px,#b5b18425 27px,#b5b18425 28px);
+ }
+ .dashboard-hero h2{font-size:clamp(26px,3.2vw,43px);max-width:72%;font-weight:760;line-height:1.3;letter-spacing:-.035em}
+ .dashboard-hero::after{
+  width:14px;height:125px;right:24px;top:6px;bottom:auto;left:auto;z-index:-1;
+  border:2px solid #6b6340;border-radius:5px;
+  background:linear-gradient(90deg,#c48c36 0 20%,#efc46c 20% 62%,#e7ad43 62% 82%,#bf8e40 82%),
+   #efc46c;transform:rotate(32deg);opacity:.7;
+  box-shadow:6px 4px 0 #837b4830;
+ }
+ .dashboard-hero::before{
+  content:"";position:absolute;width:92px;height:44px;right:60px;top:29px;
+  border:1.5px solid #7c826048;border-radius:50%;transform:rotate(-23deg);z-index:-1;
+ }
+ .hero-actions{position:relative;z-index:1}
+ .hero-actions a{border-radius:10px 12px 9px 11px;font-weight:750}
+ .primary-link{background:#2d6646;color:#fffdf1;border:1px solid #224d35;box-shadow:2px 3px 0 #24492e24}
+ .quiet-link{color:#44583a;background:#fffcef;border:1px solid #b8bd9e}
+ .dashboard-cards{gap:12px;margin:18px 0}
+ .dashboard-cards .metric{
+  position:relative;min-height:130px;padding:20px 15px 16px!important;
+  border:1px solid #d8ddcd;border-radius:15px 20px 15px 18px;
+  overflow:hidden;background:#fffefa;
+ }
+ .dashboard-cards .metric span{color:#68715f;font-size:13px;font-weight:650;padding-right:39px}
+ .dashboard-cards .metric strong{color:#304530;font-size:clamp(22px,2.8vw,34px);letter-spacing:-.04em;margin-top:14px}
+ .dashboard-cards .metric::before{
+  content:"+";display:grid;place-items:center;position:absolute;left:auto;right:13px;top:13px;
+  width:33px;height:33px;border:1px solid #abbf9f;border-radius:9px 11px 8px 10px;
+  color:#427346;background:#eaf2df;font:24px system-ui;transform:rotate(-7deg);
+ }
+ .dashboard-cards .metric.income{background:#eaf2e1;border-color:#c7d7b9;color:#2d4b31}
+ .dashboard-cards .metric.income span{color:#4d6c45}
+ .dashboard-cards .metric.income::before{background:#d9e7c8;color:#30603c}
+ .dashboard-cards .metric.income::after{display:none}
+ .dashboard-cards .metric.expense{background:#fff0e3;border-color:#ebd5c0}
+ .dashboard-cards .metric.expense::before{content:"−";background:#fae3cc;color:#a56a40;border-color:#d6b99b}
+ .dashboard-cards .metric.expense strong{color:#815a3a}
+ .dashboard-cards .metric.cash{background:#f3f1d8;border-color:#dedbb9}
+ .dashboard-cards .metric.cash::before{content:"₹";background:#e9e4bb;color:#6c6b37;border-color:#c4c08b}
+ .dashboard-cards .metric.cash strong{color:#686b39}
+ .dashboard-cards .metric.due{background:#eeecf5;border-color:#d9d3e6}
+ .dashboard-cards .metric.due::before{content:"◷";background:#e3dfed;color:#75608b;border-color:#c6b9d4}
+ .dashboard-cards .metric.due strong{color:#6c587d}
+ .trend-panel{border-radius:16px 21px 16px 19px;background:#fffefa;padding:22px}
+ .trend-heading h3{color:#394c33;font-size:clamp(18px,2.1vw,23px)}
+ .trend-legend span{background:#f1f3e9;border:1px solid #e1e5d7;color:#5c6852;border-radius:7px}
+ .trend-legend span::before,.trend-bar{background:#66885b}
+ .trend-legend .legend-expense::before,.trend-bar.expense{background:#d19660}
+ .trend-bars{
+  background:repeating-linear-gradient(to top,transparent 0,transparent 35px,#d9dfcc80 35px,#d9dfcc80 36px);
+  border-color:#b8c4aa;
+ }
+ .trend-bar{border:1px solid #4b7443;border-radius:5px 7px 0 0;
+  background:repeating-linear-gradient(125deg,#66885b 0 4px,#8aa37e 4px 5px)}
+ .trend-bar.expense{border-color:#b48050;background:repeating-linear-gradient(125deg,#d19660 0 4px,#dfae82 4px 5px)}
+ .trend-month,.muted,.cash-note{color:#6c7464}
+ .section-title{color:#354d32}
+ #ledger-panel-title::before,#stock-panel-title::before{
+  display:inline-grid;place-items:center;content:"⇄";width:34px;height:34px;margin-right:9px;
+  font-size:22px;background:#edf2e2;border:1px solid #bdcaae;border-radius:8px 11px 8px 10px;transform:rotate(-4deg);
+ }
+ #stock-panel-title::before{content:"▦";background:#fbefd8;border-color:#dbcca6}
+ .ledger-records{background:#f4f5ec;border:1px dashed #ccd4bf;border-radius:13px}
+ .ledger-records h3{color:#536247}
+ .ledger-records .line{border-bottom:1px dashed #cdd5bf;padding:12px 0}
+ input,select,.ledger-form input,.ledger-form select,.report-controls input,.report-controls select{
+  color:#36452f;background:#fffef9;border:1px solid #cbd3bd;border-radius:9px;
+  min-height:43px;box-shadow:inset 0 -2px 0 #dce0d21a;
+ }
+ input:focus,select:focus{border-color:#73935d;box-shadow:0 0 0 3px #9db78625}
+ label{color:#58664c}
+ button{border-radius:9px 11px 8px 10px;background:#2f6847;border:1px solid #28593c;font-weight:700}
+ button.secondary{background:#eef2e4;color:#44603b;border:1px solid #d0dac2}
+ button:not(:disabled):hover,.primary-link:hover{filter:none;background-color:#3b7852;color:white}
+ .report-table thead th{background:#ecf0e1;color:#46593b}
+ .report-table,.report-table th,.report-table td{border-color:#d6ddc9}
+ .attendance-person,.attendance-salary,.attendance-date{border-color:#d8dfcb}
+ .ledger-history summary,.history-summary{color:#47713e}
+ #login-panel{background:#fffefa;border:1px solid #d4dbc7;box-shadow:5px 6px 0 #d9dfce70;border-radius:17px 24px 16px 20px}
+ #login-panel .section-title{font-size:23px}
+ :focus-visible{outline:2px solid #8b9f63;outline-offset:3px}
+ @media(min-width:850px){
+  #cloud-panel{grid-template-columns:216px minmax(0,1fr);gap:24px}
+  #app-nav{padding:16px 12px;min-height:450px}
+  #app-nav a{min-height:58px;padding:12px 10px;font-size:14px;line-height:1.6}
+ }
+ @media(max-width:849px){
+  main{padding-inline:13px}
+  #app-nav{gap:6px;padding:7px;border-radius:13px;box-shadow:2px 3px 0 #cdd3bf}
+  #app-nav a{display:flex;align-items:center;padding:8px 11px;gap:7px;font-size:12px;white-space:nowrap}
+  .nav-icon{width:27px;height:27px;font-size:20px}
+  .dashboard-hero{padding:22px 19px;min-height:155px}
+  .dashboard-hero h2{max-width:90%;font-size:30px}
+  .dashboard-hero::after{right:16px;height:92px;opacity:.45}
+  .hero-actions a{font-size:13px;min-height:42px}
+  .dashboard-cards .metric{min-height:118px;padding:18px 12px 14px!important}
+  .dashboard-cards .metric span{font-size:12px;padding-right:25px}
+  .dashboard-cards .metric::before{width:28px;height:28px;right:9px;top:12px;font-size:21px}
+  .dashboard-cards .metric strong{font-size:25px}
+ }
+ @media(max-width:440px){
+  .brand strong{font-size:17px}.brand small{font-size:11px}
+  .dashboard-cards{gap:9px}.dashboard-hero h2{font-size:28px}
+  .dashboard-cards .metric strong{font-size:23px}
+  .workspace>section:not(#dashboard-panel){padding:15px}
+  #account-panel{padding:11px!important}
+ }
+ @media(prefers-reduced-motion:no-preference){
+  a,button{transition:background-color .16s ease,box-shadow .16s ease}
+  .dashboard-cards .metric:hover{box-shadow:3px 4px 0 #c7ceb5}
+ }
+}
+
 </style></head><body><header class="app-header">
   <div class="header-inner">
     <a class="brand" href="#dashboard-panel" aria-label="विघ्नहर्ता मेडिकल · मुख्य डॅशबोर्ड">
@@ -1464,6 +1628,7 @@ window.addEventListener('ledger-language-change', () => {
 });
 
 </script></body></html>
+
 
 
 
