@@ -522,6 +522,7 @@ body[data-signed-in=true] #view-fab{display:grid}
   <a href="#stock-summary"><span class="nav-icon" aria-hidden="true">▦</span>स्टॉकिस्ट</a>
   <a id="nav-attendance" class="hidden" href="#attendance-panel"><span class="nav-icon" aria-hidden="true">◷</span>हजेरी व पगार</a>
   <a href="#period-report"><span class="nav-icon" aria-hidden="true">▤</span>मासिक व वार्षिक रिपोर्ट</a>
+  <a id="nav-staff-access" class="hidden" href="#staff-access-panel"><span class="nav-icon" aria-hidden="true">♙</span>स्टाफ प्रवेश</a>
 </nav>
 <div class="workspace">
 <section id="account-panel" aria-label="खाते आणि सिंक">
@@ -534,6 +535,13 @@ body[data-signed-in=true] #view-fab{display:grid}
     <summary><span id="sync-state" class="warn" role="status">Cloud कनेक्शन तपासत आहे…</span></summary>
     <p class="muted">ऑफलाइन असताना सिंक बाकी असू शकते. सर्व्हरशी सिंक झाल्याची खात्री होईपर्यंत ब्राउझर डेटा साफ करू नका. जुने CSV बॅकअप स्वतंत्र सुरक्षित ठिकाणी ठेवा.</p>
   </details>
+</section>
+<section id="staff-access-panel" class="hidden" aria-labelledby="staff-access-heading">
+  <h2 id="staff-access-heading" class="section-title">स्टाफ प्रवेश व्यवस्थापन</h2>
+  <p>ज्या स्टाफला ॲप वापरू द्यायचे नाही, त्याच्या नावासमोरचे “प्रवेश काढा” बटण वापरा. पुन्हा प्रवेश देण्यासाठी मालकाला Firebase मध्ये परवानगी जोडावी लागेल.</p>
+  <p class="muted">यामुळे फक्त ॲपची स्टाफ परवानगी काढली जाते. जुने व्यवहार, हजेरी, पगार आणि Firebase लॉगिन खाते कायम राहतात. आधीच उपकरणावर दिसलेली माहिती दूरून पुसली जात नाही.</p>
+  <p id="staff-access-state" role="status" aria-live="polite"></p>
+  <div id="staff-access-list"></div>
 </section>
 <section id="dashboard-panel" class="dashboard-panel" aria-labelledby="dashboard-heading">
   <div class="dashboard-hero">
@@ -2000,7 +2008,65 @@ el('finance-print').onclick=()=>{document.body.classList.add('finance-print');tr
 el('salary-payment-export').onclick=()=>{if(owner)downloadCSV([['ID','Date','Staff ID','Staff','Salary Month','Mode','Amount','Note'],...salaryPayments.map(r=>[r.id,r.date,r.staffId,r.staffName,r.salaryMonth,r.mode,r.amount,r.note])],'Vighnaharta_Salary_Payments.csv')};
 financeReset();financeExpenseFields();
 
-onAuthStateChanged(auth,async u=>{clearSubs();document.body.dataset.signedIn='false';historyPages.clear();resetAttendanceCloud();financeReset();user=null;owner=false;showAttendance(false);reportSources.clear();currentReport=null;reportPanel.open=false;el('report-content').replaceChildren();el('report-state').textContent='';el('cloud-panel').classList.add('hidden');el('login-panel').classList.remove('hidden');cloudMain=[];cloudStock=[];localizedSnapshots.clear();localizedMessages.delete('cm-list');localizedMessages.delete('cs-list');localMessage('sync-state','Cloud कनेक्शन तपासत आहे…');updateDashboard();el('cm-list').replaceChildren();el('cs-list').replaceChildren();drawWorkspaceTrend('loading');if(!u)return;try{owner=u.uid===ownerUID;const staff=owner|| (await getDoc(doc(db,'authorizedStaff',u.uid))).exists();if(!staff){localMessage('login-error','या खात्याला प्रवेश परवानगी नाही.');await signOut(auth);return}user=u;document.body.dataset.signedIn='true';el('login-panel').classList.add('hidden');el('cloud-panel').classList.remove('hidden');renderCloudIdentity();showAttendance(owner);if(owner){watchAttendance();watchSalaryPayments();}watch('transactions');watch('stockistTransactions');navigateWorkspace(true)}catch(e){localMessage('login-error','परवानगी तपासता आली नाही: ',e.code||e.message)}});
+let accessRows=[],accessMeta=null,accessBusy=false;
+function resetStaffAccess(){
+ accessRows=[];accessMeta=null;accessBusy=false;
+ el('nav-staff-access').classList.add('hidden');
+ el('staff-access-panel').classList.add('hidden');
+ el('staff-access-list').replaceChildren();
+ el('staff-access-state').textContent='';
+}
+function renderStaffAccess(){
+ const list=el('staff-access-list');list.replaceChildren();
+ if(!owner||user?.uid!==ownerUID)return;
+ for(const row of accessRows){
+  const line=document.createElement('div');line.className='line';
+  const name=document.createElement('strong');name.textContent=row.email||'ईमेल नोंदवलेला नाही';
+  const id=document.createElement('div');id.className='muted';id.textContent='UID: '+row.id;
+  line.append(name,id);
+  const bar=document.createElement('div');bar.className='buttons';
+  const remove=document.createElement('button');remove.type='button';remove.textContent='प्रवेश काढा';
+  remove.disabled=accessBusy||!accessMeta||accessMeta.fromCache||accessMeta.hasPendingWrites||!navigator.onLine;
+  remove.onclick=()=>removeStaffAccess(row);bar.append(remove);line.append(bar);list.append(line);
+ }
+ if(accessMeta&&!accessRows.length)list.textContent='स्टाफ प्रवेशाची कोणतीही नोंद नाही.';
+}
+async function removeStaffAccess(row){
+ if(!owner||user?.uid!==ownerUID||row.id===ownerUID||accessBusy)return;
+ if(!navigator.onLine||!accessMeta||accessMeta.fromCache||accessMeta.hasPendingWrites){
+  el('staff-access-state').textContent='इंटरनेट आणि सर्व्हरची खात्री झाल्यावर पुन्हा प्रयत्न करा.';return;
+ }
+ if(!confirm((row.email||row.id)+' यांचा ॲप प्रवेश काढायचा? जुन्या व्यवहार, हजेरी आणि पगाराच्या नोंदी कायम राहतील.'))return;
+ accessBusy=true;renderStaffAccess();el('staff-access-state').textContent='प्रवेश काढणे सर्व्हरवर सेव्ह होत आहे…';
+ try{
+  await deleteDoc(doc(db,'authorizedStaff',row.id));
+  if(owner&&user?.uid===ownerUID)el('staff-access-state').textContent='स्टाफचा प्रवेश काढला. जुन्या नोंदी सुरक्षित आहेत.';
+ }catch(e){
+  if(owner&&user?.uid===ownerUID)el('staff-access-state').textContent='प्रवेश काढता आला नाही: '+(e.code||e.message);
+ }finally{accessBusy=false;renderStaffAccess()}
+}
+function watchStaffAccess(){
+ if(!owner||user?.uid!==ownerUID)return;
+ el('nav-staff-access').classList.remove('hidden');el('staff-access-panel').classList.remove('hidden');
+ el('staff-access-state').textContent='स्टाफची यादी लोड होत आहे…';
+ unsubs.push(onSnapshot(collection(db,'authorizedStaff'),{includeMetadataChanges:true},snap=>{
+  if(!owner||user?.uid!==ownerUID)return;
+  accessRows=snap.docs.filter(d=>d.id!==ownerUID).map(d=>({id:d.id,email:typeof d.data().email==='string'?d.data().email:''}));
+  accessRows.sort((a,b)=>(a.email||a.id).localeCompare(b.email||b.id));
+  accessMeta={fromCache:snap.metadata.fromCache,hasPendingWrites:snap.metadata.hasPendingWrites};
+  if(!accessBusy)el('staff-access-state').textContent=accessMeta.fromCache?'स्थानिक यादी: सर्व्हर पडताळणी बाकी.':accessMeta.hasPendingWrites?'सिंक बाकी आहे.':'स्टाफ यादी क्लाउडशी सिंक झाली.';
+  renderStaffAccess();
+ },e=>{
+  if(!owner||user?.uid!==ownerUID)return;
+  accessMeta=null;accessRows=[];renderStaffAccess();
+  el('staff-access-state').textContent='स्टाफ यादी मिळाली नाही: '+(e.code||e.message);
+ }));
+}
+window.addEventListener('online',renderStaffAccess);
+window.addEventListener('offline',renderStaffAccess);
+
+
+onAuthStateChanged(auth,async u=>{clearSubs();resetStaffAccess();document.body.dataset.signedIn='false';historyPages.clear();resetAttendanceCloud();financeReset();user=null;owner=false;showAttendance(false);reportSources.clear();currentReport=null;reportPanel.open=false;el('report-content').replaceChildren();el('report-state').textContent='';el('cloud-panel').classList.add('hidden');el('login-panel').classList.remove('hidden');cloudMain=[];cloudStock=[];localizedSnapshots.clear();localizedMessages.delete('cm-list');localizedMessages.delete('cs-list');localMessage('sync-state','Cloud कनेक्शन तपासत आहे…');updateDashboard();el('cm-list').replaceChildren();el('cs-list').replaceChildren();drawWorkspaceTrend('loading');if(!u)return;try{owner=u.uid===ownerUID;const staff=owner|| (await getDoc(doc(db,'authorizedStaff',u.uid))).exists();if(!staff){localMessage('login-error','या खात्याला प्रवेश परवानगी नाही.');await signOut(auth);return}user=u;document.body.dataset.signedIn='true';el('login-panel').classList.add('hidden');el('cloud-panel').classList.remove('hidden');renderCloudIdentity();showAttendance(owner);if(owner){watchAttendance();watchSalaryPayments();watchStaffAccess();}watch('transactions');watch('stockistTransactions');navigateWorkspace(true)}catch(e){localMessage('login-error','परवानगी तपासता आली नाही: ',e.code||e.message)}});
 async function submit(which){if(!user)return;const main=which==='main',prefix=main?'cm':'cs',coll=main?'transactions':'stockistTransactions',edit=main?editMain:editStock;if(edit&&!owner){alert(t('दुरुस्ती फक्त Owner करू शकतो'));return}const fields=main?['date','type','note','mode','amount']:['date','name','type','note','amount'];const data={};for(const k of fields)data[k]=el(prefix+'-'+k).value.trim();data.amount=Number(data.amount);if(!data.date||!(data.amount>0)||(main?!data.note:!data.name)){alert(t('सर्व आवश्यक माहिती भरा'));return}if(main&&!financeValidateExpense(data,edit))return;const btn=el(prefix+'-submit');btn.disabled=true;try{const ref=edit?doc(db,coll,edit):doc(collection(db,coll));await setDoc(ref,{...data,...(edit?{}:{createdBy:user.uid}),updatedBy:user.uid,updatedAt:serverTimestamp()},{merge:!!edit});reset(which)}catch(e){safeError(e)}finally{btn.disabled=false}}
 el('cloud-main-form').onsubmit=e=>{e.preventDefault();submit('main')};el('cloud-stock-form').onsubmit=e=>{e.preventDefault();submit('stock')};
 window.addEventListener('ledger-language-change', () => {
