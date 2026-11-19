@@ -487,6 +487,10 @@ body[data-signed-in=true] #view-fab{display:grid}
 .stockist-detail-link{display:inline-block;color:#6ee7c5;font-size:14px;margin-top:4px}.dashboard-stockist-summary .muted{font-size:13px;line-height:1.6}
 @media(max-width:600px){.dashboard-stockist-summary{padding:16px}.stockist-summary-heading{align-items:start;flex-direction:column;gap:10px}.stockist-summary-heading h3{font-size:18px}.stockist-summary-heading label{max-width:none;width:100%}.stockist-summary-cards{gap:8px}.stockist-summary-cards .tile{padding:13px 9px}.stockist-summary-cards strong{font-size:20px;overflow-wrap:anywhere}.stockist-summary-cards span{font-size:13px}}
 @media print{.stockist-detail-link{display:none}.dashboard-stockist-summary,.stockist-summary-cards .tile{background:white!important;color:black!important}.stockist-summary-cards strong,.stockist-summary-cards span,.stockist-summary-heading h3{color:black!important}}
+</style><style>
+.combined-finance{padding:23px;margin:20px 0;background:linear-gradient(140deg,#142d42,#102d2f);border:1px solid #2c5860}.finance-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.finance-grid .tile{background:#12253a;padding:17px;border-color:#355167}.finance-grid span{color:#b9d0e3;font-size:14px}.finance-grid strong{font-size:29px;line-height:1.4;font-variant-numeric:tabular-nums;margin-top:7px;color:#f2c77a}.finance-grid .tile:first-child strong,.finance-net-card strong{color:#6ee8ba}.finance-grid strong[data-negative=true]{color:#ff9ea6}.finance-notice{border-left:3px solid #dcb367;padding:8px 12px;background:#172b3d;border-radius:6px;font-size:14px;color:#e1d8b6}.finance-formula{font-size:20px;font-weight:700;color:#8be6c7}.finance-dues{display:flex;gap:18px;flex-wrap:wrap;font-size:14px}.finance-dues strong{display:block;font-size:23px;margin-top:7px;color:#f0cf88}.combined-finance details{margin:12px 0}.combined-finance summary{cursor:pointer;color:#bfdbed}.salary-payment-form{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0}.salary-payment-form label{margin:0}.salary-payment-form button{align-self:end;margin:0}#salary-payments-panel{margin-top:20px;padding:18px;border:1px solid #315369;border-radius:14px}#cm-expense-fields{border:1px solid #315369;border-radius:10px;padding:10px}
+@media(max-width:600px){.combined-finance{padding:16px}.finance-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.finance-grid .tile{padding:13px 10px}.finance-grid strong{font-size:23px;overflow-wrap:anywhere}.salary-payment-form{grid-template-columns:1fr}.finance-formula{font-size:17px}}
+@media print{body.finance-print header,body.finance-print #app-nav,body.finance-print #account-panel,body.finance-print #view-fab,body.finance-print #dashboard-panel>:not(#combined-finance){display:none!important}body.finance-print .workspace>section:not(#dashboard-panel){display:none!important}body.finance-print #combined-finance{display:block!important;background:white!important;color:black!important}body.finance-print #combined-finance input,body.finance-print #combined-finance button{display:none!important}body.finance-print .finance-grid .tile{background:white!important;border-color:#aaa}body.finance-print .finance-grid strong,body.finance-print .finance-grid span,body.finance-print #combined-finance p,body.finance-print #combined-finance h3{color:black!important}}
 </style></head><body><header class="app-header">
   <div class="header-inner">
     <a class="brand" href="#dashboard-panel" aria-label="विघ्नहर्ता मेडिकल · मुख्य डॅशबोर्ड">
@@ -528,7 +532,24 @@ body[data-signed-in=true] #view-fab{display:grid}
       <a class="quiet-link" href="#period-report">सारांश पहा</a>
     </div>
   </div>
-  <div class="cards dashboard-cards">
+<section id="combined-finance" class="combined-finance hidden" aria-labelledby="finance-title">
+ <div class="stockist-summary-heading"><h3 id="finance-title">एकत्र मासिक जमा–खर्च</h3><label>महिना<input id="finance-month" type="month" required></label></div>
+ <p class="finance-notice" id="finance-state" role="status">तिन्ही विभागांची माहिती लोड होत आहे…</p>
+ <div class="finance-grid">
+  <div class="tile"><span>एकूण जमा / वसुली</span><strong id="finance-income">—</strong></div>
+  <div class="tile"><span>दुकानखर्च / न वर्गीकृत खर्च</span><strong id="finance-shop">—</strong></div>
+  <div class="tile"><span>स्टॉकिस्टला दिले</span><strong id="finance-stock">—</strong></div>
+  <div class="tile"><span>प्रत्यक्ष दिलेला पगार</span><strong id="finance-salary">—</strong></div>
+  <div class="tile"><span>एकूण खर्च</span><strong id="finance-expense">—</strong></div>
+  <div class="tile finance-net-card"><span>निव्वळ जमा–खर्च</span><strong id="finance-net">—</strong></div>
+ </div>
+ <p id="finance-formula" class="finance-formula"></p>
+ <div class="finance-dues"><p>स्टॉकिस्ट महिनाअखेर बाकी <strong id="finance-stock-due">—</strong></p><p>या महिन्याच्या पगाराची बाकी <strong id="finance-salary-due">—</strong></p></div>
+ <details><summary>कर्मचारीनिहाय पगार बाकी</summary><div id="finance-payroll-details"></div></details>
+ <p class="muted">एकूण खर्च = दुकानखर्च + स्टॉकिस्ट पेमेंट + प्रत्यक्ष दिलेला पगार. उधारीवरील खरेदी आणि न दिलेला पगार खर्चात मोजलेला नाही. हा पैशांच्या येण्या-जाण्याचा हिशोब आहे; नफा किंवा सुरुवातीची शिल्लक धरून अंतिम बँक/रोख शिल्लक नाही.</p>
+ <p class="muted">जुना खर्च आणि स्टॉकिस्ट / पगार पेमेंट एकच असेल तर जमा–खर्चातील Edit मधून प्रकार व मूळ पेमेंट निवडा. जुळणारी नोंद एकदाच मोजली जाते. जुने खर्च आपोआप जोडले जात नाहीत.</p>
+ <div class="demo-actions"><button type="button" id="finance-export" class="secondary" disabled>एकत्र सारांश CSV</button><button type="button" id="finance-print" class="secondary" disabled>एकत्र सारांश प्रिंट</button></div>
+</section><p class="muted">खालील चार कार्ड्स: जमा–खर्च विभागाचे सर्वकालीन आकडे.</p>  <div class="cards dashboard-cards">
     <div class="tile metric income"><span>एकूण जमा</span><strong id="sum-income">₹0</strong></div>
     <div class="tile metric expense"><span>एकूण खर्च</span><strong id="sum-expense">₹0</strong></div>
     <div class="tile metric cash"><span>रोख शिल्लक</span><strong id="sum-cash">₹0</strong></div>
@@ -561,7 +582,7 @@ body[data-signed-in=true] #view-fab{display:grid}
 <section id="ledger-panel" aria-labelledby="ledger-panel-title">
   <h2 class="section-title" id="ledger-panel-title">जमा-खर्च व्यवहार</h2>
   <div class="ledger-layout">
-    <form id="cloud-main-form" class="ledger-form"><label>तारीख<input id="cm-date" type="date" required></label><label>व्यवहार<select id="cm-type"><option value="income">जमा / विक्री</option><option value="expense">खर्च</option><option value="credit">उधारी</option><option value="repayment">उधारी वसुली</option><option value="opening">सुरुवातीची रोख</option></select></label><label class="ledger-wide">तपशील<input id="cm-note" required></label><label>पेमेंट माध्यम<select id="cm-mode"><option value="Cash">Cash</option><option value="UPI">UPI</option><option value="Bank">Bank</option></select><div class="payment-pills" role="group" aria-label="पेमेंट माध्यम"><button type="button" data-mode="Cash"><span aria-hidden="true">₹</span> Cash</button><button type="button" data-mode="UPI">UPI</button><button type="button" data-mode="Bank">Bank</button></div></label><label>रक्कम ₹<input id="cm-amount" type="number" min="0.01" step="0.01" required></label><button id="cm-submit" type="submit">Cloud मध्ये नोंद सेव्ह करा</button><button id="cm-cancel" class="secondary hidden" type="button">दुरुस्ती रद्द</button></form>
+    <form id="cloud-main-form" class="ledger-form"><label>तारीख<input id="cm-date" type="date" required></label><label>व्यवहार<select id="cm-type"><option value="income">जमा / विक्री</option><option value="expense">खर्च</option><option value="credit">उधारी</option><option value="repayment">उधारी वसुली</option><option value="opening">सुरुवातीची रोख</option></select></label><label class="ledger-wide">तपशील<input id="cm-note" required></label><label>पेमेंट माध्यम<select id="cm-mode"><option value="Cash">Cash</option><option value="UPI">UPI</option><option value="Bank">Bank</option></select><div class="payment-pills" role="group" aria-label="पेमेंट माध्यम"><button type="button" data-mode="Cash"><span aria-hidden="true">₹</span> Cash</button><button type="button" data-mode="UPI">UPI</button><button type="button" data-mode="Bank">Bank</button></div></label><label>रक्कम ₹<input id="cm-amount" type="number" min="0.01" step="0.01" required></label><div id="cm-expense-fields" class="ledger-wide" hidden><label>खर्चाचा प्रकार<select id="cm-expense-category"><option value="unclassified">न वर्गीकृत — जुना खर्च तपासा</option><option value="shop">दुकानखर्च</option><option value="stockist">स्टॉकिस्ट पेमेंटची दुहेरी नोंद जोडणे</option><option value="salary">पगार पेमेंटची दुहेरी नोंद जोडणे</option></select></label><label id="cm-linked-label" hidden>मूळ पेमेंट<select id="cm-linked-payment"><option value="">पेमेंट निवडा</option></select></label><p class="muted">नवीन पगार हजेरी व पगारातून, स्टॉकिस्ट पेमेंट स्टॉकिस्ट विभागातून नोंदवा. इथले जोडणे आधीपासून असलेल्या त्याच खर्चाची दुहेरी मोजणी टाळण्यासाठी आहे. तारीख व रक्कम जुळणे आवश्यक.</p></div><button id="cm-submit" type="submit">Cloud मध्ये नोंद सेव्ह करा</button><button id="cm-cancel" class="secondary hidden" type="button">दुरुस्ती रद्द</button></form>
     <div class="ledger-records">
       <h3>व्यवहार नोंदी</h3>
       <button id="export-main" type="button" class="secondary">CSV बॅकअप डाउनलोड</button><div class="search-filters"><label>नाव / तपशील शोधा<input id="cm-search" type="search" placeholder="शोधा…"></label><label>तारीख<input id="cm-filter-date" type="date"></label><button type="button" class="secondary filter-clear" id="cm-clear">फिल्टर साफ करा</button></div><div id="cm-list"></div>
@@ -598,7 +619,16 @@ body[data-signed-in=true] #view-fab{display:grid}
       <summary class="section-title">निवडलेल्या महिन्याचा पगार</summary>
       <p class="muted">गैरहजर, विनापगारी रजा आणि विनापगारी सुट्टीसाठी कपात होते. रविवार आपोआप सुट्टी.</p>
       <div id="attendance-salaries"></div>
-    </details>
+    </details><details id="salary-payments-panel"><summary class="section-title">प्रत्यक्ष दिलेला पगार</summary><p class="muted">हे बटण पैसे ट्रान्सफर करत नाही. आधी दिलेल्या पगाराची नोंद ठेवते; कपातीनंतरचा देय पगार आपोआप दिला असे धरत नाही.</p><p id="salary-payment-state" class="muted" role="status"></p>
+<form id="salary-payment-form" class="salary-payment-form">
+ <label>कर्मचारी<select id="salary-pay-person" required><option value="">कर्मचारी निवडा</option></select></label>
+ <label>कोणत्या महिन्याचा पगार<input id="salary-pay-month" type="month" required></label>
+ <label>पेमेंट तारीख<input id="salary-pay-date" type="date" required></label>
+ <label>दिलेली रक्कम ₹<input id="salary-pay-amount" type="number" min="0.01" max="9999999" step="0.01" required></label>
+ <label>पेमेंट माध्यम<select id="salary-pay-mode"><option value="Cash">Cash</option><option value="UPI">UPI</option><option value="Bank">Bank</option></select></label>
+ <label>तपशील<input id="salary-pay-note" maxlength="200"></label>
+ <button id="salary-pay-submit" type="submit">दिलेल्या पगाराची नोंद करा</button><button id="salary-payment-cancel" class="secondary" type="button" hidden>दुरुस्ती रद्द</button>
+</form><button id="salary-payment-export" type="button" class="secondary">पगार पेमेंट CSV बॅकअप</button><div id="salary-payment-history"></div></details>
   </details>
 </section>
 <section id="period-report" aria-labelledby="report-title">
@@ -918,17 +948,17 @@ function updateDashboard(){
  const month=el('month-filter').value;let buys=0,pays=0,owed=0;
  for(const r of cloudStock){let n=Number(r.amount)||0;if(r.date?.slice(0,7)===month){if(r.type==='purchase')buys+=n;if(r.type==='payment')pays+=n}if(r.date?.slice(0,7)<=month){if(['purchase','opening'].includes(r.type))owed+=n;if(r.type==='payment')owed-=n}}
  el('sum-purchase').textContent=fmt(buys);el('sum-payment').textContent=fmt(pays);el('sum-stockdue').textContent=fmt(owed);
- el('dashboard-stock-purchase').textContent=fmt(buys);el('dashboard-stock-payment').textContent=fmt(pays);el('dashboard-stock-due').textContent=fmt(owed);el('dashboard-stock-month').value=month;
+ el('dashboard-stock-purchase').textContent=fmt(buys);el('dashboard-stock-payment').textContent=fmt(pays);el('dashboard-stock-due').textContent=fmt(owed);el('dashboard-stock-month').value=month;renderFinanceSummary();
 }
 el('month-filter').value=new Date().toLocaleDateString('en-CA').slice(0,7);el('month-filter').onchange=updateDashboard;
 el('dashboard-stock-month').value=el('month-filter').value;
 el('dashboard-stock-month').onchange=()=>{el('month-filter').value=el('dashboard-stock-month').value;updateDashboard()};
 function downloadCSV(rows,name){const csv='\ufeff'+rows.map(r=>r.map(x=>'"'+String(x??'').replace(/"/g,'""')+'"').join(',')).join('\r\n');const a=document.createElement('a');const u=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));a.href=u;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(u),1000)}
-el('export-main').onclick=()=>downloadCSV([['Date','Type','Description','Mode','Amount'],...cloudMain.map(r=>[r.date,r.type,r.note,r.mode,r.amount])],'Vighnaharta_Khata_Cloud.csv');
-el('export-stock').onclick=()=>downloadCSV([['Date','Stockist','Type','Bill/Details','Amount'],...cloudStock.map(r=>[r.date,r.name,r.type,r.note,r.amount])],'Vighnaharta_Stockist_Cloud.csv');
+el('export-main').onclick=()=>downloadCSV([['Date','Type','Description','Mode','Amount','ID','Expense Category','Linked Payment ID'],...cloudMain.map(r=>[r.date,r.type,r.note,r.mode,r.amount,r.id,r.expenseCategory,r.linkedPaymentId])],'Vighnaharta_Khata_Cloud.csv');
+el('export-stock').onclick=()=>downloadCSV([['Date','Stockist','Type','Bill/Details','Amount','ID'],...cloudStock.map(r=>[r.date,r.name,r.type,r.note,r.amount,r.id])],'Vighnaharta_Stockist_Cloud.csv');
 function ledgerRow(coll,d){
  const main=coll==='transactions',prefix=main?'cm':'cs';
- const r=d.data(),line=document.createElement('div');line.className='line';const txt=document.createElement('div');txt.textContent=main?`${r.date} · ${t(reportLedgerTypes[r.type] ?? r.type)} · ${r.note} · ${t(reportModes[r.mode] ?? r.mode)} · ₹${r.amount}`:`${r.date} · ${r.name} · ${t(reportStockTypes[r.type] ?? r.type)} · ${r.note||''} · ₹${r.amount}`;line.append(txt);if(owner){const bar=document.createElement('div');bar.className='buttons';const edit=document.createElement('button');edit.type='button';edit.textContent=t('Edit');edit.onclick=()=>{if(main){editMain=d.id;for(const k of ['date','type','note','mode','amount'])el('cm-'+k).value=r[k]}else{editStock=d.id;for(const k of ['date','name','type','note','amount'])el('cs-'+k).value=r[k]||''}if(main)refreshPayment();el(prefix+'-submit').textContent=t('बदल सेव्ह करा');el(prefix+'-cancel').classList.remove('hidden');el('cloud-'+(main?'main':'stock')+'-form').scrollIntoView({behavior:'smooth'})};const del=document.createElement('button');del.type='button';del.className='secondary';del.textContent=t('काढा');del.onclick=async()=>{if(confirm(t('ही Cloud नोंद कायमची काढायची?')))try{await deleteDoc(doc(db,coll,d.id))}catch(e){safeError(e)}};bar.append(edit,del);line.append(bar)}
+ const r=d.data(),line=document.createElement('div');line.className='line';const txt=document.createElement('div');txt.textContent=main?`${r.date} · ${t(reportLedgerTypes[r.type] ?? r.type)} · ${r.note} · ${t(reportModes[r.mode] ?? r.mode)} · ₹${r.amount}`:`${r.date} · ${r.name} · ${t(reportStockTypes[r.type] ?? r.type)} · ${r.note||''} · ₹${r.amount}`;line.append(txt);if(owner){const bar=document.createElement('div');bar.className='buttons';const edit=document.createElement('button');edit.type='button';edit.textContent=t('Edit');edit.onclick=()=>{if(main){editMain=d.id;for(const k of ['date','type','note','mode','amount'])el('cm-'+k).value=r[k]}else{editStock=d.id;for(const k of ['date','name','type','note','amount'])el('cs-'+k).value=r[k]||''}if(main){refreshPayment();financeExpenseFields(r)}el(prefix+'-submit').textContent=t('बदल सेव्ह करा');el(prefix+'-cancel').classList.remove('hidden');el('cloud-'+(main?'main':'stock')+'-form').scrollIntoView({behavior:'smooth'})};const del=document.createElement('button');del.type='button';del.className='secondary';del.textContent=t('काढा');del.onclick=async()=>{if(confirm(t('ही Cloud नोंद कायमची काढायची?')))try{await deleteDoc(doc(db,coll,d.id))}catch(e){safeError(e)}};bar.append(edit,del);line.append(bar)}
  return line;
 }
 const historyPages = new Map();
@@ -968,7 +998,7 @@ function watch(coll){const prefix=coll==='transactions'?'cm':'cs';unsubs.push(on
  const left=a.data(),right=b.data();
  return (right.date||'').localeCompare(left.date||'')
    || (right.updatedAt?.toMillis?.()??0)-(left.updatedAt?.toMillis?.()??0);
- });if(coll==='transactions'){cloudMain=ds.map(d=>d.data());drawWorkspaceTrend('ready')}else cloudStock=ds.map(d=>d.data());updateDashboard();display(coll,ds,snap.metadata);setReportSource(coll,snap.metadata);localMessage('sync-state',snap.metadata.hasPendingWrites?'⏳ काही Cloud नोंदींचे सिंक बाकी आहे':snap.metadata.fromCache?'📱 स्थानिक कॅश दिसत आहे; सर्व्हरशी संपर्क तपासा':'✅ Firestore सर्व्हरशी कनेक्शन आहे')},e=>{localMessage('sync-state','⚠️ Cloud वाचन अयशस्वी: ',e.code||e.message);localizedSnapshots.delete(coll);localMessage(prefix+'-list','डेटा वाचता आला नाही');setReportSource(coll,null);if(coll==='transactions')drawWorkspaceTrend('error')}))}
+ });if(coll==='transactions'){cloudMain=ds.map(d=>({...d.data(),id:d.id}));drawWorkspaceTrend('ready')}else cloudStock=ds.map(d=>({...d.data(),id:d.id}));updateDashboard();display(coll,ds,snap.metadata);setReportSource(coll,snap.metadata);localMessage('sync-state',snap.metadata.hasPendingWrites?'⏳ काही Cloud नोंदींचे सिंक बाकी आहे':snap.metadata.fromCache?'📱 स्थानिक कॅश दिसत आहे; सर्व्हरशी संपर्क तपासा':'✅ Firestore सर्व्हरशी कनेक्शन आहे')},e=>{localMessage('sync-state','⚠️ Cloud वाचन अयशस्वी: ',e.code||e.message);localizedSnapshots.delete(coll);localMessage(prefix+'-list','डेटा वाचता आला नाही');setReportSource(coll,null);if(coll==='transactions')drawWorkspaceTrend('error')}))}
 const attendanceStatus = {
   present: 'हजर', absent: 'गैरहजर', leave: 'रजा', holiday: 'सुट्टी',
   halfDay: 'अर्धा दिवस', unpaidLeave: 'विनापगारी रजा', unpaidHoliday: 'विनापगारी सुट्टी',
@@ -1066,11 +1096,11 @@ function watchAttendance(){
   const drafts=new Map([...el('attendance-salaries').querySelectorAll('form[data-staff-id]')].map(form=>[form.dataset.staffId,[form.elements.salary.value,form.elements.paidDays.value]]));
   renderAttendance();
   for(const form of el('attendance-salaries').querySelectorAll('form[data-staff-id]')){const values=drafts.get(form.dataset.staffId);if(values&&activeStaff===form.dataset.staffId){[form.elements.salary.value,form.elements.paidDays.value]=values;if(activeField)form.elements[activeField]?.focus()}}
-  renderReport();renderAttendanceSync();
+  renderReport();renderAttendanceSync();salaryPaymentPeople();renderFinanceSummary();
  },error=>{
   if(user?.uid!==uid)return;
   attendanceCloudError=error.code||error.message;
-  renderAttendanceSync();
+  renderAttendanceSync();renderFinanceSummary();
   attendanceMessage('हजेरी क्लाउड परवानगी तपासा. जुन्या स्थानिक नोंदी सुरक्षित आहेत.');
  }));
 }
@@ -1090,7 +1120,7 @@ function saveAttendanceValue(key,value){
 function downloadAttendanceBackup(){
  if(!owner||!user)return false;
  try{
-  const data={format:'vighnaharta-attendance-backup-v1',ownerId:user.uid,exportedAt:new Date().toISOString(),serverConfirmed:attendanceLoaded&&!attendanceMeta?.fromCache&&!attendanceMeta?.hasPendingWrites&&!attendanceCloudError,records:[...mergedAttendanceEntries()].map(([key,value])=>({key,value}))};
+  const data={format:'vighnaharta-attendance-backup-v1',ownerId:user.uid,exportedAt:new Date().toISOString(),salaryPayments, salaryPaymentsServerConfirmed:!!salaryPaymentsMeta&&!salaryPaymentsMeta.fromCache&&!salaryPaymentsMeta.hasPendingWrites&&!salaryPaymentsError, serverConfirmed:attendanceLoaded&&!attendanceMeta?.fromCache&&!attendanceMeta?.hasPendingWrites&&!attendanceCloudError,records:[...mergedAttendanceEntries()].map(([key,value])=>({key,value}))};
   const url=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json;charset=utf-8'}));
   const link=document.createElement('a');link.href=url;link.download='Vighnaharta_Hajeri_Pagar_'+todayInWardha()+'.json';link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);return true;
  }catch{attendanceMessage('बॅकअप तयार झाला नाही. पुन्हा प्रयत्न करा.');return false}
@@ -1644,7 +1674,7 @@ function renderReport() {
 
 function setReportSource(collectionName, metadata) {
   reportSources.set(collectionName, metadata);
-  renderReport();
+  renderReport();financePaymentChoices();renderFinanceSummary();
 }
 
 reportPanel.ontoggle = () => { if (reportPanel.open) renderReport(); };
@@ -1777,8 +1807,180 @@ function drawWorkspaceTrend(status) {
   ]), t('गेल्या सहा महिन्यांचे जमा-खर्च')));
   values.classList.remove('hidden');
 }
-onAuthStateChanged(auth,async u=>{clearSubs();document.body.dataset.signedIn='false';historyPages.clear();resetAttendanceCloud();user=null;owner=false;showAttendance(false);reportSources.clear();currentReport=null;reportPanel.open=false;el('report-content').replaceChildren();el('report-state').textContent='';el('cloud-panel').classList.add('hidden');el('login-panel').classList.remove('hidden');cloudMain=[];cloudStock=[];localizedSnapshots.clear();localizedMessages.delete('cm-list');localizedMessages.delete('cs-list');localMessage('sync-state','Cloud कनेक्शन तपासत आहे…');updateDashboard();el('cm-list').replaceChildren();el('cs-list').replaceChildren();drawWorkspaceTrend('loading');if(!u)return;try{owner=u.uid===ownerUID;const staff=owner|| (await getDoc(doc(db,'authorizedStaff',u.uid))).exists();if(!staff){localMessage('login-error','या खात्याला प्रवेश परवानगी नाही.');await signOut(auth);return}user=u;document.body.dataset.signedIn='true';el('login-panel').classList.add('hidden');el('cloud-panel').classList.remove('hidden');renderCloudIdentity();showAttendance(owner);if(owner)watchAttendance();watch('transactions');watch('stockistTransactions');navigateWorkspace(true)}catch(e){localMessage('login-error','परवानगी तपासता आली नाही: ',e.code||e.message)}});
-async function submit(which){if(!user)return;const main=which==='main',prefix=main?'cm':'cs',coll=main?'transactions':'stockistTransactions',edit=main?editMain:editStock;if(edit&&!owner){alert(t('दुरुस्ती फक्त Owner करू शकतो'));return}const fields=main?['date','type','note','mode','amount']:['date','name','type','note','amount'];const data={};for(const k of fields)data[k]=el(prefix+'-'+k).value.trim();data.amount=Number(data.amount);if(!data.date||!(data.amount>0)||(main?!data.note:!data.name)){alert(t('सर्व आवश्यक माहिती भरा'));return}const btn=el(prefix+'-submit');btn.disabled=true;try{const ref=edit?doc(db,coll,edit):doc(collection(db,coll));await setDoc(ref,{...data,...(edit?{}:{createdBy:user.uid}),updatedBy:user.uid,updatedAt:serverTimestamp()},{merge:!!edit});reset(which)}catch(e){safeError(e)}finally{btn.disabled=false}}
+// Cash movement only: credit purchases and calculated (unpaid) salaries are not outflows.
+function financePaise(value){const n=Number(value);return Number.isFinite(n)?Math.round(n*100):0}
+function financeSummary(month,ledger,stock,payments){
+ const next=new Date(Date.UTC(Number(month.slice(0,4)),Number(month.slice(5,7)),1)).toISOString().slice(0,7);
+ const inMonth=row=>row.date>=month+'-01'&&row.date<next+'-01';
+ const stockPayments=new Map(stock.filter(r=>r.type==='payment').map(r=>[r.id,r]));
+ const salaryPayments=new Map(payments.map(r=>[r.id,r]));
+ let income=0,shop=0,stockPaid=0,salaryPaid=0,stockDue=0,unclassified=0,invalidLinks=0,linkedCount=0;
+ const used=new Set();
+ for(const row of stock){const amount=financePaise(row.amount);if(inMonth(row)&&row.type==='payment')stockPaid+=amount;if(row.date<next+'-01'){if(['opening','purchase'].includes(row.type))stockDue+=amount;if(row.type==='payment')stockDue-=amount}}
+ for(const row of payments)if(inMonth(row))salaryPaid+=financePaise(row.amount);
+ for(const row of ledger){
+  if(!inMonth(row))continue;
+  const amount=financePaise(row.amount);
+  if(['income','repayment'].includes(row.type))income+=amount;
+  if(row.type!=='expense')continue;
+  const category=row.expenseCategory;
+  let linked=false;
+  if(category==='stockist'||category==='salary'){
+   const source=category==='stockist'?stockPayments:salaryPayments;
+   const target=source.get(row.linkedPaymentId),key=category+':'+row.linkedPaymentId;
+   linked=!!target&&target.date===row.date&&financePaise(target.amount)===amount&&!used.has(key);
+   if(linked){used.add(key);linkedCount++}else invalidLinks++;
+  }
+  if(!linked)shop+=amount;
+  if(!category||category==='unclassified')unclassified++;
+ }
+ const expense=shop+stockPaid+salaryPaid;
+ return {month,income,shop,stockPaid,salaryPaid,expense,net:income-expense,stockDue,unclassified,invalidLinks,linkedCount};
+}
+function matchingFinancePayment(row,target){return !!target&&target.date===row.date&&financePaise(target.amount)===financePaise(row.amount)}
+function salaryPaidFor(staffId,month,payments){
+ const end=new Date(Date.UTC(Number(month.slice(0,4)),Number(month.slice(5,7)),1)).toISOString().slice(0,10);
+ return payments.filter(r=>r.staffId===staffId&&r.salaryMonth===month&&r.date<end).reduce((n,r)=>n+financePaise(r.amount),0);
+}
+
+function validSalaryPayment(row){return typeof row.staffId==='string'&&typeof row.staffName==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(row.date)&&!Number.isNaN(Date.parse(row.date+'T12:00:00Z'))&&new Date(row.date+'T12:00:00Z').toISOString().slice(0,10)===row.date&&/^\d{4}-(0[1-9]|1[0-2])$/.test(row.salaryMonth)&&Number.isFinite(Number(row.amount))&&Number(row.amount)>0&&['Cash','UPI','Bank'].includes(row.mode)}
+
+let salaryPayments=[],salaryPaymentsMeta=null,salaryPaymentsError='',salaryPaymentsInvalid=0,salaryPaymentEdit=null,salaryPaymentPage=0,salaryPaymentSaving=false;
+const financeMoney=n=>new Intl.NumberFormat('en-IN',{style:'currency',currency:'INR'}).format(n/100);
+function financeReset(){
+ salaryPayments=[];salaryPaymentsMeta=null;salaryPaymentsError='';salaryPaymentsInvalid=0;salaryPaymentEdit=null;salaryPaymentPage=0;
+ el('salary-payment-form').reset();el('salary-payment-cancel').hidden=true;el('salary-pay-date').value=todayInWardha();el('salary-pay-month').value=todayInWardha().slice(0,7);
+ el('salary-payment-state').textContent='';el('salary-payment-history').replaceChildren();
+}
+function financeNotices(stats){
+ const notes=[];
+ if(!owner||!salaryPaymentsMeta||salaryPaymentsError||salaryPaymentsInvalid)notes.push('पगार पेमेंट माहिती अपूर्ण / उपलब्ध नाही.');
+ if(!reportSources.get('transactions')||!reportSources.get('stockistTransactions'))notes.push('जमा–खर्च / स्टॉकिस्ट माहिती पूर्ण लोड झालेली नाही.');
+ if([...reportSources.values(),salaryPaymentsMeta].filter(Boolean).some(m=>m.fromCache))notes.push('स्थानिक कॅश: सर्व्हर पडताळणी बाकी.');
+ if([...reportSources.values(),salaryPaymentsMeta].filter(Boolean).some(m=>m.hasPendingWrites))notes.push('काही नोंदींचे सिंक बाकी आहे.');
+ if(stats.unclassified)notes.push(stats.unclassified+' जुन्या खर्चांचे वर्गीकरण बाकी; दुहेरी खर्च आहे का तपासा.');
+ if(stats.invalidLinks)notes.push(stats.invalidLinks+' जोडलेल्या खर्चांचे तपशील जुळत नाहीत; ते स्वतंत्र खर्चात धरले आहेत.');
+ return notes;
+}
+function renderFinanceSummary(){
+ el('combined-finance').classList.toggle('hidden',!owner);
+ if(!owner)return;
+ const month=el('month-filter').value;if(!/^\d{4}-\d{2}$/.test(month))return;
+ el('finance-month').value=month;
+ const stats=financeSummary(month,cloudMain,cloudStock,salaryPayments),notes=financeNotices(stats);
+ const complete=!!reportSources.get('transactions')&&!!reportSources.get('stockistTransactions')&&!!salaryPaymentsMeta&&!salaryPaymentsError&&!salaryPaymentsInvalid;
+ let salaryDue=0,unknown=0;const rows=[];
+ if(attendanceLoaded&&!attendanceCloudError){
+  for(const person of attendanceStaff()){
+   const detail=attendanceMonthDetails(person,month),paid=salaryPaidFor(person.id,month,salaryPayments);
+   if(detail.due===null){unknown++;continue}
+   const unpaid=Math.max(0,detail.due-paid);salaryDue+=unpaid;
+   rows.push({name:person.name,due:detail.due,paid,unpaid,excess:Math.max(0,paid-detail.due)});
+  }
+ }else unknown++;
+ if(unknown)notes.push(unknown+' कर्मचारी / हजेरी-पगार माहिती अपूर्ण; पूर्ण पगार बाकी मोजता आलेली नाही.');
+ if(attendanceMeta?.fromCache||attendanceMeta?.hasPendingWrites)notes.push('हजेरी व पगाराचे सिंक / पडताळणी बाकी आहे.');
+ try{if(localAttendanceEntries().some(([key])=>!attendanceCloud.has(key)))notes.push('जुन्या हजेरीच्या स्थानिक नोंदी क्लाउडवर कॉपी करणे बाकी.')}catch{}
+ for(const [id,value]of [['income',stats.income],['shop',stats.shop],['stock',stats.stockPaid],['salary',stats.salaryPaid],['expense',stats.expense],['net',stats.net]])el('finance-'+id).textContent=complete?financeMoney(value):'—';
+ el('finance-stock-due').textContent=reportSources.get('stockistTransactions')?financeMoney(stats.stockDue):'—';
+ el('finance-salary-due').textContent=complete&&!unknown?financeMoney(salaryDue):'—';
+ el('finance-state').textContent=notes.length?notes.join(' '):'सर्व विभाग उपलब्ध. रक्कम नोंदींनुसार आहे.';
+ el('finance-formula').textContent=complete?financeMoney(stats.income)+' − '+financeMoney(stats.expense)+' = '+financeMoney(stats.net):'सर्व विभाग लोड झाल्यावर एकत्र हिशोब दिसेल.';
+ el('finance-net').dataset.negative=String(stats.net<0);
+ el('finance-payroll-details').replaceChildren();
+ for(const row of rows){const p=document.createElement('p');p.className='muted';p.textContent=row.name+' · कपातीनंतर देय '+financeMoney(row.due)+' · दिला '+financeMoney(row.paid)+' · बाकी '+financeMoney(row.unpaid)+(row.excess?' · जास्त दिला '+financeMoney(row.excess):'');el('finance-payroll-details').append(p)}
+ el('finance-export').disabled=!complete;el('finance-print').disabled=!complete;
+}
+function financePaymentChoices(){
+ const category=el('cm-expense-category').value,selected=el('cm-linked-payment').value;
+ const select=el('cm-linked-payment');select.replaceChildren(new Option('पेमेंट निवडा',''));
+ const source=category==='salary'?salaryPayments:cloudStock.filter(r=>r.type==='payment');
+ for(const row of source)select.add(new Option(row.date+' · '+(row.staffName||row.name||'पेमेंट')+' · '+financeMoney(financePaise(row.amount)),row.id));
+ if(selected&&!source.some(r=>r.id===selected))select.add(new Option('जोडलेली नोंद उपलब्ध नाही · '+selected,selected));
+ select.value=selected;
+ el('cm-linked-label').hidden=!['salary','stockist'].includes(category);
+}
+function financeExpenseFields(row){
+ el('cm-expense-fields').hidden=el('cm-type').value!=='expense';
+ if(row){el('cm-expense-category').value=row.expenseCategory||'unclassified';el('cm-linked-payment').replaceChildren(new Option('',row.linkedPaymentId||''));el('cm-linked-payment').value=row.linkedPaymentId||''}
+ financePaymentChoices();
+}
+function financeValidateExpense(data,edit){
+ if(data.type!=='expense'){data.expenseCategory='';data.linkedPaymentId='';return true}
+ data.expenseCategory=el('cm-expense-category').value;data.linkedPaymentId='';
+ if(['salary','stockist'].includes(data.expenseCategory)){
+  const id=el('cm-linked-payment').value;
+  const source=data.expenseCategory==='salary'?salaryPayments:cloudStock.filter(r=>r.type==='payment');
+  const target=source.find(r=>r.id===id);
+  if(!matchingFinancePayment(data,target)){alert('जोडण्यासाठी तारीख आणि रक्कम मूळ पेमेंटशी तंतोतंत जुळली पाहिजे.');return false}
+  if(cloudMain.some(r=>r.id!==edit&&r.type==='expense'&&r.expenseCategory===data.expenseCategory&&r.linkedPaymentId===id)){alert('हे पेमेंट दुसऱ्या खर्चाशी आधीच जोडले आहे.');return false}
+  data.linkedPaymentId=id;
+ }
+ return true;
+}
+function salaryPaymentPeople(){
+ if(!owner)return;
+ const select=el('salary-pay-person'),selected=select.value,people=attendanceStaff();
+ select.replaceChildren(new Option('कर्मचारी निवडा',''));
+ for(const person of people)select.add(new Option(person.name,person.id));
+ if(selected&&!people.some(p=>p.id===selected)){const row=salaryPayments.find(p=>p.staffId===selected);if(row)select.add(new Option(row.staffName+' (जुनी नोंद)',selected))}
+ select.value=selected;
+}
+function renderSalaryPaymentHistory(){
+ if(!owner)return;
+ const box=el('salary-payment-history');box.replaceChildren();
+ const list=[...salaryPayments].sort((a,b)=>b.date.localeCompare(a.date)||b.id.localeCompare(a.id));
+ const pages=Math.max(1,Math.ceil(list.length/5));salaryPaymentPage=Math.min(salaryPaymentPage,pages-1);
+ for(const row of list.slice(salaryPaymentPage*5,(salaryPaymentPage+1)*5)){
+  const line=document.createElement('div');line.className='line';const text=document.createElement('p');text.textContent=row.date+' · '+row.staffName+' · पगार महिना '+row.salaryMonth+' · '+row.mode+' · '+financeMoney(financePaise(row.amount));line.append(text);
+  const buttons=document.createElement('div');buttons.className='buttons';const edit=document.createElement('button'),del=document.createElement('button');edit.type=del.type='button';edit.textContent='Edit';del.textContent='काढा';del.className='secondary';
+  edit.onclick=()=>{salaryPaymentEdit=row.id;el('salary-pay-person').value=row.staffId;el('salary-pay-month').value=row.salaryMonth;el('salary-pay-date').value=row.date;el('salary-pay-amount').value=row.amount;el('salary-pay-mode').value=row.mode;el('salary-pay-note').value=row.note||'';el('salary-payment-cancel').hidden=false;el('salary-pay-submit').textContent='पेमेंट बदल सेव्ह करा';el('salary-payment-form').scrollIntoView({behavior:'smooth'})};
+  del.onclick=async()=>{if(!owner||!user||!confirm('पगार दिल्याची ही नोंद कायमची काढायची? यामुळे दिलेला पगार व बाकीचा हिशोब बदलेल.'))return;try{await deleteDoc(doc(db,'attendanceAccounts',user.uid,'salaryPayments',row.id))}catch(e){safeError(e)}};
+  buttons.append(edit,del);line.append(buttons);box.append(line);
+ }
+ if(!list.length){const p=document.createElement('p');p.className='muted';p.textContent='पगार दिल्याची नोंद अद्याप नाही. हजेरीवरून मोजलेला पगार आपोआप दिला असे धरला जात नाही.';box.append(p)}
+ if(pages>1){const bar=document.createElement('div');bar.className='history-page';for(const [label,step]of [['मागील',-1],['पुढील',1]]){const b=document.createElement('button');b.type='button';b.className='secondary';b.textContent=label;b.disabled=step<0?salaryPaymentPage===0:salaryPaymentPage===pages-1;b.onclick=()=>{salaryPaymentPage+=step;renderSalaryPaymentHistory()};bar.append(b)}box.append(bar)}
+}
+function watchSalaryPayments(){
+ if(!owner||!user)return;const uid=user.uid;
+ unsubs.push(onSnapshot(collection(db,'attendanceAccounts',uid,'salaryPayments'),{includeMetadataChanges:true},snap=>{
+  if(user?.uid!==uid||!owner)return;
+  const allPayments=snap.docs.map(d=>({...d.data(),id:d.id}));salaryPayments=allPayments.filter(validSalaryPayment);salaryPaymentsInvalid=allPayments.length-salaryPayments.length;salaryPaymentsMeta=snap.metadata;salaryPaymentsError='';
+  el('salary-payment-state').textContent=snap.metadata.hasPendingWrites?'पगार पेमेंट: सिंक बाकी.':snap.metadata.fromCache?'पगार पेमेंट: स्थानिक कॅश; सर्व्हर पडताळणी बाकी.':'पगार पेमेंट: सर्व्हरशी सिंक झाले.';
+  salaryPaymentPeople();renderSalaryPaymentHistory();financePaymentChoices();renderFinanceSummary();
+ },error=>{if(user?.uid!==uid)return;salaryPaymentsError=error.code||error.message;salaryPaymentsMeta=null;el('salary-payment-state').textContent='पगार पेमेंट वाचता आले नाही: '+salaryPaymentsError;renderFinanceSummary()}));
+}
+function resetSalaryPaymentForm(){salaryPaymentEdit=null;el('salary-payment-form').reset();el('salary-pay-date').value=todayInWardha();el('salary-pay-month').value=attendanceDate.value.slice(0,7);el('salary-payment-cancel').hidden=true;el('salary-pay-submit').textContent='दिलेल्या पगाराची नोंद करा'}
+el('salary-payment-cancel').onclick=resetSalaryPaymentForm;
+el('salary-payment-form').onsubmit=async event=>{
+ event.preventDefault();if(!owner||!user||salaryPaymentSaving)return;
+ if(!salaryPaymentsMeta||salaryPaymentsError){el('salary-payment-state').textContent='आधी पगार पेमेंट क्लाउड जोडणी तपासा.';return}
+ const staffId=el('salary-pay-person').value,person=attendanceStaff().find(p=>p.id===staffId)||salaryPayments.find(p=>p.staffId===staffId);
+ const amount=Number(el('salary-pay-amount').value),date=el('salary-pay-date').value,salaryMonth=el('salary-pay-month').value,mode=el('salary-pay-mode').value;
+ if(!person||!(amount>0)||amount>9999999||!Number.isFinite(amount)||!/^\d{4}-\d{2}-\d{2}$/.test(date)||!/^\d{4}-(0[1-9]|1[0-2])$/.test(salaryMonth)||!['Cash','UPI','Bank'].includes(mode)){el('salary-payment-state').textContent='कर्मचारी, महिना, तारीख व रक्कम तपासा.';return}
+ salaryPaymentSaving=true;el('salary-pay-submit').disabled=true;const uid=user.uid;
+ try{
+  const ref=salaryPaymentEdit?doc(db,'attendanceAccounts',uid,'salaryPayments',salaryPaymentEdit):doc(collection(db,'attendanceAccounts',uid,'salaryPayments'));
+  el('salary-payment-state').textContent='पेमेंट सेव्ह / सिंक होत आहे. पुन्हा नोंद करू नका.';
+  await setDoc(ref,{staffId,staffName:person.name||person.staffName,salaryMonth,date,amount:Math.round(amount*100)/100,mode,note:el('salary-pay-note').value.trim(),updatedBy:uid,updatedAt:serverTimestamp()},{merge:!!salaryPaymentEdit});
+  if(user?.uid===uid)resetSalaryPaymentForm();
+ }catch(error){if(user?.uid===uid)el('salary-payment-state').textContent='पेमेंट सेव्ह झाले नाही: '+(error.code||error.message)}
+ finally{salaryPaymentSaving=false;el('salary-pay-submit').disabled=false}
+};
+el('cm-type').addEventListener('change',()=>financeExpenseFields());
+el('cm-expense-category').onchange=()=>{el('cm-linked-payment').value='';financePaymentChoices()};
+el('cloud-main-form').addEventListener('reset',()=>queueMicrotask(()=>financeExpenseFields()));
+el('finance-month').onchange=()=>{el('month-filter').value=el('finance-month').value;updateDashboard()};
+el('finance-export').onclick=()=>{
+ const stats=financeSummary(el('month-filter').value,cloudMain,cloudStock,salaryPayments);
+ downloadCSV([['विघ्नहर्ता मेडिकल — एकत्र मासिक जमा-खर्च'],['महिना',stats.month],['स्थिती',el('finance-state').textContent],['प्रकार','रक्कम ₹'],...['income','shop','stockPaid','salaryPaid','expense','net','stockDue'].map((key,i)=>[['जमा','दुकानखर्च / न वर्गीकृत खर्च','स्टॉकिस्ट पेमेंट','दिलेला पगार','एकूण खर्च','निव्वळ जमा-खर्च','स्टॉकिस्ट महिनाअखेर बाकी'][i],stats[key]/100]),['पगार बाकी — उपलब्ध माहिती',el('finance-salary-due').textContent],['सूचना','निव्वळ जमा-खर्च म्हणजे नफा किंवा खात्याची अंतिम शिल्लक नाही.']], 'Vighnaharta_Combined_'+stats.month+'.csv');
+};
+el('finance-print').onclick=()=>{document.body.classList.add('finance-print');try{window.print()}finally{document.body.classList.remove('finance-print')}};
+el('salary-payment-export').onclick=()=>{if(owner)downloadCSV([['ID','Date','Staff ID','Staff','Salary Month','Mode','Amount','Note'],...salaryPayments.map(r=>[r.id,r.date,r.staffId,r.staffName,r.salaryMonth,r.mode,r.amount,r.note])],'Vighnaharta_Salary_Payments.csv')};
+financeReset();financeExpenseFields();
+
+onAuthStateChanged(auth,async u=>{clearSubs();document.body.dataset.signedIn='false';historyPages.clear();resetAttendanceCloud();financeReset();user=null;owner=false;showAttendance(false);reportSources.clear();currentReport=null;reportPanel.open=false;el('report-content').replaceChildren();el('report-state').textContent='';el('cloud-panel').classList.add('hidden');el('login-panel').classList.remove('hidden');cloudMain=[];cloudStock=[];localizedSnapshots.clear();localizedMessages.delete('cm-list');localizedMessages.delete('cs-list');localMessage('sync-state','Cloud कनेक्शन तपासत आहे…');updateDashboard();el('cm-list').replaceChildren();el('cs-list').replaceChildren();drawWorkspaceTrend('loading');if(!u)return;try{owner=u.uid===ownerUID;const staff=owner|| (await getDoc(doc(db,'authorizedStaff',u.uid))).exists();if(!staff){localMessage('login-error','या खात्याला प्रवेश परवानगी नाही.');await signOut(auth);return}user=u;document.body.dataset.signedIn='true';el('login-panel').classList.add('hidden');el('cloud-panel').classList.remove('hidden');renderCloudIdentity();showAttendance(owner);if(owner){watchAttendance();watchSalaryPayments();}watch('transactions');watch('stockistTransactions');navigateWorkspace(true)}catch(e){localMessage('login-error','परवानगी तपासता आली नाही: ',e.code||e.message)}});
+async function submit(which){if(!user)return;const main=which==='main',prefix=main?'cm':'cs',coll=main?'transactions':'stockistTransactions',edit=main?editMain:editStock;if(edit&&!owner){alert(t('दुरुस्ती फक्त Owner करू शकतो'));return}const fields=main?['date','type','note','mode','amount']:['date','name','type','note','amount'];const data={};for(const k of fields)data[k]=el(prefix+'-'+k).value.trim();data.amount=Number(data.amount);if(!data.date||!(data.amount>0)||(main?!data.note:!data.name)){alert(t('सर्व आवश्यक माहिती भरा'));return}if(main&&!financeValidateExpense(data,edit))return;const btn=el(prefix+'-submit');btn.disabled=true;try{const ref=edit?doc(db,coll,edit):doc(collection(db,coll));await setDoc(ref,{...data,...(edit?{}:{createdBy:user.uid}),updatedBy:user.uid,updatedAt:serverTimestamp()},{merge:!!edit});reset(which)}catch(e){safeError(e)}finally{btn.disabled=false}}
 el('cloud-main-form').onsubmit=e=>{e.preventDefault();submit('main')};el('cloud-stock-form').onsubmit=e=>{e.preventDefault();submit('stock')};
 window.addEventListener('ledger-language-change', () => {
   renderWorkspaceDate();
