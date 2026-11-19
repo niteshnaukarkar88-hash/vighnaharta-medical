@@ -564,7 +564,7 @@ body[data-signed-in=true] #view-fab{display:grid}
 </section><section id="attendance-panel" class="hidden" aria-labelledby="attendance-title">
   <details id="attendance-details">
     <summary id="attendance-title" class="section-title">स्टाफ हजेरी व पगार</summary>
-    <p class="muted">हजेरी आणि पगाराच्या नोंदी या ब्राउझरमध्ये जतन होतात.</p>
+    <p class="muted">हजेरी व पगार त्याच Firebase खात्याशी जोडले आहेत. फक्त मालकाला प्रवेश. इंटरनेट नसताना पूर्वी लोड झालेल्या अॅपमध्ये नोंदी करून नंतर सिंक करता येतात.</p><p id="attendance-sync" class="muted" role="status">हजेरी क्लाउड कनेक्शन तपासत आहे…</p><div class="demo-actions"><button type="button" class="secondary" id="attendance-migrate" disabled>जुन्या स्थानिक नोंदी क्लाउडवर कॉपी करा</button><button type="button" class="secondary" id="attendance-backup">हजेरी व पगार JSON बॅकअप</button></div><p class="muted">कॉपी करण्याआधी JSON बॅकअप डाउनलोड होईल. क्लाउडवरील विद्यमान नोंदी बदलल्या जाणार नाहीत; जुन्या स्थानिक नोंदी पुसल्या जाणार नाहीत.</p>
     <div class="attendance-date">
       <button id="attendance-prev" type="button" class="secondary" aria-label="मागचा दिवस">‹</button>
       <label>हजेरीची तारीख<input id="attendance-date" type="date" required></label>
@@ -756,7 +756,7 @@ body[data-signed-in=true] #view-fab{display:grid}
   "या खात्याला प्रवेश परवानगी नाही.": "This account does not have access.",
   "या नावाचा कर्मचारी आधीच आहे.": "An employee with this name already exists.",
   "या ब्राउझरमधली हजेरी किंवा पगाराची माहिती वाचता आली नाही.": "Could not read attendance or payroll data in this browser.",
-  "या ब्राउझरमधल्या नोंदी. रविवार सुट्टीत धरले आहेत. पगाराची माहिती भरलेल्या आणि गणना शक्य असलेल्या महिन्यांचे आकडे दाखवले आहेत.": "These records are stored in this browser. Sundays count as days off. Payroll totals include months with enough information to calculate pay.",
+  "क्लाउड कॅश व कॉपी बाकी असलेल्या स्थानिक नोंदींवरून रिपोर्ट. रविवार सुट्टीत धरले आहेत. पगाराची माहिती पूर्ण असलेल्या महिन्यांचे आकडे दाखवले आहेत.": "These records are stored in this browser. Sundays count as days off. Payroll totals include months with enough information to calculate pay.",
   "या ब्राउझरमधल्या हजेरीच्या नोंदी वाचता आल्या नाहीत.": "Could not read attendance records in this browser.",
   "या सहा महिन्यांत जमा किंवा खर्चाच्या नोंदी नाहीत.": "No receipts or expenses were recorded in these six months.",
   "योग्य महिना किंवा वर्ष निवडा.": "Select a valid month or year.",
@@ -812,7 +812,7 @@ body[data-signed-in=true] #view-fab{display:grid}
   "स्टॉकिस्टनिहाय बाकी": "Balance by Stockist",
   "स्थानिक कॅश": "Local Cache",
   "हजर": "Present",
-  "हजेरी आणि पगाराच्या नोंदी या ब्राउझरमध्ये जतन होतात.": "Attendance and payroll records are saved in this browser.",
+  "हजेरी व पगाराची स्वतंत्र क्लाउड सिंक स्थिती तपासा.": "Attendance and payroll records are saved in this browser.",
   "हजेरी व पगार": "Attendance & Payroll",
   "हजेरी सुरू करण्यासाठी पहिले कर्मचारी नाव जोडा.": "Add your first employee to start tracking attendance.",
   "हजेरीची तारीख": "Attendance Date",
@@ -870,7 +870,7 @@ window.setTimeout(()=>{const msg=document.getElementById('login-error');if(!wind
 </script><script type="module">
 import {initializeApp} from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js';
 import {getAuth,onAuthStateChanged,signInWithEmailAndPassword,signOut} from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js';
-import {initializeFirestore,persistentLocalCache,persistentMultipleTabManager,collection,doc,setDoc,deleteDoc,onSnapshot,getDoc,serverTimestamp} from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js';
+import {initializeFirestore,persistentLocalCache,persistentMultipleTabManager,collection,doc,setDoc,deleteDoc,onSnapshot,getDoc,serverTimestamp,runTransaction} from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js';
 const {t,locale} = window.ledgerLanguage;
 const localizedMessages = new Map();
 const localizedSnapshots = new Map();
@@ -968,12 +968,8 @@ function attendanceKey(kind, ...parts) {
 }
 
 function attendanceStaff() {
-  const prefix = attendanceKey('staff', '');
-  return Object.keys(localStorage)
-    .filter(key => key.startsWith(prefix))
-    .map(key => ({id: key.slice(prefix.length), name: localStorage.getItem(key)}))
-    .filter(person => person.name)
-    .sort((a, b) => a.name.localeCompare(b.name));
+ const prefix=attendanceKey('staff','');
+ return [...mergedAttendanceEntries()].filter(([key])=>key.startsWith(prefix)).map(([key,name])=>({id:key.slice(prefix.length),name})).filter(person=>person.name).sort((a,b)=>a.name.localeCompare(b.name));
 }
 
 function attendanceElement(tag, text, className) {
@@ -987,18 +983,124 @@ function attendanceMessage(text) {
   localMessage('attendance-message',text);
 }
 
-function saveAttendanceValue(key, value) {
-  if (!owner || !user) return;
-  try {
-    if (value === '') localStorage.removeItem(key);
-    else localStorage.setItem(key, value);
-    attendanceMessage('नोंद जतन झाली.');
-    renderAttendance();
-    renderReport();
-  } catch {
-    attendanceMessage('नोंद जतन झाली नाही. ब्राउझरची स्टोरेज परवानगी आणि उपलब्ध जागा तपासा.');
-  }
+// Records are isolated by owner and by field so edits on separate dates/devices do not replace a whole account.
+const attendanceCloud = new Map();
+let attendanceLoaded = false, attendanceMeta = null, attendanceCloudError = '', attendanceMigrating = false;
+function validAttendanceEntry(key,value,uid=user?.uid){
+ if(typeof key!=='string'||typeof value!=='string'||!uid)return false;
+ const prefix=['vighnaharta-attendance-v1',uid,''].join(':');
+ if(!key.startsWith(prefix))return false;
+ const parts=key.slice(prefix.length).split(':');
+ if(!/^[a-zA-Z0-9_-]{1,100}$/.test(parts[1]||''))return false;
+ if(parts[0]==='staff'&&parts.length===2)return value.length>0&&value.length<=80;
+ if(parts[0]==='day'&&parts.length===3){
+  const day=parts[2];
+  return /^\d{4}-\d{2}-\d{2}$/.test(day)&&!Number.isNaN(Date.parse(day+'T12:00:00Z'))&&new Date(day+'T12:00:00Z').toISOString().slice(0,10)===day&&(value===''||Object.hasOwn(attendanceStatus,value));
+ }
+ if(parts[0]==='salary'&&parts.length===3&&/^\d{4}-(0[1-9]|1[0-2])$/.test(parts[2])){
+  try{const a=JSON.parse(value),[year,month]=parts[2].split('-').map(Number),days=new Date(Date.UTC(year,month,0)).getUTCDate();return Array.isArray(a)&&a.length===2&&Number.isFinite(a[0])&&a[0]>=0&&a[0]<=9999999&&Number.isInteger(a[1])&&a[1]>=1&&a[1]<=days}catch{return false}
+ }
+ return false;
 }
+function localAttendanceEntries(){
+ const rows=[];
+ if(!owner||!user)return rows;
+ for(const key of Object.keys(localStorage)){
+  const value=localStorage.getItem(key);
+  if(validAttendanceEntry(key,value))rows.push([key,value]);
+ }
+ return rows;
+}
+function readAttendanceValue(key){
+ if(attendanceCloud.has(key))return attendanceCloud.get(key);
+ try{const value=localStorage.getItem(key);return validAttendanceEntry(key,value)?value:null}catch{return null}
+}
+function mergedAttendanceEntries(){
+ let entries=[];try{entries=localAttendanceEntries()}catch{}
+ return new Map([...entries,...attendanceCloud]);
+}
+function attendanceRecordRef(key,uid=user.uid){return doc(db,'attendanceAccounts',uid,'records',encodeURIComponent(key))}
+function resetAttendanceCloud(){
+ attendanceCloud.clear();attendanceLoaded=false;attendanceMeta=null;attendanceCloudError='';
+ el('attendance-sync').textContent='हजेरी क्लाउड कनेक्शन तपासत आहे…';
+ el('attendance-migrate').disabled=true;
+}
+function renderAttendanceSync(){
+ let localOnly=0;try{localOnly=localAttendanceEntries().filter(([key])=>!attendanceCloud.has(key)).length}catch{}
+ let state=attendanceCloudError?'हजेरी क्लाउड उपलब्ध नाही: '+attendanceCloudError:!attendanceLoaded?'हजेरी क्लाउड कनेक्शन तपासत आहे…':attendanceMeta?.hasPendingWrites?'हजेरी / पगार: सिंक बाकी — ब्राउझर डेटा साफ करू नका.':attendanceMeta?.fromCache?'हजेरी / पगार: स्थानिक कॅश — सर्व्हर पडताळणी बाकी.':'हजेरी / पगार: क्लाउडशी सिंक झाले.';
+ if(localOnly)state+=' जुन्या स्थानिक नोंदी: '+localOnly+' — क्लाउडवर कॉपी करणे बाकी.';
+ el('attendance-sync').textContent=state;
+ el('attendance-migrate').disabled=attendanceMigrating||!owner||!attendanceLoaded||!!attendanceCloudError||!!attendanceMeta?.fromCache||!!attendanceMeta?.hasPendingWrites||!localOnly;
+}
+function watchAttendance(){
+ if(!owner||!user)return;
+ const uid=user.uid;
+ unsubs.push(onSnapshot(collection(db,'attendanceAccounts',uid,'records'),{includeMetadataChanges:true},snap=>{
+  if(!owner||user?.uid!==uid)return;
+  attendanceCloud.clear();
+  for(const entry of snap.docs){const row=entry.data();if(validAttendanceEntry(row.key,row.value,uid))attendanceCloud.set(row.key,row.value)}
+  attendanceLoaded=true;attendanceMeta=snap.metadata;attendanceCloudError='';
+  // Preserve unsaved salary fields while another phone updates attendance.
+  const activeForm=document.activeElement?.closest('form[data-staff-id]');
+  const activeStaff=activeForm?.dataset.staffId,activeField=document.activeElement?.name;
+  const drafts=new Map([...el('attendance-salaries').querySelectorAll('form[data-staff-id]')].map(form=>[form.dataset.staffId,[form.elements.salary.value,form.elements.paidDays.value]]));
+  renderAttendance();
+  for(const form of el('attendance-salaries').querySelectorAll('form[data-staff-id]')){const values=drafts.get(form.dataset.staffId);if(values&&activeStaff===form.dataset.staffId){[form.elements.salary.value,form.elements.paidDays.value]=values;if(activeField)form.elements[activeField]?.focus()}}
+  renderReport();renderAttendanceSync();
+ },error=>{
+  if(user?.uid!==uid)return;
+  attendanceCloudError=error.code||error.message;
+  renderAttendanceSync();
+  attendanceMessage('हजेरी क्लाउड परवानगी तपासा. जुन्या स्थानिक नोंदी सुरक्षित आहेत.');
+ }));
+}
+function saveAttendanceValue(key,value){
+ if(!owner||!user)return false;
+ if(!attendanceLoaded||attendanceCloudError){attendanceMessage('हजेरी क्लाउड जोडणी / Firebase नियम तपासा. नोंद सेव्ह झालेली नाही.');return false}
+ if(!validAttendanceEntry(key,value)){attendanceMessage('हजेरी किंवा पगाराची माहिती तपासा.');return false}
+ const uid=user.uid;
+ try{
+  // Firestore's persistent queue accepts offline edits; only metadata confirms server sync.
+  const saving=setDoc(attendanceRecordRef(key),{key,value,updatedBy:uid,updatedAt:serverTimestamp()});
+  attendanceMessage('नोंद सिंक रांगेत दिली. वरील हजेरी सिंक स्थिती पहा.');
+  saving.catch(error=>{if(user?.uid===uid){attendanceMessage('हजेरी / पगार सेव्ह झाला नाही: '+(error.code||error.message));renderAttendanceSync()}});
+  return true;
+ }catch(error){attendanceMessage('हजेरी / पगार सेव्ह झाला नाही: '+(error.code||error.message));return false}
+}
+function downloadAttendanceBackup(){
+ if(!owner||!user)return false;
+ try{
+  const data={format:'vighnaharta-attendance-backup-v1',ownerId:user.uid,exportedAt:new Date().toISOString(),serverConfirmed:attendanceLoaded&&!attendanceMeta?.fromCache&&!attendanceMeta?.hasPendingWrites&&!attendanceCloudError,records:[...mergedAttendanceEntries()].map(([key,value])=>({key,value}))};
+  const url=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json;charset=utf-8'}));
+  const link=document.createElement('a');link.href=url;link.download='Vighnaharta_Hajeri_Pagar_'+todayInWardha()+'.json';link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);return true;
+ }catch{attendanceMessage('बॅकअप तयार झाला नाही. पुन्हा प्रयत्न करा.');return false}
+}
+async function migrateLocalAttendance(){
+ if(!owner||!user||attendanceMigrating)return;
+ if(!attendanceLoaded||attendanceCloudError||attendanceMeta?.fromCache||attendanceMeta?.hasPendingWrites){attendanceMessage('जुन्या नोंदी कॉपी करण्यासाठी सर्व्हर जोडणी आणि सिंक पूर्ण होणे आवश्यक आहे.');return}
+ const uid=user.uid;let rows;
+ try{rows=localAttendanceEntries().filter(([key])=>!attendanceCloud.has(key))}catch{attendanceMessage('जुन्या स्थानिक नोंदी वाचता आल्या नाहीत.');return}
+ if(!rows.length){attendanceMessage('कॉपी करायच्या स्थानिक नोंदी नाहीत.');return}
+ if(!downloadAttendanceBackup())return;
+ attendanceMigrating=true;renderAttendanceSync();let copied=0,skipped=0;
+ try{
+  for(const [key,value] of rows){
+   if(!owner||user?.uid!==uid)throw new Error('खाते बदलले; कॉपी थांबवली.');
+   const ref=attendanceRecordRef(key,uid);
+   const created=await runTransaction(db,async transaction=>{
+    const current=await transaction.get(ref);
+    if(current.exists())return false; // Never replace an existing cloud record during migration.
+    transaction.set(ref,{key,value,updatedBy:uid,updatedAt:serverTimestamp()});return true;
+   });
+   if(created)copied++;else skipped++;
+   if(user?.uid===uid)attendanceMessage('जुन्या नोंदी कॉपी होत आहेत: '+copied+' / '+rows.length);
+  }
+  if(user?.uid===uid)attendanceMessage('क्लाउडवर कॉपी पूर्ण: '+copied+'; आधीच असलेल्या: '+skipped+'. स्थानिक नोंदी पुसलेल्या नाहीत.');
+ }catch(error){if(user?.uid===uid)attendanceMessage('कॉपी थांबली. पूर्ण: '+copied+'. स्थानिक नोंदी सुरक्षित आहेत. पुन्हा प्रयत्न करू शकता. '+(error.code||error.message))}
+ finally{attendanceMigrating=false;if(user?.uid===uid)renderAttendanceSync()}
+}
+el('attendance-migrate').onclick=migrateLocalAttendance;
+el('attendance-backup').onclick=downloadAttendanceBackup;
 
 function attendanceRow(person, date) {
   const row = attendanceElement('div', '', 'attendance-row');
@@ -1013,7 +1115,7 @@ function attendanceRow(person, date) {
   for (const [value, labelText] of Object.entries(attendanceStatus)) {
     select.add(new Option(t(labelText), value));
   }
-  select.value = localStorage.getItem(key) ?? '';
+  select.value = readAttendanceValue(key) ?? '';
   select.onchange = () => saveAttendanceValue(key, select.value);
   label.append(select);
   row.append(label);
@@ -1030,7 +1132,7 @@ function attendanceNumberField(labelText, name, value, min, step, max) {
 
 function attendanceMonthDetails(person, month) {
   const key = attendanceKey('salary', person.id, month);
-  const saved = localStorage.getItem(key);
+  const saved = readAttendanceValue(key);
   const [salary = '', paidDays = ''] = saved ? JSON.parse(saved) : [];
   const [year, monthNumber] = month.split('-').map(Number);
   const monthDays = new Date(Date.UTC(year, monthNumber, 0)).getUTCDate();
@@ -1038,7 +1140,7 @@ function attendanceMonthDetails(person, month) {
   let deductedDays = 0;
   for (let number = 1; number <= monthDays; number++) {
     const date = month + '-' + String(number).padStart(2, '0');
-    const status = isAttendanceSunday(date) ? 'holiday' : localStorage.getItem(attendanceKey('day', person.id, date));
+    const status = isAttendanceSunday(date) ? 'holiday' : readAttendanceValue(attendanceKey('day', person.id, date));
     if (!Object.hasOwn(attendanceStatus, status)) continue;
     days[status] = (days[status] ?? 0) + 1;
     if (unpaidAttendance.has(status)) deductedDays++;
@@ -1092,7 +1194,7 @@ function renderAttendance() {
     const sunday = isAttendanceSunday(date);
     const counts = new Map();
     for (const person of staff) {
-      const status = sunday ? 'holiday' : localStorage.getItem(attendanceKey('day', person.id, date)) || 'pending';
+      const status = sunday ? 'holiday' : readAttendanceValue(attendanceKey('day', person.id, date)) || 'pending';
       counts.set(status, (counts.get(status) ?? 0) + 1);
     }
     el('attendance-summary').textContent = staff.length
@@ -1131,8 +1233,7 @@ el('attendance-add').onsubmit = event => {
       attendanceMessage('या नावाचा कर्मचारी आधीच आहे.');
       return;
     }
-    saveAttendanceValue(attendanceKey('staff', crypto.randomUUID()), name);
-    if (el('attendance-message').textContent === t('नोंद जतन झाली.')) input.value = '';
+    if(saveAttendanceValue(attendanceKey('staff', crypto.randomUUID()), name)) input.value = '';
   } catch {
     attendanceMessage('कर्मचारी जोडता आला नाही. ब्राउझरची स्टोरेज परवानगी तपासा.');
   }
@@ -1411,7 +1512,7 @@ function reportTables(data, payroll, annual) {
       headers: [t('कर्मचारी'),t('हजर'),t('गैरहजर'),t('रजा'),t('सुट्टी'),t('अर्धा दिवस'),t('विनापगारी रजा'),t('विनापगारी सुट्टी'),t('कपातीचे दिवस'),
         ...(annual ? [t('पगार भरलेले महिने')] : []),t('कपात ₹'),t('देय पगार ₹')],
       rows: payrollRows,
-      note: t('या ब्राउझरमधल्या नोंदी. रविवार सुट्टीत धरले आहेत. पगाराची माहिती भरलेल्या आणि गणना शक्य असलेल्या महिन्यांचे आकडे दाखवले आहेत.'),
+      note: t('क्लाउड कॅश व कॉपी बाकी असलेल्या स्थानिक नोंदींवरून रिपोर्ट. रविवार सुट्टीत धरले आहेत. पगाराची माहिती पूर्ण असलेल्या महिन्यांचे आकडे दाखवले आहेत.'),
     });
   }
   return tables;
@@ -1479,6 +1580,8 @@ function renderReport() {
   if (statuses.some(meta => meta.hasPendingWrites)) notices.push(t('काही व्यवहारांचे Cloud सिंक बाकी आहे.'));
   let payroll = null;
   if (owner) {
+    if(!attendanceLoaded||attendanceCloudError||attendanceMeta?.fromCache||attendanceMeta?.hasPendingWrites)notices.push('हजेरी / पगार: सर्व्हर पडताळणी किंवा सिंक बाकी; रिपोर्ट अपूर्ण असू शकतो.');
+    try{if(localAttendanceEntries().some(([key])=>!attendanceCloud.has(key)))notices.push('जुन्या हजेरीच्या स्थानिक नोंदी क्लाउडवर कॉपी करणे बाकी.')}catch{}
     try {
       payroll = reportPayroll(first, annual ? 12 : 1, attendanceStaff());
     } catch {
@@ -1654,7 +1757,7 @@ function drawWorkspaceTrend(status) {
   ]), t('गेल्या सहा महिन्यांचे जमा-खर्च')));
   values.classList.remove('hidden');
 }
-onAuthStateChanged(auth,async u=>{clearSubs();document.body.dataset.signedIn='false';historyPages.clear();user=null;owner=false;showAttendance(false);reportSources.clear();currentReport=null;reportPanel.open=false;el('report-content').replaceChildren();el('report-state').textContent='';el('cloud-panel').classList.add('hidden');el('login-panel').classList.remove('hidden');cloudMain=[];cloudStock=[];localizedSnapshots.clear();localizedMessages.delete('cm-list');localizedMessages.delete('cs-list');localMessage('sync-state','Cloud कनेक्शन तपासत आहे…');updateDashboard();el('cm-list').replaceChildren();el('cs-list').replaceChildren();drawWorkspaceTrend('loading');if(!u)return;try{owner=u.uid===ownerUID;const staff=owner|| (await getDoc(doc(db,'authorizedStaff',u.uid))).exists();if(!staff){localMessage('login-error','या खात्याला प्रवेश परवानगी नाही.');await signOut(auth);return}user=u;document.body.dataset.signedIn='true';el('login-panel').classList.add('hidden');el('cloud-panel').classList.remove('hidden');renderCloudIdentity();showAttendance(owner);watch('transactions');watch('stockistTransactions');navigateWorkspace(true)}catch(e){localMessage('login-error','परवानगी तपासता आली नाही: ',e.code||e.message)}});
+onAuthStateChanged(auth,async u=>{clearSubs();document.body.dataset.signedIn='false';historyPages.clear();resetAttendanceCloud();user=null;owner=false;showAttendance(false);reportSources.clear();currentReport=null;reportPanel.open=false;el('report-content').replaceChildren();el('report-state').textContent='';el('cloud-panel').classList.add('hidden');el('login-panel').classList.remove('hidden');cloudMain=[];cloudStock=[];localizedSnapshots.clear();localizedMessages.delete('cm-list');localizedMessages.delete('cs-list');localMessage('sync-state','Cloud कनेक्शन तपासत आहे…');updateDashboard();el('cm-list').replaceChildren();el('cs-list').replaceChildren();drawWorkspaceTrend('loading');if(!u)return;try{owner=u.uid===ownerUID;const staff=owner|| (await getDoc(doc(db,'authorizedStaff',u.uid))).exists();if(!staff){localMessage('login-error','या खात्याला प्रवेश परवानगी नाही.');await signOut(auth);return}user=u;document.body.dataset.signedIn='true';el('login-panel').classList.add('hidden');el('cloud-panel').classList.remove('hidden');renderCloudIdentity();showAttendance(owner);if(owner)watchAttendance();watch('transactions');watch('stockistTransactions');navigateWorkspace(true)}catch(e){localMessage('login-error','परवानगी तपासता आली नाही: ',e.code||e.message)}});
 async function submit(which){if(!user)return;const main=which==='main',prefix=main?'cm':'cs',coll=main?'transactions':'stockistTransactions',edit=main?editMain:editStock;if(edit&&!owner){alert(t('दुरुस्ती फक्त Owner करू शकतो'));return}const fields=main?['date','type','note','mode','amount']:['date','name','type','note','amount'];const data={};for(const k of fields)data[k]=el(prefix+'-'+k).value.trim();data.amount=Number(data.amount);if(!data.date||!(data.amount>0)||(main?!data.note:!data.name)){alert(t('सर्व आवश्यक माहिती भरा'));return}const btn=el(prefix+'-submit');btn.disabled=true;try{const ref=edit?doc(db,coll,edit):doc(collection(db,coll));await setDoc(ref,{...data,...(edit?{}:{createdBy:user.uid}),updatedBy:user.uid,updatedAt:serverTimestamp()},{merge:!!edit});reset(which)}catch(e){safeError(e)}finally{btn.disabled=false}}
 el('cloud-main-form').onsubmit=e=>{e.preventDefault();submit('main')};el('cloud-stock-form').onsubmit=e=>{e.preventDefault();submit('stock')};
 window.addEventListener('ledger-language-change', () => {
