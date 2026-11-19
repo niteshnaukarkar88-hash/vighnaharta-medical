@@ -1,4 +1,4 @@
-<!doctype html><html lang="mr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#0c1626"><title>विघ्नहर्ता मेडिकल · स्वतंत्र मासिक हिशोब पेज</title><style>
+<!doctype html><html lang="mr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#0c1626"><title>विघ्नहर्ता मेडिकल | Cloud खाता</title><style>
 *{box-sizing:border-box}body{font-family:system-ui,-apple-system,sans-serif;margin:0;background:#f2f7f5;color:#16382e}header{background:#075e48;color:white;padding:20px 16px}header h1{font-size:22px;margin:0 0 4px}main{max-width:820px;margin:auto;padding:14px}section,.tile{background:white;border-radius:12px;padding:15px;margin-bottom:13px;box-shadow:0 1px 5px #0001}.cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.tile{margin:0;min-width:0}.tile strong{font-size:22px;display:block;overflow-wrap:anywhere}.muted{font-size:13px;color:#60746a}.warn{background:#fff3cd;border-radius:8px;padding:12px;font-size:13px}.hidden{display:none!important}label{display:block;margin:10px 0 4px}input,select,button{font:inherit;width:100%;padding:11px;border:1px solid #cad8d2;border-radius:8px}button{background:#075e48;color:white;border:0;margin:10px 0;font-weight:700;cursor:pointer}.secondary{background:#e5f2ed;color:#075e48}button:disabled{opacity:.5}.line{padding:12px 0;border-bottom:1px solid #ddd;overflow-wrap:anywhere}.buttons{display:flex;gap:8px}.buttons button{width:auto;padding:7px 12px}.section-title{margin-top:0;font-size:19px}#cloud-identity{overflow-wrap:anywhere}#sync-state{margin-top:12px}@media(min-width:680px){.cards{grid-template-columns:repeat(4,minmax(0,1fr))}}@media print{button,form,#login-panel,#logout-btn{display:none!important}body{background:white}section{box-shadow:none}}
 
 #attendance-panel summary{cursor:pointer}
@@ -494,6 +494,13 @@ body[data-signed-in=true] #view-fab{display:grid}
 </style><style>
 #combined-finance{margin:0;padding:26px;max-width:1100px}.standalone-eyebrow{font-size:13px;color:#78dbc0;margin-bottom:8px}.stockist-summary-heading h2{font-size:29px;line-height:1.4;margin:0;color:#ecf8ff;letter-spacing:-.02em}.finance-quick-links{display:flex;gap:9px;flex-wrap:wrap;margin:18px 0}.finance-quick-links a{display:inline-flex;padding:8px 13px;background:#19374a;border:1px solid #3b6070;color:#d1e9f2;text-decoration:none;border-radius:22px;font-size:13px}.finance-quick-links a:hover{border-color:#3ae3b4;color:#7af0cb}.finance-notice{margin-bottom:18px}.finance-grid .tile{min-height:108px}.finance-grid strong{font-size:30px}.finance-dues{border-top:1px solid #32505e;margin-top:14px;padding-top:8px}
 @media(max-width:600px){#combined-finance{padding:17px}.stockist-summary-heading h2{font-size:24px}.finance-quick-links{gap:6px;margin:12px 0}.finance-quick-links a{font-size:12px;padding:7px 10px}.finance-grid strong{font-size:23px}.finance-grid .tile{min-height:100px}}
+</style><style>
+@media print{
+ body.finance-print .workspace > section:not(#combined-finance){display:none!important}
+ body.finance-print .workspace > section#combined-finance{display:block!important;background:white!important;color:black!important}
+ body.finance-print #combined-finance h2,body.finance-print #combined-finance strong,body.finance-print #combined-finance summary{color:black!important}
+ body.finance-print .finance-quick-links,body.finance-print .standalone-eyebrow{display:none!important}
+}
 </style></head><body><header class="app-header">
   <div class="header-inner">
     <a class="brand" href="#dashboard-panel" aria-label="विघ्नहर्ता मेडिकल · मुख्य डॅशबोर्ड">
@@ -506,11 +513,11 @@ body[data-signed-in=true] #view-fab{display:grid}
       </label>
     </div>
   </div>
-</header><div style="padding:10px 16px;text-align:center;background:#533f21;color:#ffe6a4;font-weight:700">डिझाइन नमुना · सर्व आकडे काल्पनिक · प्रत्यक्ष नोंदी सेव्ह होत नाहीत</div><main><section id="login-panel"><h2 class="section-title">🔐 लॉगिन</h2><label>ईमेल</label><input id="login-email" type="email" autocomplete="username"><label>पासवर्ड</label><input id="login-password" type="password" autocomplete="current-password"><button id="login-btn" type="button">लॉगिन करा</button><p id="login-error" class="muted"></p></section>
+</header><main><section id="login-panel"><h2 class="section-title">🔐 लॉगिन</h2><label for="login-email">ईमेल</label><input id="login-email" type="email" autocomplete="username"><label for="login-password">पासवर्ड</label><input id="login-password" type="password" autocomplete="current-password"><button id="login-btn" type="button">लॉगिन करा</button><button id="login-reset" type="button" class="secondary">पासवर्ड विसरलात? रीसेट लिंक मिळवा</button><p class="muted">वर नोंदणीकृत ईमेल भरा आणि रीसेट लिंक मिळवा. नवीन पासवर्ड ईमेलमधील लिंकवर सेट करा.</p><p id="login-error" class="muted" role="status" aria-live="polite"></p></section>
 <div id="cloud-panel" class="hidden">
 <nav id="app-nav" class="app-nav" aria-label="अॅपचे विभाग">
   <a href="#dashboard-panel" aria-current="location"><span class="nav-icon" aria-hidden="true">◫</span>डॅशबोर्ड</a>
-  <a href="#combined-finance"><span class="nav-icon" aria-hidden="true">▥</span>एकत्र मासिक हिशोब</a>
+  <a id="nav-finance" class="hidden" href="#combined-finance"><span class="nav-icon" aria-hidden="true">▥</span>एकत्र मासिक हिशोब</a>
   <a href="#ledger-panel"><span class="nav-icon" aria-hidden="true">⇄</span>जमा–खर्च</a>
   <a href="#stock-summary"><span class="nav-icon" aria-hidden="true">▦</span>स्टॉकिस्ट</a>
   <a id="nav-attendance" class="hidden" href="#attendance-panel"><span class="nav-icon" aria-hidden="true">◷</span>हजेरी व पगार</a>
@@ -567,7 +574,7 @@ body[data-signed-in=true] #view-fab{display:grid}
   <p class="cash-note muted">रोख शिल्लक = सुरुवातीची रोख + रोख जमा व वसुली − रोख खर्च.</p>
 </section>
 <section id="combined-finance" class="combined-finance hidden" aria-labelledby="finance-title">
- <div class="standalone-eyebrow">संपूर्ण दुकानाचा महिन्याचा हिशोब · नमुना</div><div class="stockist-summary-heading"><h2 id="finance-title">एकत्र मासिक जमा–खर्च</h2><label>महिना<input id="finance-month" type="month" required></label></div>
+ <div class="standalone-eyebrow">संपूर्ण दुकानाचा महिन्याचा हिशोब</div><div class="stockist-summary-heading"><h2 id="finance-title">एकत्र मासिक जमा–खर्च</h2><label>महिना<input id="finance-month" type="month" required></label></div>
  <div class="finance-quick-links"><a href="#ledger-panel">जमा–खर्च नोंदी</a><a href="#stock-summary">स्टॉकिस्ट खाते</a><a href="#attendance-panel">हजेरी व पगार</a></div><p class="finance-notice" id="finance-state" role="status">तिन्ही विभागांची माहिती लोड होत आहे…</p>
  <div class="finance-grid">
   <div class="tile"><span>एकूण जमा / वसुली</span><strong id="finance-income">—</strong></div>
@@ -831,7 +838,7 @@ body[data-signed-in=true] #view-fab{display:grid}
   "वार्षिक सारांश ·": "Annual Summary ·",
   "वार्षिक सारांशाकडे परत": "Back to Annual Summary",
   "विघ्नहर्ता मेडिकल": "Vighnaharta Medical",
-  "विघ्नहर्ता मेडिकल · स्वतंत्र मासिक हिशोब पेज": "Vighnaharta Medical | Cloud Ledger",
+  "विघ्नहर्ता मेडिकल | Cloud खाता": "Vighnaharta Medical | Cloud Ledger",
   "विघ्नहर्ता मेडिकल · मुख्य डॅशबोर्ड": "Vighnaharta Medical · Main Dashboard",
   "विघ्नहर्ता मेडिकल, वर्धा": "Vighnaharta Medical, Wardha",
   "विनापगारी रजा": "Unpaid Leave",
@@ -919,36 +926,10 @@ body[data-signed-in=true] #view-fab{display:grid}
 </script>
 <script>
 window.setTimeout(()=>{const msg=document.getElementById('login-error');if(!window.medicalAppReady&&!msg.textContent)msg.textContent='अॅप लोड झाले नाही. इंटरनेट तपासा आणि GitHub Pages वरील अॅपची लिंक Chrome मध्ये उघडा.'},15000);
-</script><script>if(!location.hash)location.hash="combined-finance";</script><script type="module">// QA only. No Firebase connection; all data below is invented and stays in this page.
-const fixtureOwner='daFV9pOYYqMs3C9APuPtGiOZvhD2';
-const fixtureRows=new Map([
- ['transactions/income1',{date:'2026-11-19',type:'income',note:'नमुना विक्री',mode:'Cash',amount:50000}],
- ['transactions/expense1',{date:'2026-11-18',type:'expense',note:'नमुना दुकानखर्च',mode:'Bank',amount:5000,expenseCategory:'shop'}],
- ['transactions/expense2',{date:'2026-11-17',type:'expense',note:'नमुना स्टॉकिस्ट पेमेंटची जोडलेली नोंद',mode:'Bank',amount:8000,expenseCategory:'stockist',linkedPaymentId:'payment1'}],
- ['stockistTransactions/opening1',{date:'2026-10-01',type:'opening',name:'नमुना फार्मा',amount:10000}],
- ['stockistTransactions/purchase1',{date:'2026-11-12',type:'purchase',name:'नमुना फार्मा',amount:12000}],
- ['stockistTransactions/payment1',{date:'2026-11-17',type:'payment',name:'नमुना फार्मा',amount:8000}],
-]);
-const attendanceFixturePrefix='attendanceAccounts/'+fixtureOwner+'/records/';
-for(const [kind,part,value]of [['staff','sample1','नमुना कर्मचारी'],['salary','sample1:2026-11','[20000,30]'],['day','sample1:2026-11-18','absent']]){
- const key='vighnaharta-attendance-v1:'+fixtureOwner+':'+kind+':'+part;
- fixtureRows.set(attendanceFixturePrefix+encodeURIComponent(key),{key,value});
-}
-fixtureRows.set('attendanceAccounts/'+fixtureOwner+'/salaryPayments/pay1',{date:'2026-11-19',salaryMonth:'2026-11',staffId:'sample1',staffName:'नमुना कर्मचारी',mode:'Bank',amount:10000,note:'नमुना पगार'});
-const fixtureListeners=[];
-function initializeApp(){return {}}function getAuth(){return {}}function initializeFirestore(){return {}}function persistentLocalCache(){return {}}function persistentMultipleTabManager(){return {}}
-function onAuthStateChanged(auth,fn){setTimeout(()=>fn({uid:fixtureOwner,email:'नमुना मालक · डिझाइन तपासणी'}),0)}
-function signInWithEmailAndPassword(){return Promise.resolve()}function signOut(){return Promise.resolve()}
-function collection(db,...parts){return {path:parts.join('/')}}
-function doc(first,...parts){return {path:first?.path?first.path+'/'+(parts.length?parts.join('/'):crypto.randomUUID()):parts.join('/')}}
-function serverTimestamp(){return {toMillis:()=>0}}
-function fixtureEmit(path,cb){const docs=[...fixtureRows].filter(([key])=>key.startsWith(path+'/')&&!key.slice(path.length+1).includes('/')).map(([key,value])=>({id:key.split('/').pop(),data:()=>value}));cb({docs,metadata:{fromCache:false,hasPendingWrites:false}})}
-function onSnapshot(ref,options,callback){const entry={ref,callback};fixtureListeners.push(entry);setTimeout(()=>fixtureEmit(ref.path,callback),0);return()=>{const i=fixtureListeners.indexOf(entry);if(i>=0)fixtureListeners.splice(i,1)}}
-function setDoc(ref,data,options){fixtureRows.set(ref.path,options?.merge?{...fixtureRows.get(ref.path),...data}:data);for(const l of fixtureListeners)fixtureEmit(l.ref.path,l.callback);return Promise.resolve()}
-function deleteDoc(ref){fixtureRows.delete(ref.path);for(const l of fixtureListeners)fixtureEmit(l.ref.path,l.callback);return Promise.resolve()}
-function getDoc(ref){return Promise.resolve({exists:()=>fixtureRows.has(ref.path),data:()=>fixtureRows.get(ref.path)})}
-async function runTransaction(db,fn){return fn({get:getDoc,set:setDoc})}
-
+</script><script type="module">
+import {initializeApp} from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js';
+import {getAuth,onAuthStateChanged,signInWithEmailAndPassword,signOut,sendPasswordResetEmail} from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js';
+import {initializeFirestore,persistentLocalCache,persistentMultipleTabManager,collection,doc,setDoc,deleteDoc,onSnapshot,getDoc,serverTimestamp,runTransaction} from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js';
 const {t,locale} = window.ledgerLanguage;
 const localizedMessages = new Map();
 const localizedSnapshots = new Map();
@@ -967,6 +948,24 @@ const el=id=>document.getElementById(id);let owner=false,user=null,unsubs=[],edi
 const safeError=e=>{const msg=e?.code||e?.message||String(e);alert(t('कारवाई पूर्ण झाली नाही: ')+msg)};
 el('cm-date').value=el('cs-date').value=new Date().toLocaleDateString('en-CA');
 window.medicalAppReady=true;el('login-btn').onclick=async()=>{localMessage('login-error','लॉगिन सुरू आहे…');try{await signInWithEmailAndPassword(auth,el('login-email').value.trim(),el('login-password').value);el('login-password').value='';localMessage('login-error','')}catch(e){localMessage('login-error','लॉगिन अयशस्वी: ',e.code||e.message)}};
+el('login-reset').onclick=async()=>{
+ const button=el('login-reset'),login=el('login-btn'),emailField=el('login-email');
+ if(button.disabled)return;
+ const email=emailField.value.trim();
+ if(!email||!emailField.validity.valid){localMessage('login-error','वर तुमचा योग्य नोंदणीकृत ईमेल भरा.');emailField.focus();return}
+ button.disabled=true;login.disabled=true;
+ localMessage('login-error','पासवर्ड रीसेटची विनंती पाठवत आहे…');
+ const sent=()=>localMessage('login-error','नोंदणीकृत खाते असल्यास रीसेट लिंक ईमेलवर मिळेल. Inbox व Spam तपासा.');
+ try{await sendPasswordResetEmail(auth,email);sent()}
+ catch(error){
+  if(error.code==='auth/user-not-found')sent();
+  else if(error.code==='auth/too-many-requests')localMessage('login-error','खूप वेळा प्रयत्न झाले. थोड्या वेळाने पुन्हा प्रयत्न करा.');
+  else if(error.code==='auth/network-request-failed')localMessage('login-error','रीसेटची विनंती पाठवता आली नाही. इंटरनेट तपासून पुन्हा प्रयत्न करा.');
+  else if(error.code==='auth/invalid-email')localMessage('login-error','योग्य ईमेल पत्ता भरा.');
+  else localMessage('login-error','पासवर्ड रीसेटची विनंती पूर्ण झाली नाही. Firebase Authentication सेटिंग्ज तपासा.');
+ }finally{button.disabled=false;login.disabled=false}
+};
+
 el('logout-btn').onclick=()=>signOut(auth).catch(safeError);
 function clearSubs(){unsubs.forEach(f=>f());unsubs=[]}
 function reset(which){const main=which==='main',prefix=main?'cm':'cs';if(main)editMain=null;else editStock=null;el(prefix+'-cancel').classList.add('hidden');el(prefix+'-submit').textContent=t('Cloud मध्ये नोंद सेव्ह करा');el('cloud-'+(main?'main':'stock')+'-form').reset();el(prefix+'-date').value=new Date().toLocaleDateString('en-CA')}
@@ -984,7 +983,7 @@ function updateDashboard(){
 el('month-filter').value=new Date().toLocaleDateString('en-CA').slice(0,7);el('month-filter').onchange=updateDashboard;
 el('dashboard-stock-month').value=el('month-filter').value;
 el('dashboard-stock-month').onchange=()=>{el('month-filter').value=el('dashboard-stock-month').value;updateDashboard()};
-function downloadCSV(rows,name){const csv='\ufeff'+rows.map(r=>r.map(x=>'"'+String(x??'').replace(/"/g,'""')+'"').join(',')).join('\r\n');const a=document.createElement('a');const u=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));a.href=u;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(u),1000)}
+function downloadCSV(rows,name){const csv='\ufeff'+rows.map(r=>r.map(x=>'"'+String(typeof x==='string'&&/^[\s]*[=+@-]/.test(x)?"'"+x:(x??'')).replace(/"/g,'""')+'"').join(',')).join('\r\n');const a=document.createElement('a');const u=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));a.href=u;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(u),1000)}
 el('export-main').onclick=()=>downloadCSV([['Date','Type','Description','Mode','Amount','ID','Expense Category','Linked Payment ID'],...cloudMain.map(r=>[r.date,r.type,r.note,r.mode,r.amount,r.id,r.expenseCategory,r.linkedPaymentId])],'Vighnaharta_Khata_Cloud.csv');
 el('export-stock').onclick=()=>downloadCSV([['Date','Stockist','Type','Bill/Details','Amount','ID'],...cloudStock.map(r=>[r.date,r.name,r.type,r.note,r.amount,r.id])],'Vighnaharta_Stockist_Cloud.csv');
 function ledgerRow(coll,d){
@@ -1025,11 +1024,19 @@ const syncObserver=new MutationObserver(()=>{
  const message=el('sync-state').textContent;
  el('sync-state').dataset.state=/⚠|अयशस्वी|failed/i.test(message)?'error':/⏳|बाकी|pending/i.test(message)?'pending':/✅|connected/i.test(message)?'online':'cache';
 });syncObserver.observe(el('sync-state'),{childList:true,characterData:true,subtree:true});
+function renderLedgerSync(){
+ const states=['transactions','stockistTransactions'].map(name=>reportSources.get(name));
+ if(states.some((state,index)=>reportSources.has(['transactions','stockistTransactions'][index])&&!state))localMessage('sync-state','⚠️ काही Cloud नोंदी वाचता आल्या नाहीत; विभागातील संदेश तपासा.');
+ else if(states.some(state=>!state))localMessage('sync-state','Cloud कनेक्शन तपासत आहे…');
+ else if(states.some(state=>state.hasPendingWrites))localMessage('sync-state','⏳ काही Cloud नोंदींचे सिंक बाकी आहे');
+ else if(states.some(state=>state.fromCache))localMessage('sync-state','📱 स्थानिक कॅश दिसत आहे; सर्व्हरशी संपर्क तपासा');
+ else localMessage('sync-state','✅ Firestore सर्व्हरशी कनेक्शन आहे');
+}
 function watch(coll){const prefix=coll==='transactions'?'cm':'cs';unsubs.push(onSnapshot(collection(db,coll),{includeMetadataChanges:true},snap=>{const ds=[...snap.docs].sort((a,b)=>{
  const left=a.data(),right=b.data();
  return (right.date||'').localeCompare(left.date||'')
    || (right.updatedAt?.toMillis?.()??0)-(left.updatedAt?.toMillis?.()??0);
- });if(coll==='transactions'){cloudMain=ds.map(d=>({...d.data(),id:d.id}));drawWorkspaceTrend('ready')}else cloudStock=ds.map(d=>({...d.data(),id:d.id}));updateDashboard();display(coll,ds,snap.metadata);setReportSource(coll,snap.metadata);localMessage('sync-state',snap.metadata.hasPendingWrites?'⏳ काही Cloud नोंदींचे सिंक बाकी आहे':snap.metadata.fromCache?'📱 स्थानिक कॅश दिसत आहे; सर्व्हरशी संपर्क तपासा':'✅ Firestore सर्व्हरशी कनेक्शन आहे')},e=>{localMessage('sync-state','⚠️ Cloud वाचन अयशस्वी: ',e.code||e.message);localizedSnapshots.delete(coll);localMessage(prefix+'-list','डेटा वाचता आला नाही');setReportSource(coll,null);if(coll==='transactions')drawWorkspaceTrend('error')}))}
+ });if(coll==='transactions'){cloudMain=ds.map(d=>({...d.data(),id:d.id}));drawWorkspaceTrend('ready')}else cloudStock=ds.map(d=>({...d.data(),id:d.id}));updateDashboard();display(coll,ds,snap.metadata);setReportSource(coll,snap.metadata);renderLedgerSync()},e=>{localMessage('sync-state','⚠️ Cloud वाचन अयशस्वी: ',e.code||e.message);localizedSnapshots.delete(coll);localMessage(prefix+'-list','डेटा वाचता आला नाही');setReportSource(coll,null);renderLedgerSync();if(coll==='transactions')drawWorkspaceTrend('error')}))}
 const attendanceStatus = {
   present: 'हजर', absent: 'गैरहजर', leave: 'रजा', holiday: 'सुट्टी',
   halfDay: 'अर्धा दिवस', unpaidLeave: 'विनापगारी रजा', unpaidHoliday: 'विनापगारी सुट्टी',
@@ -1894,7 +1901,7 @@ function financeNotices(stats){
  return notes;
 }
 function renderFinanceSummary(){
- el('combined-finance').classList.toggle('hidden',!owner);
+ el('combined-finance').classList.toggle('hidden',!owner);el('nav-finance').classList.toggle('hidden',!owner);
  if(!owner)return;
  const month=el('month-filter').value;if(!/^\d{4}-\d{2}$/.test(month))return;
  el('finance-month').value=month;
@@ -2035,6 +2042,7 @@ window.addEventListener('ledger-language-change', () => {
 });
 
 </script></body></html>
+
 
 
 
