@@ -480,6 +480,13 @@ body[data-signed-in=true] #view-fab{display:grid}
 @media(min-width:850px){body[data-signed-in=true] #view-fab{display:none}}
 @media(max-width:849px){#account-panel{flex-wrap:wrap}.language-control>span{display:none}.language-control select{font-size:12px}.header-inner{gap:8px}#cloud-identity{font-size:11px}.account-main{flex-wrap:wrap}}
 @media print{#view-fab,#app-nav,.language-control{display:none!important}body,section,.tile,.trend-panel,.dashboard-hero{background:white!important;color:black!important}}
+</style><style>
+.dashboard-stockist-summary{padding:22px;margin:0 0 20px;background:linear-gradient(130deg,#142a3c,#122f32);border-color:#2c5159}
+.stockist-summary-heading{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:14px}.stockist-summary-heading h3{margin:0;color:#e0f5f4;font-size:20px}.stockist-summary-heading label{margin:0;font-size:14px;max-width:210px}.stockist-summary-heading input{display:block;margin-top:5px}
+.stockist-summary-cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.stockist-summary-cards .tile{padding:15px;background:#12263a;border-color:#315063}.stockist-summary-cards span{font-size:14px;color:#b6cddd}.stockist-summary-cards strong{font-variant-numeric:tabular-nums;font-size:27px;color:#83d2ff;margin-top:8px}.stockist-summary-cards .tile:nth-child(2) strong{color:#63e4b4}.stockist-summary-cards .tile:nth-child(3) strong{color:#f0cd83}
+.stockist-detail-link{display:inline-block;color:#6ee7c5;font-size:14px;margin-top:4px}.dashboard-stockist-summary .muted{font-size:13px;line-height:1.6}
+@media(max-width:600px){.dashboard-stockist-summary{padding:16px}.stockist-summary-heading{align-items:start;flex-direction:column;gap:10px}.stockist-summary-heading h3{font-size:18px}.stockist-summary-heading label{max-width:none;width:100%}.stockist-summary-cards{gap:8px}.stockist-summary-cards .tile{padding:13px 9px}.stockist-summary-cards strong{font-size:20px;overflow-wrap:anywhere}.stockist-summary-cards span{font-size:13px}}
+@media print{.stockist-detail-link{display:none}.dashboard-stockist-summary,.stockist-summary-cards .tile{background:white!important;color:black!important}.stockist-summary-cards strong,.stockist-summary-cards span,.stockist-summary-heading h3{color:black!important}}
 </style></head><body><header class="app-header">
   <div class="header-inner">
     <a class="brand" href="#dashboard-panel" aria-label="विघ्नहर्ता मेडिकल · मुख्य डॅशबोर्ड">
@@ -527,6 +534,16 @@ body[data-signed-in=true] #view-fab{display:grid}
     <div class="tile metric cash"><span>रोख शिल्लक</span><strong id="sum-cash">₹0</strong></div>
     <div class="tile metric due"><span>उधारी बाकी</span><strong id="sum-due">₹0</strong></div>
   </div>
+<section id="dashboard-stockist-summary" class="dashboard-stockist-summary" aria-labelledby="dashboard-stockist-title">
+ <div class="stockist-summary-heading"><h3 id="dashboard-stockist-title">स्टॉकिस्ट महिन्याचा सारांश</h3><label>महिना<input id="dashboard-stock-month" type="month"></label></div>
+ <div class="stockist-summary-cards">
+  <div class="tile"><span>महिन्याची खरेदी</span><strong id="dashboard-stock-purchase">₹0</strong></div>
+  <div class="tile"><span>महिन्याचे पेमेंट</span><strong id="dashboard-stock-payment">₹0</strong></div>
+  <div class="tile"><span>महिनाअखेर बाकी</span><strong id="dashboard-stock-due">₹0</strong></div>
+ </div>
+ <p class="muted">बाकीमध्ये निवडलेल्या महिन्यापर्यंतची मागील बाकी, खरेदी व पेमेंट समाविष्ट आहेत.</p>
+ <a href="#stock-summary" class="stockist-detail-link">स्टॉकिस्ट व्यवहार पहा</a>
+</section>
   <section class="trend-panel" aria-labelledby="trend-title">
     <div class="trend-heading">
       <div><h3 id="trend-title">जमा–खर्चाचा कल</h3><p id="trend-period" class="muted"></p></div>
@@ -901,8 +918,11 @@ function updateDashboard(){
  const month=el('month-filter').value;let buys=0,pays=0,owed=0;
  for(const r of cloudStock){let n=Number(r.amount)||0;if(r.date?.slice(0,7)===month){if(r.type==='purchase')buys+=n;if(r.type==='payment')pays+=n}if(r.date?.slice(0,7)<=month){if(['purchase','opening'].includes(r.type))owed+=n;if(r.type==='payment')owed-=n}}
  el('sum-purchase').textContent=fmt(buys);el('sum-payment').textContent=fmt(pays);el('sum-stockdue').textContent=fmt(owed);
+ el('dashboard-stock-purchase').textContent=fmt(buys);el('dashboard-stock-payment').textContent=fmt(pays);el('dashboard-stock-due').textContent=fmt(owed);el('dashboard-stock-month').value=month;
 }
 el('month-filter').value=new Date().toLocaleDateString('en-CA').slice(0,7);el('month-filter').onchange=updateDashboard;
+el('dashboard-stock-month').value=el('month-filter').value;
+el('dashboard-stock-month').onchange=()=>{el('month-filter').value=el('dashboard-stock-month').value;updateDashboard()};
 function downloadCSV(rows,name){const csv='\ufeff'+rows.map(r=>r.map(x=>'"'+String(x??'').replace(/"/g,'""')+'"').join(',')).join('\r\n');const a=document.createElement('a');const u=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));a.href=u;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(u),1000)}
 el('export-main').onclick=()=>downloadCSV([['Date','Type','Description','Mode','Amount'],...cloudMain.map(r=>[r.date,r.type,r.note,r.mode,r.amount])],'Vighnaharta_Khata_Cloud.csv');
 el('export-stock').onclick=()=>downloadCSV([['Date','Stockist','Type','Bill/Details','Amount'],...cloudStock.map(r=>[r.date,r.name,r.type,r.note,r.amount])],'Vighnaharta_Stockist_Cloud.csv');
