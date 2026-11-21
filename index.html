@@ -541,7 +541,7 @@ body[data-signed-in=true] #view-fab{display:grid}
 </section>
 <section id="bill-scanner-panel" aria-labelledby="scan-title">
 <h2 id="scan-title" class="section-title">▣ बिल स्कॅनर — खरेदी / विक्री / कलेक्शन</h2>
-<p class="muted">बिलाचा फोटो निवडा. OCR साठी इंटरनेट लागेल; वाचलेली माहिती नेहमी तपासा. सेव्ह केल्याशिवाय हिशोब बदलत नाही.</p>
+<p class="muted">बिलाचा फोटो निवडताच OCR आपोआप सुरू होईल. इंटरनेट आवश्यक आहे. वाचलेली माहिती तपासूनच सेव्ह करा; सेव्ह केल्याशिवाय हिशोब बदलत नाही.</p>
 <div class="scan-grid">
 <label>नोंद प्रकार<select id="scan-kind"><option value="purchase">खरेदी बिल + स्टॉक आवक</option><option value="sale">विक्री बिल + स्टॉक जावक</option><option value="collection">फक्त डेली कलेक्शन (स्टॉक बदल नाही)</option></select></label>
 <div class="scan-wide" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px">
@@ -2102,8 +2102,8 @@ scanEl('scan-date').value=scanToday();
 const scanEscape=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let scanRotation=0,scanObjectUrl=null;
 function scanPreview(){const f=scanEl('scan-photo').files[0];if(scanObjectUrl)URL.revokeObjectURL(scanObjectUrl);scanObjectUrl=f?URL.createObjectURL(f):null;const im=scanEl('scan-preview');im.style.display=f?'block':'none';if(f)im.src=scanObjectUrl;im.style.transform=`rotate(${scanRotation}deg)`}
-scanEl('scan-photo').addEventListener('change',()=>{scanRotation=0;scanPreview();scanStatus('फोटो निवडला. बाजूला फिरलेला असल्यास 90° फिरवा आणि OCR दाबा.')});
-scanEl('scan-camera').addEventListener('change',()=>{const camera=scanEl('scan-camera');if(!camera.files.length)return;const gallery=scanEl('scan-photo');try{const transfer=new DataTransfer();transfer.items.add(camera.files[0]);gallery.files=transfer.files;scanRotation=0;scanPreview();scanStatus('कॅमेराचा फोटो निवडला. OCR दाबा.')}catch(e){scanStatus('कॅमेराचा फोटो जोडता आला नाही. गॅलरीमधून निवडा.')}});
+scanEl('scan-photo').addEventListener('change',()=>{scanRotation=0;scanPreview();if(scanEl('scan-photo').files.length){scanStatus('फोटो निवडला. माहिती आपोआप वाचत आहे…');scanEl('scan-ocr').click();}});
+scanEl('scan-camera').addEventListener('change',()=>{const camera=scanEl('scan-camera');if(!camera.files.length)return;const gallery=scanEl('scan-photo');try{const transfer=new DataTransfer();transfer.items.add(camera.files[0]);gallery.files=transfer.files;scanRotation=0;scanPreview();scanStatus('कॅमेराचा फोटो निवडला. माहिती आपोआप वाचत आहे…');scanEl('scan-ocr').click()}catch(e){scanStatus('कॅमेराचा फोटो जोडता आला नाही. गॅलरीमधून निवडा.')}});
 scanEl('scan-rotate').onclick=()=>{scanRotation=(scanRotation+90)%360;scanPreview();scanStatus('फोटो '+scanRotation+'° फिरवला. आता OCR दाबा.')};
 async function scanOrientedImage(file){if(!scanRotation)return file;const bitmap=await createImageBitmap(file);const c=document.createElement('canvas');const sideways=scanRotation%180!==0;c.width=sideways?bitmap.height:bitmap.width;c.height=sideways?bitmap.width:bitmap.height;const ctx=c.getContext('2d');ctx.translate(c.width/2,c.height/2);ctx.rotate(scanRotation*Math.PI/180);ctx.drawImage(bitmap,-bitmap.width/2,-bitmap.height/2);bitmap.close();return c}
 function scanExtract(){
