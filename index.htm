@@ -2158,7 +2158,7 @@ scanEl('scan-ai').onclick=async()=>{
  try{
  const {getAI,getGenerativeModel,GoogleAIBackend}=await import('https://www.gstatic.com/firebasejs/11.10.0/firebase-ai.js');
  const ai=getAI(app,{backend:new GoogleAIBackend()});
- const model=getGenerativeModel(ai,{model:'gemini-2.5-flash',generationConfig:{responseMimeType:'application/json',temperature:0}});
+ const model=getGenerativeModel(ai,{model:'gemini-3.8-flash',generationConfig:{responseMimeType:'application/json',temperature:0}});
  const source=await scanOrientedImage(f);const bitmap=source instanceof HTMLCanvasElement?source:await createImageBitmap(source);const canvas=document.createElement('canvas');const scale=Math.min(1,2200/Math.max(bitmap.width,bitmap.height));canvas.width=Math.round(bitmap.width*scale);canvas.height=Math.round(bitmap.height*scale);canvas.getContext('2d').drawImage(bitmap,0,0,canvas.width,canvas.height);if(bitmap.close)bitmap.close();
  const data=canvas.toDataURL('image/jpeg',0.9).split(',')[1];
  const kind=scanEl('scan-kind').value;
