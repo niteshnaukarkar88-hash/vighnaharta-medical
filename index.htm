@@ -976,7 +976,16 @@ function renderCloudIdentity() {
 }
 const config={apiKey:'AIzaSyCjCVQcMGzmN-Cmld_di_Vz0q2tRu7VkwA',authDomain:'vighnaharta-medical.firebaseapp.com',projectId:'vighnaharta-medical',storageBucket:'vighnaharta-medical.firebasestorage.app',messagingSenderId:'879096407229',appId:'1:879096407229:web:6861bca7fb7b7dd43603d4',measurementId:'G-3ND0BFH2VK'};
 const ownerUID='daFV9pOYYqMs3C9APuPtGiOZvhD2';
-const app=initializeApp(config),auth=getAuth(app);let db;
+import {initializeAppCheck,ReCaptchaEnterpriseProvider} from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-app-check.js';
+
+const app=initializeApp(config);
+
+initializeAppCheck(app,{
+  provider:new ReCaptchaEnterpriseProvider('6Lc1AzAuAAAAAHQveNObugHYSQZVQ6Lk5fPmxkVx'),
+  isTokenAutoRefreshEnabled:true
+});
+
+const auth=getAuth(app);let db;
 try{db=initializeFirestore(app,{localCache:persistentLocalCache({tabManager:persistentMultipleTabManager()})})}catch(e){localMessage('login-error','ऑफलाइन स्टोरेज उपलब्ध नाही: ',e.message);throw e}
 const el=id=>document.getElementById(id);let owner=false,user=null,unsubs=[],editMain=null,editStock=null;let cloudMain=[],cloudStock=[];
 const safeError=e=>{const msg=e?.code||e?.message||String(e);alert(t('कारवाई पूर्ण झाली नाही: ')+msg)};
