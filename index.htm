@@ -502,7 +502,98 @@ body[data-signed-in=true] #view-fab{display:grid}
  body.finance-print .finance-quick-links,body.finance-print .standalone-eyebrow{display:none!important}
 }
 </style><style id="bill-scanner-style">
-#bill-scanner-panel .scan-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}#bill-scanner-panel label{display:block;margin:6px 0}#bill-scanner-panel textarea{width:100%;min-height:125px;background:#0d192a;color:#e3efff;border:1px solid #30445e;border-radius:9px;padding:10px;font:14px system-ui}#bill-scanner-panel .scan-wide{grid-column:1/-1}#bill-scanner-panel .scan-hint{font-size:12px;color:#a9bdd3}#bill-scanner-panel .scan-actions{display:flex;gap:8px;flex-wrap:wrap}#bill-scanner-panel .scan-actions button{width:auto;flex:1}#scan-history .line{margin:6px 0}#scan-progress{width:100%;accent-color:#7ec8ff}#scan-status{white-space:pre-wrap;overflow-wrap:anywhere}@media(max-width:540px){#bill-scanner-panel .scan-grid{grid-template-columns:1fr}#bill-scanner-panel .scan-wide{grid-column:auto}}
+#bill-scanner-panel {
+  --scan-surface: #101f34;
+  --scan-field: #0a1729;
+  --scan-border: #36516b;
+  --scan-ink: #eef7ff;
+  --scan-muted: #b6c9da;
+  --scan-accent: #65efb5;
+  display: grid;
+  gap: 16px;
+  color-scheme: dark;
+  background: #081423;
+  color: var(--scan-ink);
+  font-size: 17px;
+  line-height: 1.55;
+}
+#bill-scanner-panel .scan-intro {
+  background: radial-gradient(ellipse at top right, #124c40, transparent 70%), #0e2035;
+  border: 1px solid var(--scan-border);
+  border-radius: 20px;
+  padding: clamp(18px, 4vw, 32px);
+}
+#bill-scanner-panel #scan-title { color: var(--scan-ink); font-size: clamp(30px, 5vw, 46px); margin: 0; }
+#bill-scanner-panel .scan-intro p { margin: 8px 0 12px; color: var(--scan-muted); }
+#bill-scanner-panel .scan-intro a { color: var(--scan-accent); display: inline-flex; align-items: center; min-height: 44px; }
+#bill-scanner-panel .scan-card {
+  min-width: 0;
+  margin: 0;
+  padding: clamp(14px, 3vw, 22px);
+  background: var(--scan-surface);
+  border: 1px solid var(--scan-border);
+  border-radius: 16px;
+}
+#bill-scanner-panel h3, #bill-scanner-panel summary { color: var(--scan-ink); font-weight: 750; font-size: 20px; }
+#bill-scanner-panel h3 { margin: 0 0 12px; }
+#bill-scanner-panel summary { cursor: pointer; min-height: 44px; align-content: center; padding-block: 6px; }
+#bill-scanner-panel summary::marker { color: var(--scan-accent); }
+#bill-scanner-panel .scan-card-content { margin-top: 12px; }
+#bill-scanner-panel .scan-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 12px; }
+#bill-scanner-panel .scan-field { display: grid; min-width: 0; align-content: start; gap: 6px; margin: 0; }
+#bill-scanner-panel :is(.scan-field input,.scan-field select,.scan-field textarea) {
+  width: 100%; min-width: 0; min-height: 48px; margin: 0; padding: 10px;
+  color: var(--scan-ink); background: var(--scan-field); border: 1px solid var(--scan-border); border-radius: 10px;
+  font: inherit;
+}
+#bill-scanner-panel textarea { min-height: 130px; resize: vertical; }
+#bill-scanner-panel textarea::placeholder, #bill-scanner-panel input::placeholder { color: #90a9c0; }
+#bill-scanner-panel .scan-picker {
+  position: relative; display: grid; gap: 2px; min-width: 0;
+  padding: 13px; background: #10332f; color: var(--scan-ink); border: 1px solid #408975; border-radius: 12px;
+}
+#bill-scanner-panel .scan-picker strong { color: var(--scan-accent); font-size: 20px; }
+#bill-scanner-panel .scan-picker span { font-size: 15px; }
+#bill-scanner-panel .scan-picker input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; margin: 0; }
+#bill-scanner-panel .scan-picker:has(:disabled) { opacity: .62; }
+#bill-scanner-panel :focus-visible, #bill-scanner-panel .scan-picker:focus-within { outline: 3px solid var(--scan-accent); outline-offset: 3px; }
+#bill-scanner-panel .scan-preview-frame { display: grid; place-items: center; overflow: hidden; margin-top: 12px; }
+#bill-scanner-panel #scan-preview { margin: auto; }
+#bill-scanner-panel .scan-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+#bill-scanner-panel button {
+  width: auto; min-height: 48px; margin: 0; padding: 9px 13px; white-space: normal;
+  font: inherit; font-weight: 700; color: var(--scan-ink); background: #18334a;
+  border: 1px solid var(--scan-border); border-radius: 10px;
+}
+#bill-scanner-panel .scan-actions button { flex: 1 1 160px; }
+#bill-scanner-panel #scan-save { background: var(--scan-accent); color: #08251d; border-color: var(--scan-accent); flex-grow: 2; }
+#bill-scanner-panel button:disabled { opacity: .55; }
+#bill-scanner-panel :is(.scan-hint,.muted) { color: var(--scan-muted); }
+#bill-scanner-panel :is(#scan-status,#scan-diagnostic-log,#scan-stock-summary) { white-space: pre-wrap; overflow-wrap: anywhere; }
+#bill-scanner-panel #scan-progress { width: 100%; accent-color: var(--scan-accent); margin-top: 12px; }
+#bill-scanner-panel .scan-guide { margin-top: 12px; }
+#bill-scanner-panel :is(.scan-guide details,.scan-stock,#scan-diagnostics) { background: var(--scan-field); border: 1px solid var(--scan-border); border-radius: 10px; padding: 2px 12px; }
+#bill-scanner-panel .scan-guide summary { font-size: 16px; }
+#bill-scanner-panel .scan-guide p { margin-top: 0; color: var(--scan-muted); }
+#bill-scanner-panel #scan-cost-summary { margin-top: 12px; color: var(--scan-muted); }
+#bill-scanner-panel .scan-verify { display: flex; gap: 10px; align-items: flex-start; min-height: 44px; padding-block: 6px; margin-bottom: 8px; cursor: pointer; }
+#bill-scanner-panel #scan-verified { flex: none; width: 23px; height: 23px; margin: 1px 0 0; accent-color: var(--scan-accent); }
+#bill-scanner-panel .scan-register { border-color: #408975; scroll-margin-top: calc(var(--header-height, 60px) + 18px); }
+#bill-scanner-panel .scan-register-head { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+#bill-scanner-panel .scan-register-head h3 { margin: 0; font-size: 26px; }
+#bill-scanner-panel .scan-register-filters { align-items: end; }
+#bill-scanner-panel #scan-history .line {
+  background: var(--scan-field); color: var(--scan-muted); border-color: var(--scan-border);
+  font-size: 16px; overflow-wrap: anywhere;
+}
+#bill-scanner-panel #scan-history .line strong { color: var(--scan-ink); }
+#bill-scanner-panel .scan-stock { margin-top: 12px; }
+@media (max-width: 560px) {
+  #bill-scanner-panel .scan-grid { grid-template-columns: minmax(0,1fr); }
+  #bill-scanner-panel .scan-picker { min-height: 58px; }
+}
+#bill-scanner-panel .scan-item-review { padding-inline-start: 20px; overflow-wrap: anywhere; }
+#bill-scanner-panel .scan-item-review li + li { margin-top: 6px; }
 </style></head><body><header class="app-header">
   <div class="header-inner">
     <a class="brand" href="#dashboard-panel" aria-label="विघ्नहर्ता मेडिकल · मुख्य डॅशबोर्ड">
@@ -540,37 +631,108 @@ body[data-signed-in=true] #view-fab{display:grid}
   </details>
 </section>
 <section id="bill-scanner-panel" aria-labelledby="scan-title">
-<h2 id="scan-title" class="section-title">▣ बिल स्कॅनर — खरेदी / विक्री / कलेक्शन</h2>
-<p class="muted">फोटो निवडताच Gemini स्कॅन सुरू होईल. Gemini चालला नाही तर OCR आपोआप सुरू होईल. इंटरनेट आवश्यक आहे. वाचलेली माहिती तपासूनच सेव्ह करा; सेव्ह केल्याशिवाय हिशोब बदलत नाही.</p>
-<div class="scan-grid">
-<label>नोंद प्रकार<select id="scan-kind"><option value="purchase">खरेदी बिल + स्टॉक आवक</option><option value="sale">विक्री बिल + स्टॉक जावक</option><option value="collection">फक्त डेली कलेक्शन (स्टॉक बदल नाही)</option></select></label>
-<div class="scan-wide" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px">
-<label>📷 कॅमेराने बिल काढा<input id="scan-camera" type="file" accept="image/*" capture="environment"></label>
-<label>🖼️ गॅलरीमधून फोटो निवडा<input id="scan-photo" type="file" accept="image/*"></label>
-</div>
-<div class="scan-wide scan-actions"><button id="scan-ai" type="button">✦ Gemini AI फोटो स्कॅन</button><button id="scan-ocr" type="button">📷 फोटोमधील मजकूर वाचा (OCR)</button><button id="scan-clear" class="secondary" type="button">फॉर्म साफ करा</button></div>
-<div class="scan-wide scan-actions"><button id="scan-rotate" type="button" class="secondary">↻ फोटो 90° फिरवा</button><button id="scan-parse" type="button" class="secondary">✦ OCR मजकुरातून तपशील भरा</button><button id="scan-demo" type="button" class="secondary">नमुना विक्री बिल डेमो</button></div><div class="scan-wide"><img id="scan-preview" alt="बिल फोटो पूर्वावलोकन" style="display:none;max-width:100%;max-height:280px;object-fit:contain;border-radius:10px"/></div><label>तारीख<input id="scan-date" type="date"></label><label>बिल क्रमांक<input id="scan-invoice" placeholder="उदा. 12345"></label>
-<label>स्टॉकिस्ट / ग्राहक<input id="scan-party" placeholder="नाव"></label><label>बिलाची एकूण रक्कम ₹<input id="scan-total" type="number" min="0" step="0.01"></label>
-<label>पेमेंट<select id="scan-payment"><option value="">पेमेंट निवडा</option><option value="Cash">Cash</option><option value="UPI">UPI</option><option value="Bank">Bank</option><option value="Credit">उधारी</option><option value="AlreadyRecorded">आधीच हिशोबात नोंदलेले</option></select></label>
-<label>हिशोबात समावेश<select id="scan-ledger"><option value="none">फक्त स्कॅन रजिस्टर (दुबार नोंद नाही)</option><option value="link">नवीन हिशोब नोंदही तयार करा</option></select></label>
-<label class="scan-wide">औषधे (प्रत्येक ओळ: नाव | बॅच | एक्सपायरी YYYY-MM | प्रमाण | पॅक गुणक | फ्री पॅक | खरेदी दर प्रति पॅक | MRP प्रति युनिट | विक्री दर प्रति युनिट)<textarea id="scan-items" placeholder="PARACETAMOL 500 | B123 | 2027-12 | 10 | 1"></textarea></label>
-<div class="scan-wide" id="scan-cost-summary" style="padding:12px;border:1px solid #34506b;border-radius:10px;white-space:pre-line"></div><p class="scan-wide">OCR अपडेट 2 · 24/11/2026</p><label class="scan-wide">OCR मजकूर (संपादन करता येईल)<textarea id="scan-raw" placeholder="स्कॅन केलेला मजकूर इथे दिसेल"></textarea></label>
-</div><p class="scan-hint">प्रमाण × पॅक गुणक = स्टॉक युनिट्स. औषधांचे नाव, बॅच, एक्सपायरी आणि पॅक गुणक स्वतः पडताळा. विक्रीत उपलब्ध स्टॉकची पडताळणी आवश्यक आहे.</p>
-<div class="scan-actions">
-<button id="scan-cancel" class="secondary" type="button" hidden>स्कॅन रद्द करा (Cancel)</button>
-<button id="scan-retry" class="secondary" type="button" hidden>पुन्हा स्कॅन करा (Retry)</button>
-</div>
-<progress id="scan-progress" aria-label="बिल स्कॅनची प्रगती" hidden></progress>
-<p id="scan-status" class="muted" role="status" aria-live="polite">तयार. नवीन नोंद करण्यापूर्वी CSV बॅकअप घ्या.</p>
-<details id="scan-diagnostics" hidden>
+  <div class="scan-intro">
+    <h2 id="scan-title" class="section-title">बिल स्कॅनर</h2>
+    <p>खरेदी, विक्री आणि कलेक्शनची बिले स्कॅन करा. Cloud Save करण्यापूर्वी मूळ बिलाशी तपासा.</p>
+    <a id="scan-register-link" href="#scan-register">बिल रजिस्टर पहा ↓</a>
+  </div>
+
+  <div class="scan-card" aria-labelledby="scan-capture-title">
+    <h3 id="scan-capture-title">बिलाचा फोटो</h3>
+    <div class="scan-grid">
+      <label class="scan-picker"><strong>कॅमेरा</strong><span>नवीन फोटो काढा</span><input id="scan-camera" type="file" accept="image/*" capture="environment"></label>
+      <label class="scan-picker"><strong>गॅलरी</strong><span>फोनमधील फोटो निवडा</span><input id="scan-photo" type="file" accept="image/*"></label>
+    </div>
+    <div class="scan-preview-frame"><img id="scan-preview" alt="बिल फोटो पूर्वावलोकन" style="display:none;max-width:100%;max-height:280px;object-fit:contain;border-radius:10px"/></div>
+    <p class="scan-hint">फोटो निवडताच स्कॅन सुरू होतो. Gemini अयशस्वी झाल्यास OCR वापरले जाते.</p>
+    <div class="scan-actions"><button id="scan-ai" type="button">✦ Gemini AI फोटो स्कॅन</button><button id="scan-ocr" type="button">📷 फोटोमधील मजकूर वाचा (OCR)</button><button id="scan-rotate" type="button" class="secondary">↻ फोटो 90° फिरवा</button><button id="scan-cancel" class="secondary" type="button" hidden>स्कॅन रद्द करा (Cancel)</button><button id="scan-retry" class="secondary" type="button" hidden>पुन्हा स्कॅन करा (Retry)</button></div>
+    <progress id="scan-progress" aria-label="बिल स्कॅनची प्रगती" hidden></progress>
+    <p id="scan-status" class="muted" role="status" aria-live="polite">तयार. नवीन नोंद करण्यापूर्वी CSV बॅकअप घ्या.</p>
+    <details id="scan-diagnostics" hidden>
 <summary>स्कॅन निदान (Scan diagnostics)</summary>
 <p id="scan-diagnostic-log" style="white-space:pre-wrap;overflow-wrap:anywhere"></p>
 </details>
-<label><input id="scan-verified" type="checkbox"> मी मूळ बिलाशी तपशील, औषधांच्या ओळी आणि पेमेंट पडताळले आहे.</label>
-<button id="scan-save" type="button">✓ तपासलेली बिल नोंद Cloud मध्ये सेव्ह करा</button>
-<div class="scan-actions"><button id="scan-export" type="button" class="secondary">स्कॅन बिल CSV डाउनलोड</button></div>
-<h3>स्कॅन केलेली बिले</h3><p id="scan-sync-status" class="muted" role="status"></p><div id="scan-history"></div>
-<h3>स्कॅन रजिस्टरमधील स्टॉक हालचाल</h3><div id="scan-stock-summary" class="muted">या विभागातील नोंदींवर आधारित; जुना स्टॉक यात धरलेला नाही.</div>
+  </div>
+
+  <details class="scan-card" open>
+    <summary>बिल तपशील</summary>
+    <div class="scan-grid scan-card-content">
+      <label class="scan-field">नोंद प्रकार<select id="scan-kind"><option value="purchase">खरेदी बिल + स्टॉक आवक</option><option value="sale">विक्री बिल + स्टॉक जावक</option><option value="collection">फक्त डेली कलेक्शन (स्टॉक बदल नाही)</option></select></label>
+      <label class="scan-field">बिल क्रमांक<input id="scan-invoice" placeholder="उदा. 12345"></label>
+      <label class="scan-field">तारीख<input id="scan-date" type="date"></label>
+      <label class="scan-field">स्टॉकिस्ट / ग्राहक<input id="scan-party" placeholder="नाव"></label>
+    </div>
+  </details>
+
+  <details class="scan-card">
+    <summary>GSTIN, GST आणि सवलत</summary>
+    <div class="scan-card-content">
+      <p class="scan-hint" id="scan-tax-note">ही क्षेत्रे बिल पडताळण्यासाठी आहेत. Cloud नोंदीत ती स्वतंत्रपणे जतन होत नाहीत. अंतिम रक्कम पेमेंट विभागात तपासा.</p>
+      <div class="scan-grid" aria-describedby="scan-tax-note">
+        <label class="scan-field">GSTIN<input id="scan-review-gstin" maxlength="15" autocapitalize="characters" spellcheck="false"></label>
+        <label class="scan-field">GST रक्कम ₹<input id="scan-review-gst" type="number" min="0" step="0.01" inputmode="decimal"></label>
+        <label class="scan-field">सवलत ₹<input id="scan-review-discount" type="number" min="0" step="0.01" inputmode="decimal"></label>
+      </div>
+    </div>
+  </details>
+
+  <details class="scan-card" open>
+    <summary>औषधे आणि स्टॉक तपशील</summary>
+    <div class="scan-card-content">
+      <p class="scan-hint">प्रत्येक औषध एका ओळीत आहे. स्तंभ वेगळे करण्यासाठी <code>|</code> वापरा.</p>
+      <label class="scan-field">औषधांच्या ओळी<textarea id="scan-items" placeholder="PARACETAMOL 500 | B123 | 2027-12 | 10 | 1"></textarea></label>
+      <div class="scan-grid scan-guide">
+        <details><summary>बॅच आणि एक्सपायरी</summary><p>औषधाच्या नावानंतर बॅच क्रमांक आणि एक्सपायरी <code>YYYY-MM</code> स्वरूपात लिहा.</p><ul class="scan-item-review" id="scan-batch-review" hidden></ul></details>
+        <details><summary>प्रमाण आणि फ्री प्रमाण</summary><p>एक्सपायरीनंतर बिलातील प्रमाण, पॅक गुणक आणि मोफत पॅक लिहा. पॅक गुणक म्हणजे एका पॅकमधील युनिट्स.</p><ul class="scan-item-review" id="scan-quantity-review" hidden></ul></details>
+        <details><summary>खरेदी दर, MRP आणि विक्री दर</summary><p>फ्री पॅकनंतर प्रति पॅक खरेदी दर, प्रति युनिट MRP आणि प्रति युनिट विक्री दर लिहा.</p><ul class="scan-item-review" id="scan-rates-review" hidden></ul></details>
+      </div>
+      <div class="scan-wide" id="scan-cost-summary" style="padding:12px;border:1px solid #34506b;border-radius:10px;white-space:pre-line"></div>
+    </div>
+  </details>
+
+  <details class="scan-card" open>
+    <summary>एकूण रक्कम आणि पेमेंट</summary>
+    <div class="scan-grid scan-card-content">
+      <label class="scan-field">बिलाची एकूण रक्कम ₹<input id="scan-total" type="number" min="0" step="0.01"></label>
+      <label class="scan-field">पेमेंट पद्धत<select id="scan-payment"><option value="">पेमेंट निवडा</option><option value="Cash">Cash</option><option value="UPI">UPI</option><option value="Bank">Bank</option><option value="Credit">उधारी</option><option value="AlreadyRecorded">आधीच हिशोबात नोंदलेले</option></select></label>
+      <label class="scan-field">हिशोबात समावेश<select id="scan-ledger"><option value="none">फक्त स्कॅन रजिस्टर (दुबार नोंद नाही)</option><option value="link">नवीन हिशोब नोंदही तयार करा</option></select></label>
+    </div>
+  </details>
+
+  <details class="scan-card">
+    <summary>OCR मजकूर आणि साधने</summary>
+    <div class="scan-card-content">
+      <label class="scan-field">OCR मजकूर (संपादन करता येईल)<textarea id="scan-raw" placeholder="स्कॅन केलेला मजकूर इथे दिसेल"></textarea></label>
+      <div class="scan-actions"><button id="scan-parse" type="button" class="secondary">✦ OCR मजकुरातून तपशील भरा</button><button id="scan-demo" type="button" class="secondary">नमुना विक्री बिल डेमो</button></div>
+    </div>
+  </details>
+
+  <div class="scan-card scan-review">
+    <label class="scan-verify"><input id="scan-verified" type="checkbox"><span>मी मूळ बिलाशी तपशील, औषधांच्या ओळी आणि पेमेंट पडताळले आहे.</span></label>
+    <div class="scan-actions"><button id="scan-save" type="button">✓ तपासलेली बिल नोंद Cloud मध्ये सेव्ह करा</button><button id="scan-clear" class="secondary" type="button">फॉर्म साफ करा</button></div>
+  </div>
+
+  <div id="scan-register" class="scan-card scan-register" role="region" tabindex="-1" aria-labelledby="scan-register-title">
+    <div class="scan-register-head">
+      <h3 id="scan-register-title">बिल रजिस्टर</h3>
+      <button id="scan-export" type="button" class="secondary">स्कॅन बिल CSV डाउनलोड</button>
+    </div>
+    <p id="scan-sync-status" class="muted" role="status"></p>
+    <div class="scan-grid scan-register-filters">
+      <label class="scan-field">बिल शोधा<input id="scan-search" type="search" placeholder="बिल क्रमांक, नाव किंवा औषध"></label>
+      <label class="scan-field">नोंद प्रकार<select id="scan-filter-kind"><option value="">सर्व प्रकार</option><option value="purchase">खरेदी</option><option value="sale">विक्री</option><option value="collection">कलेक्शन</option></select></label>
+      <label class="scan-field">पेमेंट<select id="scan-filter-payment"><option value="">सर्व पेमेंट</option><option value="Cash">Cash</option><option value="UPI">UPI</option><option value="Bank">Bank</option><option value="Credit">उधारी</option><option value="AlreadyRecorded">आधीच नोंदलेले</option></select></label>
+      <label class="scan-field">पासून<input id="scan-filter-from" type="date"></label>
+      <label class="scan-field">पर्यंत<input id="scan-filter-to" type="date"></label>
+      <button id="scan-filter-clear" class="secondary" type="button">फिल्टर साफ करा</button>
+    </div>
+    <p id="scan-filter-count" role="status" class="scan-hint"></p>
+    <div id="scan-history"></div>
+    <details class="scan-stock">
+      <summary>सर्व नोंदींची स्टॉक हालचाल</summary>
+      <div id="scan-stock-summary" class="muted">या विभागातील नोंदींवर आधारित; जुना स्टॉक यात धरलेला नाही.</div>
+    </details>
+  </div>
 </section>
 <section id="staff-access-panel" class="hidden" aria-labelledby="staff-access-heading">
   <h2 id="staff-access-heading" class="section-title">स्टाफ प्रवेश व्यवस्थापन</h2>
@@ -2527,6 +2689,75 @@ scanEl('scan-retry').onclick=()=>scanPhoto(scanRetryOcrOnly);
 
 scanEl('scan-save').onclick=async()=>{if(scanRun||scanEl('scan-save').disabled)return;if(!user){scanStatus('प्रथम लॉगिन करा');return}const btn=scanEl('scan-save');if(!scanEl('scan-verified').checked){scanStatus('Cloud Save करण्यापूर्वी मूळ बिल तपासा आणि पडताळणीची खूण करा.');return}try{const kind=scanEl('scan-kind').value,date=scanEl('scan-date').value,invoice=scanEl('scan-invoice').value.trim(),party=scanEl('scan-party').value.trim(),total=Number(scanEl('scan-total').value),payment=scanEl('scan-payment').value,linked=scanEl('scan-ledger').value==='link',items=kind==='collection'?[]:scanItems();if(invoice.startsWith('DEMO-ONLY'))throw Error('डेमो बिल सेव्ह करता येत नाही. वास्तविक बिल क्रमांक भरा');if(!payment||!date||!invoice||!party||!Number.isFinite(total)||total<=0)throw Error('तारीख, बिल क्रमांक, नाव, रक्कम आणि पेमेंट आवश्यक');if(kind!=='purchase'&&items.some(i=>i.freePacks>0))throw Error('फ्री पॅक फक्त खरेदीसाठी वापरा');if(kind!=='collection'&&!items.length)throw Error('संपूर्ण बिलासाठी औषधांची यादी भरा');if(kind==='sale'&&linked&&payment==='Credit')throw Error('उधारी विक्रीची स्वतंत्र वसुली प्रक्रिया आवश्यक आहे; सध्या फक्त स्कॅन रजिस्टरमध्ये नोंदवा');if(linked&&payment==='AlreadyRecorded')throw Error('आधीच नोंदलेल्या बिलासाठी नवीन हिशोब लिंक निवडू नका');const key=[kind,scanNorm(party),scanNorm(invoice)].join('~');const id='scan-'+Array.from(new TextEncoder().encode(key)).map(x=>x.toString(16).padStart(2,'0')).join('');if(scanSavedIds.has(id)||scanBills.some(b=>b.id===id))throw Error('हे बिल स्कॅन रजिस्टरमध्ये आधीच नोंदलेले आहे');if(!confirm('बिल तपासले आहे का? '+(linked?'नवीन हिशोब नोंद तयार होईल.':'फक्त स्कॅन रजिस्टरमध्ये नोंद होईल.')+' आधीच्या व्यवहारात नोंद असेल तर पुन्हा लिंक करू नका.'))return;btn.disabled=true;const uid=user.uid,rawText=scanEl('scan-raw').value.slice(0,20000);const ref=doc(db,'scanBills',id);await runTransaction(db,async tx=>{const existing=await tx.get(ref);if(existing.exists())throw Error('हे बिल आधीच सेव्ह आहे');let ledgerRef=null,ledgerData=null;if(linked){const coll=kind==='purchase'?'stockistTransactions':'transactions';ledgerRef=doc(db,coll,id);if((await tx.get(ledgerRef)).exists())throw Error('लिंक हिशोब नोंद आधीच आहे');ledgerData=kind==='purchase'?{date,name:party,type:'purchase',note:'स्कॅन बिल '+invoice,amount:total,createdBy:uid,updatedBy:uid,updatedAt:serverTimestamp()}:{date,type:payment==='Credit'?'credit':'income',note:'स्कॅन विक्री/कलेक्शन बिल '+invoice+' · '+party,mode:payment,amount:total,createdBy:uid,updatedBy:uid,updatedAt:serverTimestamp()}}tx.set(ref,{kind,date,invoice,party,total,payment,items,rawText,linkedLedger:linked,createdBy:uid,updatedAt:serverTimestamp()});if(ledgerRef)tx.set(ledgerRef,ledgerData)});scanSavedIds.add(id);scanEl('scan-clear').click();scanStatus('✅ बिल नोंद जतन करण्याची विनंती पूर्ण. Cloud Sync स्थिती तपासा.')}catch(e){scanStatus('⚠️ नोंद सेव्ह झाली नाही: '+(e.message||e))}finally{btn.disabled=false}};
 scanEl('scan-export').onclick=()=>downloadCSV([['Type','Date','Invoice','Party','Total','Payment','Ledger Linked','Items'],...scanBills.map(b=>[b.kind,b.date,b.invoice,b.party,b.total,b.payment,b.linkedLedger?'Yes':'No',(b.items||[]).map(i=>[i.name,i.batch,i.expiry,i.quantity,i.packFactor,i.freePacks??0,i.purchaseRate??'',i.mrpUnit??'',i.saleRate??''].join('|')).join('; ')])],'Vighnaharta_Scanned_Bills.csv');
+// Filters only the rendered register. Stock totals and exports still use the full records.
+const scanRegisterFields=['scan-search','scan-filter-kind','scan-filter-payment','scan-filter-from','scan-filter-to'];
+function scanFilterRegister(){
+ const [query,kind,payment,from,to]=scanRegisterFields.map(id=>scanEl(id).value);
+ const terms=scanNorm(query).split(' ').filter(Boolean);
+ const rows=scanEl('scan-history').children;
+ let visible=0;
+ scanBills.forEach((bill,index)=>{
+  const row=rows[index];
+  if(!row)return;
+  const searchable=scanNorm([bill.invoice,bill.party,...(bill.items||[]).map(item=>item.name)].join(' '));
+  const match=(!kind||kind===bill.kind)&&(!payment||payment===bill.payment)
+   &&(!from||(bill.date||'')>=from)&&(!to||(bill.date||'')<=to)
+   &&terms.every(term=>searchable.includes(term));
+  row.hidden=!match;
+  if(match)visible++;
+ });
+ const count=scanEl('scan-filter-count');
+ if(from&&to&&from>to)count.textContent='सुरुवातीची तारीख शेवटच्या तारखेपूर्वी निवडा.';
+ else if(scanBills.length&&!visible)count.textContent='या शोधासाठी बिले सापडली नाहीत.';
+ else count.textContent=scanBills.length?`${visible} / ${scanBills.length} बिले`:'';
+}
+for(const id of scanRegisterFields)scanEl(id).addEventListener('input',scanFilterRegister);
+scanEl('scan-filter-clear').addEventListener('click',()=>{
+ for(const id of scanRegisterFields)scanEl(id).value='';
+ scanFilterRegister();
+});
+new MutationObserver(scanFilterRegister).observe(scanEl('scan-history'),{childList:true});
+
+const scanTaxReview=['scan-review-gstin','scan-review-gst','scan-review-discount'].map(scanEl);
+for(const field of scanTaxReview)field.addEventListener('input',scanResetVerification);
+function scanClearTaxReview(){
+ for(const field of scanTaxReview)field.value='';
+}
+scanEl('scan-clear').addEventListener('click',scanClearTaxReview);
+for(const id of ['scan-camera','scan-photo'])scanEl(id).addEventListener('change',scanClearTaxReview);
+scanEl('scan-demo').addEventListener('click',scanClearTaxReview);
+
+const scanItemReview=[
+ ['scan-batch-review',[[1,'बॅच'],[2,'एक्सपायरी']]],
+ ['scan-quantity-review',[[3,'प्रमाण'],[4,'पॅक गुणक'],[5,'फ्री पॅक']]],
+ ['scan-rates-review',[[6,'खरेदी दर'],[7,'MRP'],[8,'विक्री दर']]]
+];
+function scanRefreshItemReview(){
+ const items=scanEl('scan-items').value.split(/\r?\n/).filter(line=>line.trim())
+  .map(line=>line.split('|').map(field=>field.trim()));
+ for(const [id,columns] of scanItemReview){
+  const list=scanEl(id);
+  list.hidden=!items.length;
+  list.replaceChildren(...items.map(([name,...values])=>{
+   const item=document.createElement('li');
+   const title=document.createElement('strong');
+   title.textContent=name||'औषधाचे नाव';
+   const valuesText=columns.map(([index,label])=>label+' '+(values[index-1]||'—')).join(' · ');
+   item.append(title,document.createTextNode(' · '+valuesText));
+   return item;
+  }));
+ }
+}
+new MutationObserver(scanRefreshItemReview).observe(scanEl('scan-cost-summary'),{childList:true});
+scanEl('scan-demo').addEventListener('click',scanRefreshItemReview);
+
+scanEl('scan-register-link').addEventListener('click',event=>{
+ event.preventDefault();
+ const register=scanEl('scan-register');
+ register.focus({preventScroll:true});
+ register.scrollIntoView({block:'start'});
+});
+
 
 onAuthStateChanged(auth,async u=>{clearSubs();resetStaffAccess();document.body.dataset.signedIn='false';historyPages.clear();resetAttendanceCloud();financeReset();user=null;owner=false;showAttendance(false);reportSources.clear();currentReport=null;reportPanel.open=false;el('report-content').replaceChildren();el('report-state').textContent='';el('cloud-panel').classList.add('hidden');el('login-panel').classList.remove('hidden');cloudMain=[];cloudStock=[];localizedSnapshots.clear();localizedMessages.delete('cm-list');localizedMessages.delete('cs-list');localMessage('sync-state','Cloud कनेक्शन तपासत आहे…');updateDashboard();el('cm-list').replaceChildren();el('cs-list').replaceChildren();drawWorkspaceTrend('loading');if(!u)return;try{owner=u.uid===ownerUID;const staff=owner|| (await getDoc(doc(db,'authorizedStaff',u.uid))).exists();if(!staff){localMessage('login-error','या खात्याला प्रवेश परवानगी नाही.');await signOut(auth);return}user=u;document.body.dataset.signedIn='true';el('login-panel').classList.add('hidden');el('cloud-panel').classList.remove('hidden');renderCloudIdentity();showAttendance(owner);if(owner){watchAttendance();watchSalaryPayments();watchStaffAccess();}watch('transactions');watch('stockistTransactions');scanWatch();navigateWorkspace(true)}catch(e){localMessage('login-error','परवानगी तपासता आली नाही: ',e.code||e.message)}});
 async function submit(which){if(!user)return;const main=which==='main',prefix=main?'cm':'cs',coll=main?'transactions':'stockistTransactions',edit=main?editMain:editStock;if(edit&&!owner){alert(t('दुरुस्ती फक्त Owner करू शकतो'));return}const fields=main?['date','type','note','mode','amount']:['date','name','type','note','amount'];const data={};for(const k of fields)data[k]=el(prefix+'-'+k).value.trim();data.amount=Number(data.amount);if(!data.date||!(data.amount>0)||(main?!data.note:!data.name)){alert(t('सर्व आवश्यक माहिती भरा'));return}if(main&&!financeValidateExpense(data,edit))return;const btn=el(prefix+'-submit');btn.disabled=true;try{const ref=edit?doc(db,coll,edit):doc(collection(db,coll));await setDoc(ref,{...data,...(edit?{}:{createdBy:user.uid}),updatedBy:user.uid,updatedAt:serverTimestamp()},{merge:!!edit});reset(which)}catch(e){safeError(e)}finally{btn.disabled=false}}
