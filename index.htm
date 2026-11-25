@@ -502,7 +502,7 @@ body[data-signed-in=true] #view-fab{display:grid}
  body.finance-print .finance-quick-links,body.finance-print .standalone-eyebrow{display:none!important}
 }
 </style><style id="bill-scanner-style">
-#bill-scanner-panel .scan-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}#bill-scanner-panel label{display:block;margin:6px 0}#bill-scanner-panel textarea{width:100%;min-height:125px;background:#0d192a;color:#e3efff;border:1px solid #30445e;border-radius:9px;padding:10px;font:14px system-ui}#bill-scanner-panel .scan-wide{grid-column:1/-1}#bill-scanner-panel .scan-hint{font-size:12px;color:#a9bdd3}#bill-scanner-panel .scan-actions{display:flex;gap:8px;flex-wrap:wrap}#bill-scanner-panel .scan-actions button{width:auto;flex:1}#scan-history .line{margin:6px 0}#scan-status{white-space:pre-wrap;overflow-wrap:anywhere}@media(max-width:540px){#bill-scanner-panel .scan-grid{grid-template-columns:1fr}#bill-scanner-panel .scan-wide{grid-column:auto}}
+#bill-scanner-panel .scan-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}#bill-scanner-panel label{display:block;margin:6px 0}#bill-scanner-panel textarea{width:100%;min-height:125px;background:#0d192a;color:#e3efff;border:1px solid #30445e;border-radius:9px;padding:10px;font:14px system-ui}#bill-scanner-panel .scan-wide{grid-column:1/-1}#bill-scanner-panel .scan-hint{font-size:12px;color:#a9bdd3}#bill-scanner-panel .scan-actions{display:flex;gap:8px;flex-wrap:wrap}#bill-scanner-panel .scan-actions button{width:auto;flex:1}#scan-history .line{margin:6px 0}#scan-progress{width:100%;accent-color:#7ec8ff}#scan-status{white-space:pre-wrap;overflow-wrap:anywhere}@media(max-width:540px){#bill-scanner-panel .scan-grid{grid-template-columns:1fr}#bill-scanner-panel .scan-wide{grid-column:auto}}
 </style></head><body><header class="app-header">
   <div class="header-inner">
     <a class="brand" href="#dashboard-panel" aria-label="विघ्नहर्ता मेडिकल · मुख्य डॅशबोर्ड">
@@ -556,11 +556,16 @@ body[data-signed-in=true] #view-fab{display:grid}
 <label class="scan-wide">औषधे (प्रत्येक ओळ: नाव | बॅच | एक्सपायरी YYYY-MM | प्रमाण | पॅक गुणक | फ्री पॅक | खरेदी दर प्रति पॅक | MRP प्रति युनिट | विक्री दर प्रति युनिट)<textarea id="scan-items" placeholder="PARACETAMOL 500 | B123 | 2027-12 | 10 | 1"></textarea></label>
 <div class="scan-wide" id="scan-cost-summary" style="padding:12px;border:1px solid #34506b;border-radius:10px;white-space:pre-line"></div><p class="scan-wide">OCR अपडेट 2 · 24/11/2026</p><label class="scan-wide">OCR मजकूर (संपादन करता येईल)<textarea id="scan-raw" placeholder="स्कॅन केलेला मजकूर इथे दिसेल"></textarea></label>
 </div><p class="scan-hint">प्रमाण × पॅक गुणक = स्टॉक युनिट्स. औषधांचे नाव, बॅच, एक्सपायरी आणि पॅक गुणक स्वतः पडताळा. विक्रीत उपलब्ध स्टॉकची पडताळणी आवश्यक आहे.</p>
+<div class="scan-actions">
+<button id="scan-cancel" class="secondary" type="button" hidden>स्कॅन रद्द करा (Cancel)</button>
+<button id="scan-retry" class="secondary" type="button" hidden>पुन्हा स्कॅन करा (Retry)</button>
+</div>
+<progress id="scan-progress" aria-label="बिल स्कॅनची प्रगती" hidden></progress>
 <p id="scan-status" class="muted" role="status" aria-live="polite">तयार. नवीन नोंद करण्यापूर्वी CSV बॅकअप घ्या.</p>
 <label><input id="scan-verified" type="checkbox"> मी मूळ बिलाशी तपशील, औषधांच्या ओळी आणि पेमेंट पडताळले आहे.</label>
 <button id="scan-save" type="button">✓ तपासलेली बिल नोंद Cloud मध्ये सेव्ह करा</button>
 <div class="scan-actions"><button id="scan-export" type="button" class="secondary">स्कॅन बिल CSV डाउनलोड</button></div>
-<h3>स्कॅन केलेली बिले</h3><div id="scan-history"></div>
+<h3>स्कॅन केलेली बिले</h3><p id="scan-sync-status" class="muted" role="status"></p><div id="scan-history"></div>
 <h3>स्कॅन रजिस्टरमधील स्टॉक हालचाल</h3><div id="scan-stock-summary" class="muted">या विभागातील नोंदींवर आधारित; जुना स्टॉक यात धरलेला नाही.</div>
 </section>
 <section id="staff-access-panel" class="hidden" aria-labelledby="staff-access-heading">
@@ -2105,8 +2110,10 @@ window.addEventListener('offline',renderStaffAccess);
 
 // Bill scanner extension. Existing ledger data is never migrated or deleted.
 let scanBills=[];
+const scanSavedIds=new Set();
 const scanEl=id=>document.getElementById(id);
 const scanStatus=msg=>{scanEl('scan-status').textContent=msg};
+const scanSyncStatus=msg=>{scanEl('scan-sync-status').textContent=msg};
 const scanToday=()=>new Date().toLocaleDateString('en-CA');
 scanEl('scan-date').value=scanToday();
 const scanEscape=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -2222,11 +2229,12 @@ function scanItems(){return scanEl('scan-items').value.split(/\r?\n/).filter(x=>
 function scanCostPreview(){const out=scanEl('scan-cost-summary');try{const items=scanItems();const purchase=scanEl('scan-kind').value==='purchase';if(!items.length){out.textContent='दर व प्रमाण भरल्यावर गणना दिसेल.';return}const complete=items.every(i=>i.costTotal!==null&&i.saleRate!==null);const cost=items.reduce((n,i)=>n+(i.costTotal||0),0),revenue=items.reduce((n,i)=>n+i.units*(i.saleRate||0),0);out.textContent='एकूण युनिट्स: '+items.reduce((n,i)=>n+i.units,0)+'\n'+(purchase&&complete?'खरेदी खर्च ₹'+cost.toFixed(2)+' | संभाव्य विक्री ₹'+revenue.toFixed(2)+'\nअंदाजित सकल नफा ₹'+(revenue-cost).toFixed(2)+' (कर, सवलत व इतर खर्च वगळून)':'नफा गणनेसाठी खरेदी व विक्री दर आवश्यक; विक्रीचा प्रत्यक्ष नफा येथे मोजला जात नाही.');}catch(e){out.textContent=e.message}}
 scanEl('scan-items').addEventListener('input',scanCostPreview);scanEl('scan-kind').addEventListener('change',scanCostPreview);scanEl('scan-clear').addEventListener('click',()=>queueMicrotask(scanCostPreview));scanCostPreview();
 function scanRender(){const root=scanEl('scan-history');root.replaceChildren();const summary=new Map();for(const b of scanBills){const row=document.createElement('div');row.className='line';row.innerHTML='<strong>'+scanEscape(b.kind==='purchase'?'खरेदी':b.kind==='sale'?'विक्री':'कलेक्शन')+' · '+scanEscape(b.invoice)+'</strong><div>'+scanEscape(b.party)+' · '+scanEscape(b.date)+' · ₹'+Number(b.total||0).toFixed(2)+'</div><small>'+scanEscape(b.payment)+' · '+(b.items?.length||0)+' उत्पादने'+(b.linkedLedger?' · हिशोब लिंक':'')+'</small>';root.append(row);if(b.kind==='collection')continue;for(const item of b.items||[]){const key=scanNorm(item.name)+' | '+scanNorm(item.batch)+' | '+item.expiry;summary.set(key,(summary.get(key)||0)+(b.kind==='purchase'?1:-1)*Number(item.units||0))}}if(!scanBills.length)root.textContent='अजून स्कॅन बिले नाहीत.';scanEl('scan-stock-summary').textContent=summary.size?[...summary].map(([k,v])=>k+' : '+v+' युनिट्स (फक्त स्कॅन केलेल्या बिलांचा निव्वळ फरक)').join('  •  '):'या स्कॅन रजिस्टरमध्ये स्टॉक हालचाल नाही.'}
-function scanWatch(){if(!user)return;unsubs.push(onSnapshot(collection(db,'scanBills'),{includeMetadataChanges:true},snap=>{scanBills=snap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(b.date||'').localeCompare(a.date||''));scanRender();scanStatus(snap.metadata.hasPendingWrites?'⏳ स्कॅन बिल Cloud Sync बाकी आहे':snap.metadata.fromCache?'📱 स्थानिक कॅश; Cloud पडताळणी बाकी':'✅ स्कॅन बिल रजिस्टर Cloud शी जोडलेले आहे')},e=>scanStatus('⚠️ स्कॅन बिल रजिस्टर वाचता आले नाही: '+(e.code||e.message))))}
+function scanWatch(){if(!user)return;unsubs.push(onSnapshot(collection(db,'scanBills'),{includeMetadataChanges:true},snap=>{scanBills=snap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(b.date||'').localeCompare(a.date||''));scanRender();scanSyncStatus(snap.metadata.hasPendingWrites?'⏳ स्कॅन बिल Cloud Sync बाकी आहे':snap.metadata.fromCache?'📱 स्थानिक कॅश; Cloud पडताळणी बाकी':'✅ स्कॅन बिल रजिस्टर Cloud शी जोडलेले आहे')},e=>scanSyncStatus('⚠️ स्कॅन बिल रजिस्टर वाचता आले नाही: '+(e.code||e.message))))}
 scanEl('scan-clear').onclick=()=>{
  scanResetDraft();
  scanEl('scan-date').value=scanToday();
  scanFile=null;
+ scanEl('scan-retry').hidden=true;
  scanRotation=0;
  if(scanObjectUrl)URL.revokeObjectURL(scanObjectUrl);
  scanObjectUrl=null;
@@ -2234,26 +2242,58 @@ scanEl('scan-clear').onclick=()=>{
  scanStatus('नवीन बिलासाठी फॉर्म तयार');
 };
 scanEl('scan-kind').onchange=()=>{scanEl('scan-ledger').value='none';scanStatus('नोंद प्रकार निवडला. हिशोब लिंक पर्याय काळजीपूर्वक निवडा.')};
-async function scanWithOcr(jpeg){
+async function scanStage(parent,timeout,timeoutMessage,work){
+ const stage=new AbortController();
+ const cancel=()=>stage.abort(parent.reason);
+ if(parent.aborted)throw parent.reason;
+ parent.addEventListener('abort',cancel,{once:true});
+ const timer=setTimeout(()=>stage.abort(new Error(timeoutMessage)),timeout);
+ try{
+  const interrupted=new Promise((_,reject)=>{
+   stage.signal.addEventListener('abort',()=>reject(stage.signal.reason),{once:true});
+  });
+  return await Promise.race([interrupted,work(stage.signal)]);
+ }finally{
+  clearTimeout(timer);
+  parent.removeEventListener('abort',cancel);
+ }
+}
+async function scanWithOcr(jpeg,signal,progress){
  if(!window.Tesseract){
   await new Promise((resolve,reject)=>{
    const script=document.createElement('script');
+   const cleanup=()=>signal.removeEventListener('abort',cancel);
+   const cancel=()=>{cleanup();script.remove();reject(signal.reason)};
+   signal.addEventListener('abort',cancel,{once:true});
    script.src='https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js';
-   script.onload=resolve;
-   script.onerror=()=>{script.remove();reject(Error('OCR लायब्ररी लोड झाली नाही.'))};
+   script.onload=()=>{cleanup();resolve()};
+   script.onerror=()=>{cleanup();script.remove();reject(Error('OCR लायब्ररी लोड झाली नाही.'))};
    document.head.append(script);
   });
  }
- const worker=await window.Tesseract.createWorker('eng');
+ if(signal.aborted)throw signal.reason;
+ const worker=await window.Tesseract.createWorker('eng',1,{
+  logger:message=>{
+   if(!signal.aborted&&message.status==='recognizing text')progress(message.progress);
+  }
+ });
+ let termination;
+ const stop=()=>{termination??=Promise.resolve().then(()=>worker.terminate()).catch(()=>{})};
+ signal.addEventListener('abort',stop,{once:true});
  try{
+  if(signal.aborted)throw signal.reason;
   const result=await worker.recognize(jpeg);
   const raw=result.data.text?.trim();
   if(!raw)throw Error('फोटोमध्ये मजकूर सापडला नाही.');
   return raw;
- }finally{await worker.terminate()}
+ }finally{
+  signal.removeEventListener('abort',stop);
+  stop();
+ }
 }
-async function scanWithGemini(jpeg){
+async function scanWithGemini(jpeg,signal){
  const {getAI,getGenerativeModel,GoogleAIBackend}=await import('https://www.gstatic.com/firebasejs/11.10.0/firebase-ai.js');
+ if(signal.aborted)throw signal.reason;
  const ai=getAI(app,{backend:new GoogleAIBackend()});
  const model=getGenerativeModel(ai,{model:'gemini-3.8-flash',generationConfig:{responseMimeType:'application/json',temperature:0}});
  const data=jpeg.split(',')[1];
@@ -2275,48 +2315,77 @@ function scanFillGemini(d){
  put('scan-raw',String(d.rawText??'')+'\n'+rows.map(i=>clean(i.name)+' : '+clean(i.quantity)+' | बिलातील रक्कम ₹'+clean(i.lineAmount)).join('\n'));scanCostPreview();scanStatus('Gemini AI पूर्ण: '+rows.length+' औषधांच्या ओळी. सर्व दर, प्रमाण, पेमेंट आणि अंतिम रक्कम मूळ बिलाशी तपासा. Cloud Save आपोआप होत नाही.');
 }
 
-let scanBusy=false;
+const scanGeminiTimeout=30000;
+let scanRun=null;
+let scanRetryOcrOnly=false;
+function scanProgress(message,value){
+ const progress=scanEl('scan-progress');
+ if(value===undefined)progress.removeAttribute('value');
+ else progress.value=value;
+ scanStatus(message);
+}
 async function scanPhoto(ocrOnly=false){
- if(scanBusy||scanEl('scan-save').disabled)return;
+ if(scanRun||scanEl('scan-save').disabled)return;
  if(!scanFile){scanStatus('प्रथम बिलाचा फोटो निवडा');return}
- if(!navigator.onLine){scanStatus('स्कॅनसाठी इंटरनेट आवश्यक आहे. तपशील हाताने भरता येतील.');return}
+ scanRetryOcrOnly=ocrOnly;
+ scanEl('scan-retry').hidden=false;
+ if(!navigator.onLine){scanStatus('इंटरनेटशी जोडा आणि Retry दाबा. तपशील हातानेही भरता येतील.');return}
  const account=user;
- if(!account){scanStatus('प्रथम लॉगिन करा');return}
+ if(!account){scanStatus('प्रथम लॉगिन करा आणि Retry दाबा.');return}
  scanResetVerification();
- scanBusy=true;
- const ids=['scan-ai','scan-ocr','scan-save','scan-clear','scan-photo','scan-camera','scan-rotate','scan-kind','scan-ledger','scan-parse','scan-demo','scan-verified',...scanDraftFields];
+ const run=new AbortController();
+ scanRun=run;
+ const ids=['scan-ai','scan-ocr','scan-retry','scan-save','scan-clear','scan-photo','scan-camera','scan-rotate','scan-kind','scan-ledger','scan-parse','scan-demo','scan-verified',...scanDraftFields];
  const controls=ids.map(scanEl).filter(control=>!control.disabled);
  controls.forEach(control=>{control.disabled=true});
- scanStatus('फोटो स्कॅनसाठी तयार करत आहे…');
+ scanEl('scan-cancel').hidden=false;
+ scanEl('scan-progress').hidden=false;
+ scanProgress('फोटो तयार करत आहे…');
+ let fallback='';
  try{
-  const jpeg=await scanJpeg(scanObjectUrl,scanRotation);
+  const jpeg=await scanStage(run.signal,15000,'फोटो तयार करण्यास जास्त वेळ लागला.',()=>scanJpeg(scanObjectUrl,scanRotation));
+  if(user!==account)return;
   let details;
   if(!ocrOnly){
-   scanStatus('Gemini AI बिल वाचत आहे…');
-   try{details=await scanWithGemini(jpeg)}
-   catch{scanStatus('Gemini स्कॅन अयशस्वी. OCR सुरू आहे…')}
-  }else scanStatus('OCR बिल वाचत आहे…');
+   const timeoutMessage='Gemini ने ३० सेकंदांत उत्तर दिले नाही.';
+   scanProgress('Gemini बिल वाचत आहे… (कमाल ३० सेकंद)');
+   try{
+    details=await scanStage(run.signal,scanGeminiTimeout,timeoutMessage,signal=>scanWithGemini(jpeg,signal));
+   }catch(error){
+    if(run.signal.aborted)throw error;
+    fallback=error.message===timeoutMessage?timeoutMessage:'Gemini बिल वाचू शकले नाही.';
+   }
+  }
+  if(user!==account)return;
   if(details){
-   if(user!==account)return;
    scanFillGemini(details);
   }else{
-   if(user!==account)return;
-   const raw=await scanWithOcr(jpeg);
+   const message=(fallback?fallback+' ':'')+'OCR बिल वाचत आहे…';
+   scanProgress(message);
+   const raw=await scanStage(run.signal,90000,'OCR ने ९० सेकंदांत उत्तर दिले नाही.',signal=>
+    scanWithOcr(jpeg,signal,value=>scanEl('scan-progress').value=value));
    if(user!==account)return;
    scanEl('scan-raw').value=raw;
    scanExtract();
+   if(fallback)scanStatus(fallback+' '+scanEl('scan-status').textContent);
   }
- }catch(e){
-  scanStatus('स्कॅन पूर्ण झाला नाही: '+(e.message||e)+' तपशील हाताने भरता येतील.');
+  scanEl('scan-retry').hidden=true;
+ }catch(error){
+  if(run.signal.aborted)scanStatus('स्कॅन रद्द केला. पुन्हा सुरू करण्यासाठी Retry दाबा.');
+  else scanStatus([fallback,error.message,'Retry दाबा किंवा तपशील हाताने भरा.'].filter(Boolean).join(' '));
  }finally{
-  scanBusy=false;
+  scanRun=null;
+  scanEl('scan-cancel').hidden=true;
+  scanEl('scan-progress').hidden=true;
   controls.forEach(control=>{control.disabled=false});
  }
 }
 scanEl('scan-ai').onclick=()=>scanPhoto();
 scanEl('scan-ocr').onclick=()=>scanPhoto(true);
+scanEl('scan-cancel').onclick=()=>scanRun?.abort(new Error('स्कॅन रद्द केला.'));
+scanEl('scan-retry').onclick=()=>scanPhoto(scanRetryOcrOnly);
 
-scanEl('scan-save').onclick=async()=>{if(scanBusy||scanEl('scan-save').disabled)return;if(!user){scanStatus('प्रथम लॉगिन करा');return}const btn=scanEl('scan-save');if(!scanEl('scan-verified').checked){scanStatus('Cloud Save करण्यापूर्वी मूळ बिल तपासा आणि पडताळणीची खूण करा.');return}try{const kind=scanEl('scan-kind').value,date=scanEl('scan-date').value,invoice=scanEl('scan-invoice').value.trim(),party=scanEl('scan-party').value.trim(),total=Number(scanEl('scan-total').value),payment=scanEl('scan-payment').value,linked=scanEl('scan-ledger').value==='link',items=kind==='collection'?[]:scanItems();if(invoice.startsWith('DEMO-ONLY'))throw Error('डेमो बिल सेव्ह करता येत नाही. वास्तविक बिल क्रमांक भरा');if(!payment||!date||!invoice||!party||!Number.isFinite(total)||total<=0)throw Error('तारीख, बिल क्रमांक, नाव, रक्कम आणि पेमेंट आवश्यक');if(kind!=='purchase'&&items.some(i=>i.freePacks>0))throw Error('फ्री पॅक फक्त खरेदीसाठी वापरा');if(kind!=='collection'&&!items.length)throw Error('संपूर्ण बिलासाठी औषधांची यादी भरा');if(kind==='sale'&&linked&&payment==='Credit')throw Error('उधारी विक्रीची स्वतंत्र वसुली प्रक्रिया आवश्यक आहे; सध्या फक्त स्कॅन रजिस्टरमध्ये नोंदवा');if(linked&&payment==='AlreadyRecorded')throw Error('आधीच नोंदलेल्या बिलासाठी नवीन हिशोब लिंक निवडू नका');const key=[kind,scanNorm(party),scanNorm(invoice)].join('~');const id='scan-'+Array.from(new TextEncoder().encode(key)).map(x=>x.toString(16).padStart(2,'0')).join('');if(scanBills.some(b=>b.id===id))throw Error('हे बिल स्कॅन रजिस्टरमध्ये आधीच नोंदलेले आहे');if(!confirm('बिल तपासले आहे का? '+(linked?'नवीन हिशोब नोंद तयार होईल.':'फक्त स्कॅन रजिस्टरमध्ये नोंद होईल.')+' आधीच्या व्यवहारात नोंद असेल तर पुन्हा लिंक करू नका.'))return;btn.disabled=true;const ref=doc(db,'scanBills',id);await runTransaction(db,async tx=>{const existing=await tx.get(ref);if(existing.exists())throw Error('हे बिल आधीच सेव्ह आहे');let ledgerRef=null,ledgerData=null;if(linked){const coll=kind==='purchase'?'stockistTransactions':'transactions';ledgerRef=doc(db,coll,id);if((await tx.get(ledgerRef)).exists())throw Error('लिंक हिशोब नोंद आधीच आहे');ledgerData=kind==='purchase'?{date,name:party,type:'purchase',note:'स्कॅन बिल '+invoice,amount:total,createdBy:user.uid,updatedBy:user.uid,updatedAt:serverTimestamp()}:{date,type:payment==='Credit'?'credit':'income',note:'स्कॅन विक्री/कलेक्शन बिल '+invoice+' · '+party,mode:payment,amount:total,createdBy:user.uid,updatedBy:user.uid,updatedAt:serverTimestamp()}}tx.set(ref,{kind,date,invoice,party,total,payment,items,rawText:scanEl('scan-raw').value.slice(0,20000),linkedLedger:linked,createdBy:user.uid,updatedAt:serverTimestamp()});if(ledgerRef)tx.set(ledgerRef,ledgerData)});scanEl('scan-clear').click();scanStatus('✅ बिल नोंद जतन करण्याची विनंती पूर्ण. Cloud Sync स्थिती तपासा.')}catch(e){scanStatus('⚠️ नोंद सेव्ह झाली नाही: '+(e.message||e))}finally{btn.disabled=false}};
+scanEl('scan-save').onclick=async()=>{if(scanRun||scanEl('scan-save').disabled)return;if(!user){scanStatus('प्रथम लॉगिन करा');return}const btn=scanEl('scan-save');if(!scanEl('scan-verified').checked){scanStatus('Cloud Save करण्यापूर्वी मूळ बिल तपासा आणि पडताळणीची खूण करा.');return}try{const kind=scanEl('scan-kind').value,date=scanEl('scan-date').value,invoice=scanEl('scan-invoice').value.trim(),party=scanEl('scan-party').value.trim(),total=Number(scanEl('scan-total').value),payment=scanEl('scan-payment').value,linked=scanEl('scan-ledger').value==='link',items=kind==='collection'?[]:scanItems();if(invoice.startsWith('DEMO-ONLY'))throw Error('डेमो बिल सेव्ह करता येत नाही. वास्तविक बिल क्रमांक भरा');if(!payment||!date||!invoice||!party||!Number.isFinite(total)||total<=0)throw Error('तारीख, बिल क्रमांक, नाव, रक्कम आणि पेमेंट आवश्यक');if(kind!=='purchase'&&items.some(i=>i.freePacks>0))throw Error('फ्री पॅक फक्त खरेदीसाठी वापरा');if(kind!=='collection'&&!items.length)throw Error('संपूर्ण बिलासाठी औषधांची यादी भरा');if(kind==='sale'&&linked&&payment==='Credit')throw Error('उधारी विक्रीची स्वतंत्र वसुली प्रक्रिया आवश्यक आहे; सध्या फक्त स्कॅन रजिस्टरमध्ये नोंदवा');if(linked&&payment==='AlreadyRecorded')throw Error('आधीच नोंदलेल्या बिलासाठी नवीन हिशोब लिंक निवडू नका');const key=[kind,scanNorm(party),scanNorm(invoice)].join('~');const id='scan-'+Array.from(new TextEncoder().encode(key)).map(x=>x.toString(16).padStart(2,'0')).join('');if(scanSavedIds.has(id)||scanBills.some(b=>b.id===id))throw Error('हे बिल स्कॅन रजिस्टरमध्ये आधीच नोंदलेले आहे');if(!confirm('बिल तपासले आहे का? '+(linked?'नवीन हिशोब नोंद तयार होईल.':'फक्त स्कॅन रजिस्टरमध्ये नोंद होईल.')+' आधीच्या व्यवहारात नोंद असेल तर पुन्हा लिंक करू नका.'))return;btn.disabled=true;const uid=user.uid,rawText=scanEl('scan-raw').value.slice(0,20000);const ref=doc(db,'scanBills',id);await runTransaction(db,async tx=>{const existing=await tx.get(ref);if(existing.exists())throw Error('हे बिल आधीच सेव्ह आहे');let ledgerRef=null,ledgerData=null;if(linked){const coll=kind==='purchase'?'stockistTransactions':'transactions';ledgerRef=doc(db,coll,id);if((await tx.get(ledgerRef)).exists())throw Error('लिंक हिशोब नोंद आधीच आहे');ledgerData=kind==='purchase'?{date,name:party,type:'purchase',note:'स्कॅन बिल '+invoice,amount:total,createdBy:uid,updatedBy:uid,updatedAt:serverTimestamp()}:{date,type:payment==='Credit'?'credit':'income',note:'स्कॅन विक्री/कलेक्शन बिल '+invoice+' · '+party,mode:payment,amount:total,createdBy:uid,updatedBy:uid,updatedAt:serverTimestamp()}}tx.set(ref,{kind,date,invoice,party,total,payment,items,rawText,linkedLedger:linked,createdBy:uid,updatedAt:serverTimestamp()});if(ledgerRef)tx.set(ledgerRef,ledgerData)});scanSavedIds.add(id);scanEl('scan-clear').click();scanStatus('✅ बिल नोंद जतन करण्याची विनंती पूर्ण. Cloud Sync स्थिती तपासा.')}catch(e){scanStatus('⚠️ नोंद सेव्ह झाली नाही: '+(e.message||e))}finally{btn.disabled=false}};
 scanEl('scan-export').onclick=()=>downloadCSV([['Type','Date','Invoice','Party','Total','Payment','Ledger Linked','Items'],...scanBills.map(b=>[b.kind,b.date,b.invoice,b.party,b.total,b.payment,b.linkedLedger?'Yes':'No',(b.items||[]).map(i=>[i.name,i.batch,i.expiry,i.quantity,i.packFactor,i.freePacks??0,i.purchaseRate??'',i.mrpUnit??'',i.saleRate??''].join('|')).join('; ')])],'Vighnaharta_Scanned_Bills.csv');
 
 onAuthStateChanged(auth,async u=>{clearSubs();resetStaffAccess();document.body.dataset.signedIn='false';historyPages.clear();resetAttendanceCloud();financeReset();user=null;owner=false;showAttendance(false);reportSources.clear();currentReport=null;reportPanel.open=false;el('report-content').replaceChildren();el('report-state').textContent='';el('cloud-panel').classList.add('hidden');el('login-panel').classList.remove('hidden');cloudMain=[];cloudStock=[];localizedSnapshots.clear();localizedMessages.delete('cm-list');localizedMessages.delete('cs-list');localMessage('sync-state','Cloud कनेक्शन तपासत आहे…');updateDashboard();el('cm-list').replaceChildren();el('cs-list').replaceChildren();drawWorkspaceTrend('loading');if(!u)return;try{owner=u.uid===ownerUID;const staff=owner|| (await getDoc(doc(db,'authorizedStaff',u.uid))).exists();if(!staff){localMessage('login-error','या खात्याला प्रवेश परवानगी नाही.');await signOut(auth);return}user=u;document.body.dataset.signedIn='true';el('login-panel').classList.add('hidden');el('cloud-panel').classList.remove('hidden');renderCloudIdentity();showAttendance(owner);if(owner){watchAttendance();watchSalaryPayments();watchStaffAccess();}watch('transactions');watch('stockistTransactions');scanWatch();navigateWorkspace(true)}catch(e){localMessage('login-error','परवानगी तपासता आली नाही: ',e.code||e.message)}});
